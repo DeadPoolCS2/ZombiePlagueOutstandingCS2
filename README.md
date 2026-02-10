@@ -8,7 +8,8 @@
 
 <div align="center"><strong>支持多种自定义配置/Supports multiple custom configurations。</p></div>
 <div align="center"><strong>支持自定义丧尸种类,多重游戏模式,僵尸瘟疫道具,支持API拓展,音效系统等。</p></div>
-  <div align="center"><strong>supports customizable zombie types, multiple game modes, zombie plague items, API expansion, sound effects system, and more.</p></div>
+  <div align="center"><strong>supports customizable zombie types, multiple game modes, zombie plague items, sound effects system, and more.</p></div>
+     <div align="center"><strong>supports API expansion.</p></div>
 </div>
 
 <div align="center">
