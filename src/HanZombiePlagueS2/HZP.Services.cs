@@ -1,4 +1,3 @@
-using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
@@ -14,6 +13,7 @@ using SwiftlyS2.Shared.SchemaDefinitions;
 using SwiftlyS2.Shared.SteamAPI;
 using static HanZombiePlagueS2.HZPZombieClassCFG;
 using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
+
 
 namespace HanZombiePlagueS2;
 
@@ -413,6 +413,12 @@ public partial class HZPServices
                 };
             }
 
+            var origin = pawn.AbsOrigin;
+            if (origin == null)
+                return;
+
+            Vector offsetPos = new(origin.Value.X, origin.Value.Y, origin.Value.Z + 50);
+            var particle = _helpers.CreateParticleAtPos(pawn, offsetPos, "particles/explosions_fx/explosion_hegrenade_water_intial_trail.vpcf");
             //_logger.LogInformation($"posszombie 完成 [{controller.PlayerName}]");
         }
         catch (Exception ex)

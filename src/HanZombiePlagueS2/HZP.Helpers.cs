@@ -595,6 +595,7 @@ public partial class HZPHelpers
         );
     }
 
+    /*
     public CParticleSystem? CreateBurnParticleAtPawn(CBasePlayerPawn? pawn)
     {
         if (pawn == null || !pawn.IsValid)
@@ -618,75 +619,28 @@ public partial class HZPHelpers
         particle.AcceptInput("SetParent", "!activator", pawn, particle);
         return particle;
     }
-
-    /*
-    public void DrawExpandingRing(Vector position, float maxRadius, int R, int G, int B, int A, float duration = 0.4f, int segments = 16, float thickness = 18.0f)
-    {
-        CBeam?[] beams = new CBeam?[segments];
-        float startTime = _core.Engine.GlobalVars.CurrentTime;
-
-        for (int i = 0; i < segments; i++)
-        {
-            float angle = MathF.PI * 2 * i / segments;
-            float nextAngle = MathF.PI * 2 * (i + 1) / segments;
-
-            Vector start = new Vector(
-                position.X + MathF.Cos(angle),
-                position.Y + MathF.Sin(angle),
-                position.Z
-            );
-
-            Vector end = new Vector(
-                position.X + MathF.Cos(nextAngle),
-                position.Y + MathF.Sin(nextAngle),
-                position.Z
-            );
-
-            beams[i] = CreateLaser(start, end, new Color(R, G, B, A), thickness);
-        }
-
-
-        CancellationTokenSource? timer = null;
-        timer = _core.Scheduler.RepeatBySeconds(0.01f, () =>
-        {
-            float progress = Math.Min((_core.Engine.GlobalVars.CurrentTime - startTime) / duration, 1.0f);
-            float currentRadius = maxRadius * progress;
-
-            for (int i = 0; i < segments; i++)
-            {
-                if (beams[i] is not { IsValid: true, IsValidEntity: true })
-                    continue;
-
-                float angle = MathF.PI * 2 * i / segments;
-                float nextAngle = MathF.PI * 2 * (i + 1) / segments;
-
-                Vector start = new Vector(
-                    position.X + currentRadius * MathF.Cos(angle),
-                    position.Y + currentRadius * MathF.Sin(angle),
-                    position.Z
-                );
-
-                Vector end = new Vector(
-                    position.X + currentRadius * MathF.Cos(nextAngle),
-                    position.Y + currentRadius * MathF.Sin(nextAngle),
-                    position.Z
-                );
-
-                TeleportLaser(beams[i], start, end);
-            }
-
-            if (progress >= 1.0f)
-            {
-                foreach (var beam in beams.Where(b => b != null && b.IsValid && b.IsValidEntity))
-                {
-                    beam.AcceptInput("Kill", 0);
-                }
-                timer?.Cancel();
-            }
-        });
-    }
     */
 
+    public CParticleSystem? CreateParticleAtPos(CCSPlayerPawn pawn, Vector pos, string effectName)
+    {
+        if (pawn == null || !pawn.IsValid)
+            return null;
+
+        var particle = _core.EntitySystem.CreateEntityByDesignerName<CParticleSystem>("info_particle_system");
+        if (!particle.IsValid || !particle.IsValidEntity)
+            return null;
+
+
+        particle.StartActive = true;
+        particle.EffectName = effectName;
+        particle.AcceptInput("Start", "");
+        particle.DispatchSpawn();
+
+
+        particle.Teleport(pos, QAngle.Zero, Vector.Zero);
+        particle.AcceptInput("SetParent", "!activator", pawn, particle);
+        return particle;
+    }
     public void DrawExpandingRing(Vector position, float maxRadius, int R, int G, int B, int A, float duration = 0.4f, int segments = 16, float thickness = 18.0f)
     {
         CBeam?[] beams = new CBeam?[segments];
@@ -814,21 +768,23 @@ public partial class HZPHelpers
         if (pawn == null || !pawn.IsValid)
             return;
 
-        var particle = CreateBurnParticleAtPawn(pawn);
+        ApplyDamage(attacker, zombie, initialDmg);
+
+        var origin = pawn.AbsOrigin;
+        if (origin == null)
+            return;
+
+        Vector offsetPos = new(origin.Value.X, origin.Value.Y, origin.Value.Z + 15);
+
+        var particle = CreateParticleAtPos(pawn, offsetPos, "particles/burning_fx/env_fire_large.vpcf");
         if (particle == null || !particle.IsValid || !particle.IsValidEntity)
             return;
 
-        ApplyDamage(attacker, zombie, initialDmg);
-
         // 持续伤害timer
         float startTime = _core.Engine.GlobalVars.CurrentTime;
-        //var cts = new CancellationTokenSource();
         float lastSoundTime = startTime;
         var timer = _core.Scheduler.RepeatBySeconds(0.2f, () =>
         {
-            //if (cts.Token.IsCancellationRequested)
-            //return;
-
             if (zombie == null || !zombie.IsValid || pawn == null || !pawn.IsValid)
             {
                 ClearPlayerBurn(playerId);
@@ -839,7 +795,6 @@ public partial class HZPHelpers
             if (elapsed >= duration)
             {
                 ClearPlayerBurn(playerId);
-                //cts.Cancel();
                 return;
             }
 
@@ -1223,5 +1178,6 @@ public partial class HZPHelpers
         return entity;
     }
 
+    
 
 }
