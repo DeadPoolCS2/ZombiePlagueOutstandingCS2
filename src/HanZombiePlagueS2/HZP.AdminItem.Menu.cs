@@ -73,12 +73,16 @@ public class HZPAdminItemMenu
 
                 _globals.IsAssassin.TryGetValue(Id, out bool IsAssassin);
                 _globals.IsNemesis.TryGetValue(Id, out bool IsNemesis);
+                _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
 
                 if (IsAssassin || IsNemesis)
                 {
                     clicker.SendCenter(_helpers.T(clicker, "ItemTVaccineError"));
                     return;
                 }
+
+                if(!IsZombie)
+                    return;
 
                 _globals.IsHero.TryGetValue(Id, out bool IsHero);
                 _globals.IsSniper.TryGetValue(Id, out bool IsSniper);
@@ -105,7 +109,7 @@ public class HZPAdminItemMenu
                 string Default = "characters/models/ctm_st6/ctm_st6_variante.vmdl";
                 string Custom = string.IsNullOrEmpty(CFG.HumandefaultModel) ? Default : CFG.HumandefaultModel;
 
-                _helpers.TVaccine(clicker, maxHealth, CFG.HumanInitialSpeed, CFG.TVaccineSound, Custom, 1.0f);
+                _helpers.TVaccine(clicker, maxHealth, CFG.HumanInitialSpeed, Custom, CFG.TVaccineSound, 1.0f);
                 clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTVaccineSuccess"));
                 _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(player, "ItemTVaccineSuccessToAll", clicker.Name));
             });

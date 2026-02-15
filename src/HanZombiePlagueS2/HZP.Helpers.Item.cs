@@ -49,7 +49,6 @@ public partial class HZPHelpers
         ClearPlayerBurn(Id);
 
         pawn.SetModel(models);
-
         pawn.MaxHealth = maxHealth;
         pawn.MaxHealthUpdated();
         pawn.Health = maxHealth;
