@@ -595,32 +595,6 @@ public partial class HZPHelpers
         );
     }
 
-    /*
-    public CParticleSystem? CreateBurnParticleAtPawn(CBasePlayerPawn? pawn)
-    {
-        if (pawn == null || !pawn.IsValid)
-            return null;
-
-        var particle = _core.EntitySystem.CreateEntityByDesignerName<CParticleSystem>("info_particle_system");
-        var particleE = _core.EntitySystem.GetRefEHandle(particle);
-
-        if (!particleE.IsValid)
-            return null;
-
-        var origin = pawn.AbsOrigin!;
-        Vector offsetPos = new(origin.Value.X, origin.Value.Y, origin.Value.Z + 15);
-        particle.StartActive = true;
-        particle.EffectName = "particles/burning_fx/env_fire_large.vpcf";
-        particle.AcceptInput("Start", "");
-        particle.DispatchSpawn();
-
-
-        particle.Teleport(offsetPos, QAngle.Zero, Vector.Zero);
-        particle.AcceptInput("SetParent", "!activator", pawn, particle);
-        return particle;
-    }
-    */
-
     public CParticleSystem? CreateParticleAtPos(CCSPlayerPawn pawn, Vector pos, string effectName)
     {
         if (pawn == null || !pawn.IsValid)
@@ -989,7 +963,7 @@ public partial class HZPHelpers
         pawn.MoveTypeUpdated();
 
         if (!string.IsNullOrEmpty(sound))
-            EmitSoundFormPlayer(player, sound, 1.0f);
+            EmitSoundFormPlayer(player, sound, 0.6f);
 
         _core.Scheduler.DelayBySeconds(duration, () =>
         {

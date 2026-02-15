@@ -274,7 +274,12 @@ public partial class HZPServices
         _helpers.SetFov(player, 90);
         _helpers.ClearPlayerBurn(Id);
         _helpers.ClearFreezeStaten(player);
-        pawn.SetModel("characters/models/ctm_sas/ctm_sas.vmdl");
+
+
+        string Default = "characters/models/ctm_st6/ctm_st6_variante.vmdl";
+        string Custom = string.IsNullOrEmpty(CFG.HumandefaultModel) ? Default : CFG.HumandefaultModel;
+
+        pawn.SetModel(Custom);
 
         var maxHealth = CFG.HumanMaxHealth;
         pawn.MaxHealth = maxHealth;
