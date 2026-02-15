@@ -107,6 +107,26 @@ public partial class HZPEvents
         _core.GameEvent.HookPre<EventSmokegrenadeDetonate>(OnSmokegrenadeDetonate);
 
         _core.GameEvent.HookPre<EventDecoyFiring>(OnDecoyFiring);
+
+        _core.Event.OnEntityCreated += Event_OnEntityCreated;
+    }
+
+    private void Event_OnEntityCreated(IOnEntityCreatedEvent @event)
+    {
+        var entity = @event.Entity;
+        if (entity == null || !entity.IsValid || !entity.IsValidEntity)
+            return;
+
+        if (!entity.DesignerName.Contains("_projectile"))
+            return;
+
+        _core.Scheduler.NextTick(() =>
+        {
+            if (entity.IsValid && entity.IsValidEntity)
+            {
+                _helpers.CheckGrenadeSpawned(entity);
+            }
+        });
     }
 
     private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event)
@@ -277,6 +297,13 @@ public partial class HZPEvents
         @event.AddItem("soundevents/game_sounds_physics.vsndevts");
         @event.AddItem("soundevents/game_sounds_weapons.vsndevts");
         @event.AddItem("soundevents/game_sounds_player.vsndevts");
+
+        @event.AddItem("particles/ui/hud/ui_map_def_utility_trail.vpcf");
+        @event.AddItem("particles/burning_fx/barrel_burning_trail.vpcf");
+        @event.AddItem("particles/environment/de_train/train_coal_dump_trails.vpcf");
+
+        @event.AddItem("particles/explosions_fx/explosion_hegrenade_water_intial_trail.vpcf");
+        @event.AddItem("particles/survival_fx/danger_trail_spores_world.vpcf");
 
         var CFG = _mainCFG.CurrentValue;
         var ambsound = CFG.PrecacheAmbSound;

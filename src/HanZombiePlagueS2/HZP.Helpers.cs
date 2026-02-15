@@ -1,4 +1,5 @@
 
+using System.Diagnostics;
 using System.Security.AccessControl;
 using System.Timers;
 using Microsoft.Extensions.Logging;
@@ -1153,6 +1154,73 @@ public partial class HZPHelpers
 
         var localizer = _core.Translation.GetPlayerLocalizer(player);
         return localizer[key, args];
+    }
+
+    public void CheckGrenadeSpawned(CEntityInstance entity)
+    {
+        if (entity == null || !entity.IsValid || !entity.IsValidEntity)
+            return;
+
+        var grenade = entity.As<CBaseCSGrenadeProjectile>();
+        if (grenade == null || !grenade.IsValid || !grenade.IsValidEntity)
+            return;
+
+        if (!grenade.Thrower.IsValid || grenade.Thrower.Value == null || !grenade.Thrower.Value.IsValidEntity)
+            return;
+
+        var pawn = grenade.Thrower.Value;
+        if (pawn == null || !pawn.IsValid)
+            return;
+
+        var player = _core.PlayerManager.GetPlayerFromPawn(pawn);
+        if (player == null || !player.IsValid)
+            return;
+
+        _globals.IsZombie.TryGetValue(player.PlayerID, out bool IsZombie);
+
+        string trailPath = "particles/ui/hud/ui_map_def_utility_trail.vpcf";
+        string firePath = "particles/burning_fx/barrel_burning_trail.vpcf";
+        string blackPath = "particles/environment/de_train/train_coal_dump_trails.vpcf";
+        if (grenade.DesignerName.Equals("hegrenade_projectile", StringComparison.OrdinalIgnoreCase))
+        {
+            if (IsZombie)
+            {
+                var Trail = CreateParticleGlow(grenade, blackPath);
+                if (Trail != null && Trail.IsValid && Trail.IsValidEntity)
+                {
+                    Trail.AcceptInput("FollowEntity", "!activator", grenade, Trail);
+                }
+            }
+            else
+            {
+                var Trail = CreateParticleGlow(grenade, firePath);
+                if (Trail != null && Trail.IsValid && Trail.IsValidEntity)
+                {
+                    Trail.AcceptInput("FollowEntity", "!activator", grenade, Trail);
+                }
+            }
+        }
+
+        var trail = CreateParticleGlow(grenade, trailPath);
+        if (trail != null && trail.IsValid && trail.IsValidEntity)
+        {
+            trail.AcceptInput("FollowEntity", "!activator", grenade, trail);
+        }
+    }
+    public CEnvParticleGlow? CreateParticleGlow(CBaseCSGrenadeProjectile grenade, string particles)
+    {
+        var entity = _core.EntitySystem.CreateEntity<CEnvParticleGlow>();
+        if (entity == null || !entity.IsValid || !entity.IsValidEntity)
+            return null;
+
+        entity.StartActive = true;
+        entity.EffectName = particles;
+        entity.RenderMode = RenderMode_t.kRenderNormal;
+
+        entity.DispatchSpawn();
+        entity.AcceptInput("Start", 0);
+
+        return entity;
     }
 
 
