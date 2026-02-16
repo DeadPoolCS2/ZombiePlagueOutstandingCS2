@@ -1,0 +1,171 @@
+{
+  "HZPMainCFG": {
+	"RoundReadyTime": "22.0",
+	"RoundTime": "4.0",
+	"NormalInfection": 
+	{
+		"Enable": true,
+		"Name": "感染模式",
+		"MotherZombieNames": "母体僵尸",
+		"MotherZombieCount": 1,
+		"Weight": 50,
+		"EnableInfiniteClipMode": false,
+		"ZombieCanReborn": false
+	},
+	"MultiInfection": 
+	{
+		"Enable": true,
+		"Name": "多重感染模式",
+		"MotherZombieNames": "母体僵尸",
+		"MotherZombieCount": 5,
+		"Weight": 50,
+		"EnableInfiniteClipMode": true,
+		"ZombieCanReborn": true
+	},
+	"Nemesis": 
+	{
+		"Enable": true,
+		"Name": "复仇之神模式",
+		"NemesisNames": "复仇之神",
+		"Weight": 50,
+		"EnableInfiniteClipMode": true,
+		"ZombieCanReborn": true
+	},
+	"Survivor": 
+	{
+		"Enable": true,
+		"Name": "幸存者模式",
+		"Weight": 50,
+		"SurvivorNames": "幸存者",
+		"SurvivorHealth": 1000,
+		"SurvivorSpeed": 3.0,
+		"SurvivorGravity": 0.5,
+		"SurvivorDamage": 5.0,
+		"SurvivorWeapon": "weapon_m249",
+		"CustomWeaponName": "幸存者M249",
+		"ModelsPath": "characters/models/tm_phoenix_heavy/tm_phoenix_heavy.vmdl",
+		"EnableInfiniteClipMode": false,
+		"ZombieCanReborn": false
+	},
+	"Swarm": 
+	{
+		"Enable": true,
+		"Name": "军团模式",
+		"Weight": 50,
+		"EnableInfiniteClipMode": true,
+		"ZombieCanReborn": false
+	},
+	"Plague": 
+	{
+		"Enable": true,
+		"Name": "瘟疫模式",
+		"Weight": 50,
+		"NemesisNames": "复仇之神",
+		"SurvivorNames": "幸存者",
+		"EnableInfiniteClipMode": true,
+		"ZombieCanReborn": true
+	},
+	"Assassin": 
+	{
+		"Enable": true,
+		"Name": "暗杀者模式",
+		"Weight": 50,
+		"AssassinNames": "暗杀者",
+		"InvisibilityDist": 200.0,
+		"EnableInfiniteClipMode": false,
+		"ZombieCanReborn": true
+	},
+	"Sniper": 
+	{
+		"Enable": true,
+		"Name": "狙击手模式",
+		"Weight": 50,
+		"SniperNames": "狙击手",
+		"SniperHealth": 500,
+		"SniperSpeed": 3.0,
+		"SniperGravity": 0.6,
+		"SniperDamage": 10.0,
+		"SniperWeapon": "weapon_awp",
+		"CustomWeaponName": "狙击英雄AWP",
+		"ModelsPath": "characters/models/tm_professional/tm_professional_varf4.vmdl",
+		"EnableInfiniteClipMode": false,
+		"ZombieCanReborn": true
+	},
+	"AVS": 
+	{
+		"Enable": true,
+		"Name": "狙击手VS暗杀者",
+		"Weight": 50,
+		"AssassinNames": "暗杀者",
+		"SniperNames": "狙击手",
+		"EnableInfiniteClipMode": true,
+		"ZombieCanReborn": true
+	},
+	"Hero": 
+	{
+		"Enable": true,
+		"Name": "英雄模式",
+		"Weight": 50,
+		"HeroCount": 3,
+		"HeroNames": "英雄",
+		"HeroHealth": 1500,
+		"HeroSpeed": 3.0,
+		"HeroGravity": 0.4,
+		"HeroDamage": 50.0,
+		"ModelsPath": "characters/models/ctm_heavy/ctm_heavy.vmdl",
+		"EnableInfiniteClipMode": false,
+		"ZombieCanReborn": true
+	},
+	"HumandefaultModel": "characters/models/ctm_st6/ctm_st6_variante.vmdl",
+	"HumanMaxHealth": 225,
+	"HumanInitialSpeed": 1.0,
+	"HumanInitialGravity": 0.8,
+	"HumanKnockBackHeadMultiply": 2.0,
+	"HumanKnockBackBodyMultiply": 1.0,
+	"HumanKnockBackGroundMultiply": 1.0,
+	"HumanKnockBackAirMultiply": 0.5,
+	"HumanHeroKnockBackMultiply": 1.0,
+	"EnableDamageHud": true,
+	"EnableInfiniteReserveAmmo": true,
+	"EnableWeaponNoRecoil": true,
+	"HumanSpawnPoints": "CT,T,DM",
+	"ZombieSpawnPoints": "CT,T,DM",
+	"KnockZombieForce": 250.0,
+	"StunZombieTime": 0.1,
+	"TVaccineSound": "HealthShot.Pickup",
+	"TVirusGrenadeRange": 300.0,
+	"TVirusCanInfectHero": true,
+	"TVirusGrenadeSound": "han.zombieplague.grenadedote",
+	"AddHealthSound": "HealthShot.Pickup",
+	"FireGrenade": true,
+	"SpawnGiveFireGrenade": true,
+	"FireGrenadeRange": 300.0,
+	"FireGrenadeDmg": 500.0,
+	"FireDmg": 10.0,
+	"FireGrenadeDuration": 5.0,
+	"FireGrenadeSound": "han.zombieplague.grenadedote",
+	"SpawnGiveIncGrenade": false,
+	"LightGrenade": true,
+	"SpawnGiveLightGrenade": true,
+	"LightGrenadeRange": 1000.0,
+	"LightGrenadeDuration": 30.0,
+	"LightGrenadeSound": "C4.ExplodeTriggerTrip",
+	"FreezeGrenade": true,
+	"SpawnGiveFreezeGrenade": true,
+	"FreezeGrenadeRange": 300.0,
+	"FreezeGrenadeDuration": 10.0,
+	"FreezeGrenadeSound": "han.zombieplague.grenadedote",
+	"TelportGrenade": true,
+	"SpawnGiveTelportGrenade": false,
+	"CanUseScbaSuit": true,
+	"ScbaSuitGetSound": "Player.PickupPistol",
+	"ScbaSuitBrokenSound": "Breakable.Flesh",
+	"ZombieClassCommand": "sw_zclass",
+	"AdminMenuItemCommand": "sw_zmenu",
+	"AdminMenuPermission": "",
+	"AmbSound": "han.zombie.amb.zriot,han.zombie.amb.classicA,han.zombie.amb.classicB,han.zombie.amb.classicC,han.zombie.amb.classicD",
+	"AmbSoundLoopTime": "60.0",
+	"AmbSoundVolume": "0.8",
+	"PrecacheAmbSound": "soundevents/hanzbambience.vsndevts,soundevents/hanzombiepanicplayer.vsndevts"
+  }
+}
