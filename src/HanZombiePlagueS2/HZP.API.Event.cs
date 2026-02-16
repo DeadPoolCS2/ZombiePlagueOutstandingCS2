@@ -45,18 +45,6 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
 
     public void NotifyInfect(IPlayer attacker, IPlayer victim, bool grenade, string name)
     {
-        /*DeBug
-        if (_onInfect != null)
-        {
-            var invocationList = _onInfect.GetInvocationList();
-            _logger.LogInformation($"[Debug] 当前事件订阅者数量: {invocationList.Length}");
-
-            foreach (var handler in invocationList)
-            {
-                _logger.LogInformation($"[Debug] 订阅者详情: {handler.Method.DeclaringType?.FullName}.{handler.Method.Name}");
-            }
-        }
-        */
         OnPlayerInfect?.Invoke(attacker, victim, grenade, name);
     }
 

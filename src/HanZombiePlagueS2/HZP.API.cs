@@ -421,7 +421,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
 
         if (currentHealth >= maxHealth)
         {
-            target.SendMessage(MessageType.Chat, $"你已经拥有最大血量 {maxHealth} 无法继续增加!!");
+            target.SendMessage(MessageType.Chat, _helpers.T(target, "ItemAddHelathMax", maxHealth)); 
             return;
         }
 
