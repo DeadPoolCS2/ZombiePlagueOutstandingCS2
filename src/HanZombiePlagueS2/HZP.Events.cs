@@ -92,11 +92,6 @@ public partial class HZPEvents
         _core.GameEvent.HookPre<EventPlayerSpawn>(CheckRoundWinSpawn);
         _core.GameEvent.HookPre<EventPlayerSpawn>(RandomSpawn);
 
-        
-
-        
-
-        _core.GameEvent.HookPre<EventPlayerHurt>(OnKnockAndStun);
 
         _core.GameEvent.HookPre<EventGrenadeThrown>(OnGrenadeThrown);
         _core.GameEvent.HookPre<EventHegrenadeDetonate>(OnGrenadeDetonate);
@@ -142,9 +137,7 @@ public partial class HZPEvents
             _helpers.SwitchAllPlayerTeam();
             _commands.RoundCvar();
             _helpers.BuildSpawnCache();
-            //_helpers.RemoveRoundObjective();
-
-            
+            _helpers.RemoveHostage();
 
             var playerCount = _helpers.ServerPlayerCount();
             if (playerCount <= 0)
@@ -1051,6 +1044,22 @@ public partial class HZPEvents
 
     private void Event_OnHumanTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)
     {
+        var victim = @event.Entity;
+        if (victim == null || !victim.IsValid)
+            return;
+
+        var victimPawn = victim.As<CCSPlayerPawn>();
+        if (victimPawn == null || !victimPawn.IsValid)
+            return;
+
+        var victimController = victimPawn.Controller.Value?.As<CCSPlayerController>();
+        if (victimController == null || !victimController.IsValid)
+            return;
+
+        var victimPlayer = _core.PlayerManager.GetPlayer((int)(victimController.Index - 1));
+        if (victimPlayer == null || !victimPlayer.IsValid)
+            return;
+
         var attacker = @event.Info.Attacker.Value;
         if (attacker == null || !attacker.IsValid)
             return;
@@ -1067,33 +1076,54 @@ public partial class HZPEvents
         if (AttackerPlayer == null || !AttackerPlayer.IsValid)
             return;
 
+        var activeWeapon = AttackerPawn.WeaponServices?.ActiveWeapon.Value;
+        if (activeWeapon == null || !activeWeapon.IsValid)
+            return;
+
         var attackerId = AttackerPlayer.PlayerID;
+        var victimId = victimPlayer.PlayerID;
+
+        var CFG = _mainCFG.CurrentValue;
+
+        _globals.IsZombie.TryGetValue(attackerId, out bool attackerIsZombie);
+        _globals.IsZombie.TryGetValue(victimId, out bool victimIsZombie);
+        if (attackerIsZombie || !victimIsZombie)
+            return;
 
         _globals.IsSurvivor.TryGetValue(attackerId, out bool attackerIsSurvivor);
         _globals.IsSniper.TryGetValue(attackerId, out bool attackerIsSniper);
         _globals.IsHero.TryGetValue(attackerId, out bool attackerIsHero);
 
-        if (!attackerIsSurvivor && !attackerIsSniper && !attackerIsHero)
+        if (attackerIsSurvivor || attackerIsSniper || attackerIsHero)
+        {
+            var config = _mainCFG.CurrentValue;
+            if (attackerIsSurvivor && activeWeapon.DesignerName == config.Survivor.SurvivorWeapon)
+            {
+                @event.Info.Damage *= config.Survivor.SurvivorDamage;
+            }
+            else if (attackerIsSniper && activeWeapon.DesignerName == config.Sniper.SniperWeapon)
+            {
+                @event.Info.Damage *= config.Sniper.SniperDamage;
+            }
+            else if (attackerIsHero)
+            {
+                @event.Info.Damage *= config.Hero.HeroDamage;
+            }
+
+        }
+
+        var AmmoType = @event.Info.AmmoType;
+        if(AmmoType == -1)
             return;
 
-        var activeWeapon = AttackerPawn.WeaponServices?.ActiveWeapon.Value;
-        if (activeWeapon == null || !activeWeapon.IsValid)
-            return;
+        bool isheadshot = @event.Info.ActualHitGroup == HitGroup_t.HITGROUP_HEAD;
 
-        var config = _mainCFG.CurrentValue;
-        if (attackerIsSurvivor && activeWeapon.DesignerName == config.Survivor.SurvivorWeapon)
-        {
-            @event.Info.Damage *= config.Survivor.SurvivorDamage;
-        }
-        else if (attackerIsSniper && activeWeapon.DesignerName == config.Sniper.SniperWeapon)
-        {
-            @event.Info.Damage *= config.Sniper.SniperDamage;
-        }
-        else if (attackerIsHero)
-        {
-            @event.Info.Damage *= config.Hero.HeroDamage;
-        }
+        //_logger.LogInformation($"Damage Info - Attacker: {AttackerPlayer.Name}, Victim: {victimPlayer.Name}, AmmoType: {@event.Info.AmmoType}, IsHeadshot: {isheadshot}");
 
+        float stunTime = CFG.StunZombieTime;
+        float force = CFG.KnockZombieForce;
+        _helpers.KnockBackZombie(AttackerPlayer, victimPlayer, force, isheadshot);
+        _helpers.SetZombieFreezeOrStun(victimPlayer, stunTime);
     }
 
     private HookResult OnHumanWeaponFire(EventWeaponFire @event)
@@ -1203,40 +1233,6 @@ public partial class HZPEvents
         _globals.IsZombie.TryGetValue(Id, out var isZombie);
 
         _service.RandomSpawnPoint(player, !isZombie);
-
-        return HookResult.Continue;
-    }
-
-    private HookResult OnKnockAndStun(EventPlayerHurt @event)
-    {
-      
-        var victim = @event.UserIdPlayer;
-        if (victim == null || !victim.IsValid)
-            return HookResult.Continue;
-
-        var attackerId = @event.Attacker;
-
-        var attacker = _core.PlayerManager.GetPlayer(attackerId);
-        if (attacker == null || !attacker.IsValid)
-            return HookResult.Continue;
-
-        var vId = victim.PlayerID;
-        var aId = attacker.PlayerID;
-
-        var CFG = _mainCFG.CurrentValue;
-
-        _globals.IsZombie.TryGetValue(aId, out bool attackerIsZombie);
-        _globals.IsZombie.TryGetValue(vId, out bool victimIsZombie);
-        if (attackerIsZombie || !victimIsZombie)
-            return HookResult.Continue;
-
-        float stunTime = CFG.StunZombieTime;
-        float force = CFG.KnockZombieForce;
-        var knock = _helpers.KnockBackZombie(attacker, victim, force);
-
-        _helpers.SetZombieFreezeOrStun(victim, stunTime);
-        victim.Controller.AbsVelocity = knock;
-
 
         return HookResult.Continue;
     }

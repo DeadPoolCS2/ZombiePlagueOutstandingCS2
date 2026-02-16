@@ -107,11 +107,13 @@ public class HZPCommands
         _core.Engine.ExecuteCommand($"mp_roundtime_hostage {CFG.RoundTime}");
         _core.Engine.ExecuteCommand($"mp_roundtime_defuse {CFG.RoundTime}");
         _core.Engine.ExecuteCommand($"mp_roundtime {CFG.RoundTime}");
+        _core.Engine.ExecuteCommand("mp_give_player_c4 0");
 
     }
 
     public void ServerCvar()
     {
+        
         _core.Engine.ExecuteCommand("mp_randomspawn 1");
         _core.Engine.ExecuteCommand("mp_roundtime_hostage 3");
         _core.Engine.ExecuteCommand("mp_roundtime_defuse 3");

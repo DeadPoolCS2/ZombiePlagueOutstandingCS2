@@ -191,21 +191,14 @@ public partial class HZPHelpers
         return activeWeapon.DesignerName == "weapon_knife";
     }
 
-    public void RemoveRoundObjective()
+    public void RemoveHostage()
     {
-        var objectivelist = new List<string>() { "func_bomb_target", "func_hostage_rescue", "hostage_entity", "c4" };
-
-        foreach (string objectivename in objectivelist)
+        var hostage = _core.EntitySystem.GetAllEntitiesByClass<CHostage>().ToList();
+        foreach (var entity in hostage)
         {
-            var entityIndex = _core.EntitySystem.GetAllEntitiesByDesignerName<CEntityInstance>(objectivename);
-
-            foreach (var entity in entityIndex)
+            if (entity != null && entity.IsValid && entity.IsValidEntity)
             {
-                if (entity != null && entity.IsValid)
-                {
-                    entity.AcceptInput("Kill", 0, null, null);
-                }
-
+                entity.Despawn();
             }
         }
     }
@@ -562,37 +555,62 @@ public partial class HZPHelpers
 
     }
 
-    
-    public Vector KnockBackZombie(IPlayer Attacker, IPlayer target, float force)
+    public void KnockBackZombie(IPlayer attacker, IPlayer target, float force, bool isheadshot)
     {
-        if (Attacker == null || !Attacker.IsValid)
-            return new SwiftlyS2.Shared.Natives.Vector(0, 0, 0);
+ 
+        if (attacker == null || !attacker.IsValid)
+            return;
+
+        if (attacker.Controller.DesignerName != "cs_player_controller")
+            return;
 
         if (target == null || !target.IsValid)
-            return new SwiftlyS2.Shared.Natives.Vector(0, 0, 0);
+            return;
 
-        var AttackerPos = Attacker.Controller.AbsOrigin;
-        if (AttackerPos == null)
-            return new SwiftlyS2.Shared.Natives.Vector(0, 0, 0);
+        if(!attacker.IsAlive || !target.IsAlive)
+            return;
 
-        var targetPos = target.Controller.AbsOrigin;
-        if (targetPos == null)
-            return new SwiftlyS2.Shared.Natives.Vector(0, 0, 0);
+        _globals.IsZombie.TryGetValue(attacker.PlayerID, out bool attackerisZombie);
+        _globals.IsZombie.TryGetValue(target.PlayerID, out bool targetisZombie);
+        if (attackerisZombie || !targetisZombie)
+            return;
 
-        var dir = new SwiftlyS2.Shared.Natives.Vector(
-            targetPos.Value.X - AttackerPos.Value.X,
-            targetPos.Value.Y - AttackerPos.Value.Y,
-            targetPos.Value.Z - AttackerPos.Value.Z
-        );
+        var targetpawn = target.PlayerPawn;
+        if (targetpawn == null || !targetpawn.IsValid)
+            return;
 
-        float length = MathF.Sqrt(dir.X * dir.X + dir.Y * dir.Y + dir.Z * dir.Z);
-        if (length <= 0.01f) return new SwiftlyS2.Shared.Natives.Vector(0, 0, 0);
+        var attackerpawn = attacker.PlayerPawn;
+        if (attackerpawn == null || !attackerpawn.IsValid)
+            return;
 
-        return new SwiftlyS2.Shared.Natives.Vector(
-            dir.X / length * force,
-            dir.Y / length * force,
-            50f
-        );
+        _globals.IsSniper.TryGetValue(attacker.PlayerID, out bool IsSniper);
+        _globals.IsSurvivor.TryGetValue(attacker.PlayerID, out bool IsSurvivor);
+        _globals.IsHero.TryGetValue(attacker.PlayerID, out bool IsHero);
+
+        QAngle attackerEye = attackerpawn.EyeAngles;
+        attackerEye.ToDirectionVectors(out Vector vecKnockback, out _, out _);
+
+        bool isOnGround = targetpawn.GroundEntity.IsValid;
+        bool currentlyInAir = !isOnGround && targetpawn.AbsVelocity.Z != 0;
+        bool isHero = (IsSniper || IsSurvivor || IsHero);
+
+        float weaponknockback = 1.0f;
+        float hitgroupsKnockback = isheadshot ? 2.0f : 1.0f;
+        float airKnock = 2.0f;
+        float heroKnock = isHero ? 2.0f : 1.0f;
+
+        var pushVelocity = vecKnockback * heroKnock * weaponknockback * hitgroupsKnockback * force;
+        if (currentlyInAir)
+        {
+
+            pushVelocity = vecKnockback * heroKnock * weaponknockback * hitgroupsKnockback * force * airKnock;
+
+        }
+
+        var vel = targetpawn.AbsVelocity;
+
+        targetpawn.Teleport(null, null, vel + pushVelocity);
+
     }
 
     public CParticleSystem? CreateParticleAtPos(CCSPlayerPawn pawn, Vector pos, string effectName)
