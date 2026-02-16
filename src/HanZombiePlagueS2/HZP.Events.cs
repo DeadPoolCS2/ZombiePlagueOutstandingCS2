@@ -1116,14 +1116,22 @@ public partial class HZPEvents
         if(AmmoType == -1)
             return;
 
+        float stunTime = CFG.StunZombieTime;
+        _helpers.SetZombieFreezeOrStun(victimPlayer, stunTime);
+
         bool isheadshot = @event.Info.ActualHitGroup == HitGroup_t.HITGROUP_HEAD;
 
         //_logger.LogInformation($"Damage Info - Attacker: {AttackerPlayer.Name}, Victim: {victimPlayer.Name}, AmmoType: {@event.Info.AmmoType}, IsHeadshot: {isheadshot}");
 
-        float stunTime = CFG.StunZombieTime;
+        var inflictor = @event.Info.Inflictor.Value;
+        if(inflictor == null || !inflictor.IsValid || !inflictor.IsValidEntity)
+            return;
+
+        string inflictorname = inflictor.DesignerName;
+
         float force = CFG.KnockZombieForce;
-        _helpers.KnockBackZombie(AttackerPlayer, victimPlayer, force, isheadshot);
-        _helpers.SetZombieFreezeOrStun(victimPlayer, stunTime);
+        _helpers.KnockBackZombie(AttackerPlayer, victimPlayer, inflictorname, force, isheadshot, CFG);
+        
     }
 
     private HookResult OnHumanWeaponFire(EventWeaponFire @event)

@@ -555,13 +555,13 @@ public partial class HZPHelpers
 
     }
 
-    public void KnockBackZombie(IPlayer attacker, IPlayer target, float force, bool isheadshot)
+    public void KnockBackZombie(IPlayer attacker, IPlayer target, string inflictor, float force, bool isheadshot, HZPMainCFG CFG)
     {
  
         if (attacker == null || !attacker.IsValid)
             return;
 
-        if (attacker.Controller.DesignerName != "cs_player_controller")
+        if (!inflictor.Equals("player", StringComparison.OrdinalIgnoreCase))
             return;
 
         if (target == null || !target.IsValid)
@@ -594,18 +594,15 @@ public partial class HZPHelpers
         bool currentlyInAir = !isOnGround && targetpawn.AbsVelocity.Z != 0;
         bool isHero = (IsSniper || IsSurvivor || IsHero);
 
-        float weaponknockback = 1.0f;
-        float hitgroupsKnockback = isheadshot ? 2.0f : 1.0f;
-        float airKnock = 2.0f;
-        float heroKnock = isHero ? 2.0f : 1.0f;
+        float hitgroupsKnockback = isheadshot ? CFG.HumanKnockBackHeadMultiply : CFG.HumanKnockBackBodyMultiply;
 
-        var pushVelocity = vecKnockback * heroKnock * weaponknockback * hitgroupsKnockback * force;
-        if (currentlyInAir)
-        {
+        float airOrgroundKnock = currentlyInAir ? force * CFG.HumanKnockBackAirMultiply : force;
 
-            pushVelocity = vecKnockback * heroKnock * weaponknockback * hitgroupsKnockback * force * airKnock;
+        float totalKnockback = hitgroupsKnockback * airOrgroundKnock;
 
-        }
+        float finalKnock = isHero ? (totalKnockback * CFG.HumanHeroKnockBackMultiply) : totalKnockback;
+
+        var pushVelocity = vecKnockback * finalKnock;
 
         var vel = targetpawn.AbsVelocity;
 

@@ -115,6 +115,11 @@ public class HZPMainCFG
     public bool EnableDamageHud { get; set; } = true;
     public float HumanInitialSpeed { get; set; } = 1.0f;
     public float HumanInitialGravity { get; set; } = 0.8f;
+    public float HumanKnockBackHeadMultiply { get; set; } = 2.0f;
+    public float HumanKnockBackBodyMultiply { get; set; } = 1.0f;
+    public float HumanKnockBackGroundMultiply { get; set; } = 1.0f;
+    public float HumanKnockBackAirMultiply { get; set; } = 0.5f;
+    public float HumanHeroKnockBackMultiply { get; set; } = 1.0f;
     public bool EnableInfiniteReserveAmmo { get; set; } = true;
     public bool EnableWeaponNoRecoil { get; set; } = true;
     public string HumanSpawnPoints { get; set; } = string.Empty;
