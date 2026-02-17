@@ -16,8 +16,8 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z31PY52N)
 
-## 视频
-https://www.bilibili.com/video/BV1c3cJzrEWn
+## video
+https://www.youtube.com/watch?v=DVeR5u28M_s
 </div>
 
 ---
@@ -351,5 +351,6 @@ This API allows other plugins to:
 - Interact with game flow (check win conditions, give props, set glow/FOV/god mode, etc.)
 
 For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
+
 
 
