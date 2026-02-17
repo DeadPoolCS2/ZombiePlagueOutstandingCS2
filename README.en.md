@@ -225,7 +225,6 @@ If the name does not match, the class is disabled (Enable: false), or the class 
 | HpRegenHp           | Health restored per regeneration tick            | 30           | -                                          |
 | ZombieSoundVolume   | Volume of zombie-related sounds                  | 1.0          | Range: 0.0 ~ 1.0                           |
 | IdleInterval        | Interval between idle sounds (seconds)           | 70.0         | -                                          |
-| 参数                  | 说明                          | 示例路径示例                                                                 |
 |-----------------------|-------------------------------|-----------------------------------------------------------------------------|
 | Parameter             | Description                              | Example Path Example                                                  |
 |-----------------------|------------------------------------------|-----------------------------------------------------------------------|
@@ -351,6 +350,7 @@ This API allows other plugins to:
 - Interact with game flow (check win conditions, give props, set glow/FOV/god mode, etc.)
 
 For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
+
 
 
 
