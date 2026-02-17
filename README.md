@@ -315,5 +315,6 @@ VoxList 是一个数组，每个元素代表一组完整的播报语音包（例
 
 ## API 支持
 
-完整 API 接口（IHanZombiePlagueAPI），支持事件监听（如感染、胜利）、玩家状态查询、强制设置角色等。详见 [HanZombiePlagueAPI.xml](./HanZombiePlagueAPI.xml)  。
+完整 API 接口（IHanZombiePlagueAPI），支持事件监听（如感染、胜利）、玩家状态查询、强制设置角色等。详见 [HanZombiePlagueAPI.xml](.API/net10.0/HanZombiePlagueAPI.xml) 。 
+
 
