@@ -32,7 +32,7 @@ https://www.bilibili.com/video/BV1c3cJzrEWn
 
 # Han Zombie Plague S2
 
-**僵尸瘟疫增强插件（Season 2）**  
+**僵尸瘟疫插件**  
 适用于 Counter-Strike 2 游戏的僵尸瘟疫模式插件。提供丰富的游戏模式、特殊丧尸/人类角色、道具系统、API 支持，让你的服务器充满乐趣与挑战！
 
 ## 特色功能总览
