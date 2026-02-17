@@ -22,6 +22,14 @@ https://www.bilibili.com/video/BV1c3cJzrEWn
 
 ---
 
+插件可以配合以下创意工坊资源使用
+```
+音效 : 3644652779
+丧尸模型 : 3170427476
+```
+
+---
+
 <div align="center">
   <a href="./README.md"><img src="https://flagcdn.com/48x36/cn.png" alt="中文" width="48" height="36" /> <strong>中文版</strong></a>  
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
