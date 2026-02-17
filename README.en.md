@@ -22,6 +22,14 @@ https://www.youtube.com/watch?v=DVeR5u28M_s
 
 ---
 
+Example Workshop files
+```
+sound : 3644652779
+zombie models : 3170427476
+```
+
+---
+
 <div align="center">
   <a href="./README.en.md"><img src="https://flagcdn.com/48x36/gb.png" alt="English" width="48" height="36" /> <strong>English</strong></a>  
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -350,6 +358,7 @@ This API allows other plugins to:
 - Interact with game flow (check win conditions, give props, set glow/FOV/god mode, etc.)
 
 For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
+
 
 
 
