@@ -341,7 +341,7 @@ Each voice package follows this structure:
 ## API Support
 
 Full API interface (`IHanZombiePlagueAPI`) is provided, supporting event listening (e.g., infection, victory), player status queries, forced class setting, and more.  
-See details in `HanZombiePlagueAPI.xml` (or the include file `hanzombieplague.inc`).
+See details in [HanZombiePlagueAPI.xml](API/net10.0/HanZombiePlagueAPI.xml)
 
 This API allows other plugins to:
 - Listen to key events (e.g., `HZP_OnPlayerInfect`, `HZP_OnNemesisSelected`, `HZP_OnGameStart`, `HZP_OnHumanWin`, etc.)
@@ -350,6 +350,7 @@ This API allows other plugins to:
 - Interact with game flow (check win conditions, give props, set glow/FOV/god mode, etc.)
 
 For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
+
 
 
 
