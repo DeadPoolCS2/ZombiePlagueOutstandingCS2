@@ -366,6 +366,25 @@ public partial class HZPServices
             _helpers.RemoveScbaSuit(zombie, CFG.ScbaSuitBrokenSound);
             _helpers.RemoveGodState(zombie);
             _helpers.RemoveInfiniteAmmo(zombie);
+
+            // Disable jetpack and remove mines when player becomes zombie
+            _globals.HasJetpack.Remove(Id);
+            _globals.JetpackFuel.Remove(Id);
+            _globals.JetpackLastFuelTime.Remove(Id);
+            _globals.JetpackRocketCooldownEnd.Remove(Id);
+            _globals.PrevAttack2Pressed.Remove(Id);
+            _globals.HasReviveToken.Remove(Id);
+            var minesToRemove = _globals.AllMines.Where(m => m.OwnerId == Id && !m.Exploded).ToList();
+            foreach (var mine in minesToRemove)
+            {
+                if (mine.Beam != null && mine.Beam.IsValid && mine.Beam.IsValidEntity)
+                    mine.Beam.AcceptInput("Kill", 0);
+                if (mine.Visual != null && mine.Visual.IsValid && mine.Visual.IsValidEntity)
+                    mine.Visual.AcceptInput("Kill", 0);
+                mine.Exploded = true;
+            }
+            _globals.AllMines.RemoveAll(m => m.OwnerId == Id);
+            _globals.TripMineCharges.Remove(Id);
             
             _globals.IsZombie[Id] = true;
             zombie.SwitchTeam(Team.T);

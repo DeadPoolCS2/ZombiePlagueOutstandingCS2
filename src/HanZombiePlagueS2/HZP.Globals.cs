@@ -89,6 +89,28 @@ public class HZPGlobals
     /// <summary>True if the player had the jump (Space) button pressed in the previous tick.</summary>
     public Dictionary<int, bool> PrevJumpPressed = new Dictionary<int, bool>();
 
+    // ── Jetpack ───────────────────────────────────────────────────────────────
+    /// <summary>True if the player currently owns a jetpack.</summary>
+    public Dictionary<int, bool> HasJetpack = new Dictionary<int, bool>();
+    /// <summary>Remaining fuel for the player's jetpack.</summary>
+    public Dictionary<int, float> JetpackFuel = new Dictionary<int, float>();
+    /// <summary>Server time (CurrentTime) at which fuel was last consumed.</summary>
+    public Dictionary<int, float> JetpackLastFuelTime = new Dictionary<int, float>();
+    /// <summary>Server time at which the player's rocket cooldown expires.</summary>
+    public Dictionary<int, float> JetpackRocketCooldownEnd = new Dictionary<int, float>();
+    /// <summary>True if the player had Attack2 (right-click) pressed in the previous tick.</summary>
+    public Dictionary<int, bool> PrevAttack2Pressed = new Dictionary<int, bool>();
+
+    // ── Trip Mines ────────────────────────────────────────────────────────────
+    /// <summary>Number of unplanted mine charges the player has.</summary>
+    public Dictionary<int, int> TripMineCharges = new Dictionary<int, int>();
+    /// <summary>All currently active (not-yet-exploded) trip mines on the map.</summary>
+    public List<TripMineData> AllMines = new List<TripMineData>();
+
+    // ── Revive Token ──────────────────────────────────────────────────────────
+    /// <summary>True if the player has an active revive token that will trigger on death.</summary>
+    public Dictionary<int, bool> HasReviveToken = new Dictionary<int, bool>();
+
 }
 public class ZombieRegenState
 {
@@ -121,7 +143,24 @@ public class GlowEntity
 {
     public CBaseModelEntity? Relay { get; set; } = null;
     public CBaseModelEntity? Glow { get; set; } = null;
+}
 
+/// <summary>Represents a single planted trip mine on the map.</summary>
+public class TripMineData
+{
+    public int OwnerId;
+    /// <summary>Position of the mine body (on the wall surface).</summary>
+    public Vector MinePosition;
+    /// <summary>Far end of the laser beam.</summary>
+    public Vector BeamEnd;
+    /// <summary>The beam entity (laser visual).</summary>
+    public CBeam? Beam;
+    /// <summary>Particle visual attached at the mine position.</summary>
+    public CParticleSystem? Visual;
+    /// <summary>Remaining health of the mine.</summary>
+    public int Health;
+    /// <summary>True once the mine has detonated (pending removal).</summary>
+    public bool Exploded;
 }
 
 

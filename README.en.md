@@ -48,6 +48,7 @@ A Zombie Plague mode plugin for Counter-Strike 2. Featuring rich game modes, spe
 - **10 Diverse Game Modes**: From classic infection to special class confrontations, all fully configurable.
 - **Special Class System**: Mother Zombie, Nemesis, Assassin, Survivor, Sniper, Hero, etc. Each class has independent attributes (health, speed, gravity, damage, model, weapon).
 - **Props & Abilities**: T-Virus Grenade (infection area), Incendiary Grenade, Flashbang, Freeze Grenade, Teleport Grenade, SCBA Suit (infection immunity), God Mode, Infinite Ammo, Infinite Clip, No Recoil.
+- **Advanced Extra Items**: Ammo-pack purchasable items — Jetpack (CTRL+SPACE fly, right-click rocket), Trip Mines (laser beam, auto-explode on zombie trip), Revive Token (one-time respawn on death).
 - **Custom Configuration**: Per-mode toggle for infinite ammo & zombie respawn; global settings for knockback force, spawn points, sound effects, ambient music, etc.
 - **Player Interaction**: Menu-based zombie class preference selection (saved to database), admin menu, kill damage HUD display.
 - **API Support**: Complete event system (infection, class selection, victory, etc.) for other plugins to extend custom logic.
@@ -397,36 +398,75 @@ Admins can grant AP with: `hzp_give_ap <player> <amount>`
 
 All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.jsonc`.
 
-| Item | Team | Default Price |
-|------|------|--------------|
-| Armor | Human | 3 AP |
-| HE Grenade | Human | 2 AP |
-| Flash Grenade | Human | 2 AP |
-| Smoke Grenade | Human | 2 AP |
-| Antidote (cure to human) | Zombie | 8 AP |
-| Zombie Madness (temporary invulnerability) | Zombie | 6 AP |
-| Multi-Jump (+1 extra jump, stackable) | Human | 4 AP |
-| Knife Blink (3 teleport charges, use `!blink`) | Human | 5 AP |
+| Item | Team | Default Price | Notes |
+|------|------|--------------|-------|
+| Armor | Human | 3 AP | Restores 100 armor |
+| HE Grenade | Human | 2 AP | |
+| Flash Grenade | Human | 2 AP | |
+| Smoke Grenade | Human | 2 AP | |
+| Antidote (cure to human) | Zombie | 8 AP | |
+| Zombie Madness (temporary invulnerability) | Zombie | 6 AP | |
+| Multi-Jump (+1 extra jump, stackable) | Human | 4 AP | |
+| Knife Blink (3 teleport charges, use `!blink`) | Human | 5 AP | |
+| **Jetpack** | Human | 10 AP | Hold CTRL+SPACE to fly; right-click to fire a rocket |
+| **Trip Mine** | Human | 6 AP | Use `!mine` to plant; laser beam triggers explosion when a zombie crosses it |
+| **Revive Token** | Human | 8 AP | Automatically respawns you once on death; blocked in special modes |
+
+#### Jetpack Controls & Notes
+- **Fly**: Hold **CTRL + SPACE** simultaneously to activate thrust. Fuel depletes while flying.
+- **Rocket**: Press **right-click (Mouse2)** to fire a homing rocket that explodes on impact, dealing radius damage to nearby zombies.
+- Fuel refills automatically when a new round starts.
+- The jetpack is automatically removed when the player becomes a zombie, dies, or disconnects.
+
+#### Trip Mine Controls & Notes
+- **Buy** a mine from the Extra Items menu (gives 1 charge, max 2 active at once).
+- **Plant**: Type `!mine` in chat (or `hzp_mine`) while aiming at the surface you want to attach the mine to.
+- A red laser beam is projected from the mine. Any zombie that enters within ~40 units of the beam triggers an explosion.
+- All mines are cleaned up on round end and when the owner disconnects or becomes a zombie.
+
+#### Revive Token Notes
+- Buying the token while alive stores it for the current round.
+- On death (as a human), the token is consumed and the player respawns after 1.5 seconds as a full-health human.
+- **Blocked** in special modes: Survivor, Sniper, Nemesis, Assassin, Swarm, Plague, AVS.
+- Allowed in: Normal Infection, Multi Infection, Hero mode.
+- The token is cleared at round start and after it is used.
 
 ### Configuration – HZPExtraItemsCFG.jsonc
 
 ```jsonc
 {
   "HZPExtraItemsCFG": {
-    "ArmorAmount": 100,           // Armor points given by Armor item
-    "MultijumpIncrement": 1,      // Extra jumps per purchase
-    "MultijumpMax": 3,            // Maximum extra jumps allowed
-    "MadnessDuration": 10.0,      // Zombie Madness duration (seconds)
-    "KnifeBlinkCharges": 3,       // Blink charges per purchase
-    "KnifeBlinkDistance": 300.0,  // Blink distance (engine units)
-    "KnifeBlinkCooldown": 2.0,    // Cooldown between blinks (seconds)
-    "StartingAmmoPacks": 0,       // AP given on connect
-    "RoundSurviveReward": 3,      // AP for surviving as human
-    "ZombieKillReward": 2,        // AP for zombie killing a human
+    "ArmorAmount": 100,            // Armor points given by Armor item
+    "MultijumpIncrement": 1,       // Extra jumps per purchase
+    "MultijumpMax": 3,             // Maximum extra jumps allowed
+    "MadnessDuration": 10.0,       // Zombie Madness duration (seconds)
+    "KnifeBlinkCharges": 3,        // Blink charges per purchase
+    "KnifeBlinkDistance": 300.0,   // Blink distance (engine units)
+    "KnifeBlinkCooldown": 2.0,     // Cooldown between blinks (seconds)
+    // ── Jetpack ──────────────────────────────────────────────────────────
+    "JetpackMaxFuel": 250.0,       // Maximum fuel capacity (units)
+    "JetpackThrustForce": 350.0,   // Upward thrust velocity while flying (units/s)
+    "JetpackFuelConsumeRate": 30.0,// Fuel consumed per second while flying
+    "JetpackRocketDamage": 500,    // Rocket damage at point-blank
+    "JetpackRocketRadius": 300.0,  // Rocket explosion radius (units)
+    "JetpackRocketCooldown": 2.0,  // Cooldown between rockets (seconds)
+    // ── Trip Mine ─────────────────────────────────────────────────────────
+    "TripMineMaxPerPlayer": 2,     // Max simultaneously planted mines per player
+    "TripMineDamage": 2000.0,      // Explosion damage at the mine's centre
+    "TripMineRadius": 300.0,       // Explosion radius (units)
+    "TripMineBeamLength": 300.0,   // Length of the laser beam (units)
+    "TripMineTripRadius": 40.0,    // Distance from beam to trigger explosion
+    // ── Ammo Packs ────────────────────────────────────────────────────────
+    "StartingAmmoPacks": 0,        // AP given on connect
+    "RoundSurviveReward": 3,       // AP for surviving as human
+    "ZombieKillReward": 2,         // AP for zombie killing a human
     "Items": [
       // Each item: Key (internal), Name (display), Price, Enable, Team
-      { "Key": "armor",         "Name": "Armor",        "Price": 3, "Enable": true, "Team": "Human"  },
-      { "Key": "antidote",      "Name": "Antidote",     "Price": 8, "Enable": true, "Team": "Zombie" },
+      { "Key": "armor",        "Name": "Armor",                           "Price": 3,  "Enable": true, "Team": "Human"  },
+      { "Key": "antidote",     "Name": "Antidote",                        "Price": 8,  "Enable": true, "Team": "Zombie" },
+      { "Key": "jetpack",      "Name": "Jetpack",                         "Price": 10, "Enable": true, "Team": "Human"  },
+      { "Key": "trip_mine",    "Name": "Trip Mine (!mine to plant)",       "Price": 6,  "Enable": true, "Team": "Human"  },
+      { "Key": "revive_token", "Name": "Revive Token",                    "Price": 8,  "Enable": true, "Team": "Human"  },
       // ... add more items here
     ]
   }

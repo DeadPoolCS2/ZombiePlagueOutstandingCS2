@@ -90,6 +90,8 @@ public partial class HZPEvents
         _core.Event.OnTick += Event_OnTickSpeed;
         _core.Event.OnTick += Event_OnTickNoRecoil;
         _core.Event.OnTick += Event_OnTickMultijump;
+        _core.Event.OnTick += Event_OnTickJetpack;
+        _core.Event.OnTick += Event_OnTickTripMines;
 
         _core.GameEvent.HookPre<EventWeaponFire>(OnHumanWeaponFire);
         _core.Event.OnEntityTakeDamage += Event_OnHumanTakeDamage;
@@ -252,6 +254,7 @@ public partial class HZPEvents
         
         _helpers.ClearAllBurns();
         _helpers.ClearAllLights();
+        _extraItemsMenu.CleanupAllMines();
         _globals.GameInfiniteClipMode = false;
         _core.Scheduler.DelayBySeconds(2.0f, () =>
         {
@@ -286,6 +289,10 @@ public partial class HZPEvents
                 _globals.KnifeBlinkCooldownEnd.Remove(id);
                 _globals.ZombieMadnessActive.Remove(id);
                 _globals.PrevJumpPressed.Remove(id);
+                // Jetpack / Trip Mine / Revive Token
+                _extraItemsMenu.CleanupJetpack(id);
+                _globals.TripMineCharges.Remove(id);
+                _globals.HasReviveToken.Remove(id);
                 bool wasZombie = false;
                 _globals.IsZombie.TryGetValue(id, out wasZombie);
                 if (!wasZombie && player.Controller != null && player.Controller.IsValid && player.Controller.PawnIsAlive)
@@ -590,6 +597,10 @@ public partial class HZPEvents
         _globals.KnifeBlinkCooldownEnd.Remove(Id);
         _globals.ZombieMadnessActive.Remove(Id);
         _globals.PrevJumpPressed.Remove(Id);
+        // Jetpack and mines cleanup on death
+        _extraItemsMenu.CleanupJetpack(Id);
+        _extraItemsMenu.CleanupTripMinesForPlayer(Id);
+        // (HasReviveToken is intentionally kept here – handled below)
 
         if (!_globals.GameStart)
             return HookResult.Continue;
@@ -632,6 +643,53 @@ public partial class HZPEvents
         }
         if (!IsZombie && _gameMode.CanZombieReborn())
         {
+            // ── Revive Token check ──────────────────────────────────────────
+            _globals.HasReviveToken.TryGetValue(Id, out bool hasReviveToken);
+            var mode = _gameMode.CurrentMode;
+            bool reviveModeAllowed = mode == GameModeType.Normal
+                                  || mode == GameModeType.NormalInfection
+                                  || mode == GameModeType.MultiInfection
+                                  || mode == GameModeType.Hero;
+
+            if (hasReviveToken && reviveModeAllowed)
+            {
+                _globals.HasReviveToken[Id] = false; // consume token
+                float reviveDelay = _extraItemsCFG.CurrentValue.ReviveTokenRespawnDelay;
+                _core.Scheduler.DelayBySeconds(reviveDelay, () =>
+                {
+                    var p = _core.PlayerManager.GetPlayer(Id);
+                    if (p == null || !p.IsValid) return;
+                    if (!_globals.GameStart) return;
+
+                    _globals.IsZombie[Id] = false;
+                    p.Respawn();
+
+                    _core.Scheduler.NextWorldUpdate(() =>
+                    {
+                        var p2 = _core.PlayerManager.GetPlayer(Id);
+                        if (p2 == null || !p2.IsValid) return;
+
+                        var pawn = p2.PlayerPawn;
+                        if (pawn == null || !pawn.IsValid) return;
+
+                        var cfg = _mainCFG.CurrentValue;
+                        pawn.MaxHealth = cfg.HumanMaxHealth;
+                        pawn.MaxHealthUpdated();
+                        pawn.Health = cfg.HumanMaxHealth;
+                        pawn.HealthUpdated();
+
+                        string defaultModel = string.IsNullOrEmpty(cfg.HumandefaultModel)
+                            ? "characters/models/ctm_st6/ctm_st6_variante.vmdl"
+                            : cfg.HumandefaultModel;
+                        pawn.SetModel(defaultModel);
+                    });
+
+                    p.SendMessage(MessageType.Chat, _helpers.T(p, "ReviveTokenUsed"));
+                });
+                return HookResult.Continue;
+            }
+            // ── End Revive Token ────────────────────────────────────────────
+
             _core.Scheduler.DelayBySeconds(1.0f, () =>
             {
                 var player = _core.PlayerManager.GetPlayer(Id);
@@ -992,6 +1050,10 @@ public partial class HZPEvents
         _globals.KnifeBlinkCooldownEnd.Remove(id);
         _globals.ZombieMadnessActive.Remove(id);
         _globals.PrevJumpPressed.Remove(id);
+        // Jetpack / Trip Mine / Revive Token
+        _extraItemsMenu.CleanupJetpack(id);
+        _extraItemsMenu.CleanupTripMinesForPlayer(id);
+        _globals.HasReviveToken.Remove(id);
 
         _globals.InSwing[id] = false;
 
@@ -1162,6 +1224,28 @@ public partial class HZPEvents
             var vel = pawn.AbsVelocity;
             pawn.Teleport(null, null, new SwiftlyS2.Shared.Natives.Vector(vel.X, vel.Y, JumpVelocityZ));
         }
+    }
+
+    private void Event_OnTickJetpack()
+    {
+        foreach (var player in _core.PlayerManager.GetAlive())
+        {
+            if (player == null || !player.IsValid) continue;
+
+            int id = player.PlayerID;
+            if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) continue;
+
+            _globals.IsZombie.TryGetValue(id, out bool isZombie);
+            if (isZombie) continue;
+
+            _extraItemsMenu.TryExecuteJetpackThrust(player);
+            _extraItemsMenu.TryFireJetpackRocket(player);
+        }
+    }
+
+    private void Event_OnTickTripMines()
+    {
+        _extraItemsMenu.CheckTripMines();
     }
 
     private void Event_OnHumanTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)
