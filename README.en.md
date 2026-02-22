@@ -359,8 +359,80 @@ This API allows other plugins to:
 
 For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
 
+---
 
+## Main Game Menu & Extra Items System
 
+### Commands
 
+| Command | Description |
+|---------|-------------|
+| `!menu` / `!zp` | Open the main game menu (chat) |
+| `hzp_menu` | Open the main game menu (console) |
+| `!extras` | Open the extra items menu directly |
+| `!blink` | Activate Knife Blink (if purchased) |
+| `hzp_give_ap <name\|#userid> <amount>` | Admin: give ammo packs to a player |
+
+### Main Menu Options
+
+1. **Buy Weapons** – Opens the round-start weapons menu (human only, once per round).
+2. **Buy Extra Items** – Opens the extra items shop.
+3. **Choose Zombie Class** – Opens the zombie class preference menu.
+4. **Unstuck** – Teleports you to a nearby free position if you are stuck.
+5. **Join Spectator** – Moves you to the spectator team.
+
+### Ammo Packs (AP)
+
+Ammo Packs are the currency for the Extra Items shop.
+
+| Source | Amount (configurable) |
+|--------|----------------------|
+| Connect | `StartingAmmoPacks` (default 0) |
+| Surviving a round as human | `RoundSurviveReward` (default 3) |
+| Zombie kills a human | `ZombieKillReward` (default 2) |
+
+Admins can grant AP with: `hzp_give_ap <player> <amount>`
+
+### Extra Items
+
+All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.jsonc`.
+
+| Item | Team | Default Price |
+|------|------|--------------|
+| Armor | Human | 3 AP |
+| HE Grenade | Human | 2 AP |
+| Flash Grenade | Human | 2 AP |
+| Smoke Grenade | Human | 2 AP |
+| Antidote (cure to human) | Zombie | 8 AP |
+| Zombie Madness (temporary invulnerability) | Zombie | 6 AP |
+| Multi-Jump (+1 extra jump, stackable) | Human | 4 AP |
+| Knife Blink (3 teleport charges, use `!blink`) | Human | 5 AP |
+
+### Configuration – HZPExtraItemsCFG.jsonc
+
+```jsonc
+{
+  "HZPExtraItemsCFG": {
+    "ArmorAmount": 100,           // Armor points given by Armor item
+    "MultijumpIncrement": 1,      // Extra jumps per purchase
+    "MultijumpMax": 3,            // Maximum extra jumps allowed
+    "MadnessDuration": 10.0,      // Zombie Madness duration (seconds)
+    "KnifeBlinkCharges": 3,       // Blink charges per purchase
+    "KnifeBlinkDistance": 300.0,  // Blink distance (engine units)
+    "KnifeBlinkCooldown": 2.0,    // Cooldown between blinks (seconds)
+    "StartingAmmoPacks": 0,       // AP given on connect
+    "RoundSurviveReward": 3,      // AP for surviving as human
+    "ZombieKillReward": 2,        // AP for zombie killing a human
+    "Items": [
+      // Each item: Key (internal), Name (display), Price, Enable, Team
+      { "Key": "armor",         "Name": "Armor",        "Price": 3, "Enable": true, "Team": "Human"  },
+      { "Key": "antidote",      "Name": "Antidote",     "Price": 8, "Enable": true, "Team": "Zombie" },
+      // ... add more items here
+    ]
+  }
+}
+```
+
+Items can be disabled by setting `"Enable": false`. Custom items can be added by extending the source code.
 
 

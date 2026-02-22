@@ -38,6 +38,9 @@ public partial class HZPEvents
     private readonly HZPGameMode _gameMode;
 
     private readonly HanZombiePlagueAPI _api;
+    private readonly HZPExtraItemsMenu _extraItemsMenu;
+    private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
+
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
         HZPCommands commands, IOptionsMonitor<HZPMainCFG> mainCFG,
@@ -45,7 +48,9 @@ public partial class HZPEvents
         IOptionsMonitor<HZPZombieClassCFG> zombieClassCFG,
         PlayerZombieState zombieState, HZPGameMode gameMode,
         IOptionsMonitor<HZPSpecialClassCFG> specialClassCFG,
-        HanZombiePlagueAPI api)
+        HanZombiePlagueAPI api,
+        HZPExtraItemsMenu extraItemsMenu,
+        IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG)
     {
         _core = core;
         _logger = logger;
@@ -60,6 +65,8 @@ public partial class HZPEvents
         _gameMode = gameMode;
         _SpecialClassCFG = specialClassCFG;
         _api = api;
+        _extraItemsMenu = extraItemsMenu;
+        _extraItemsCFG = extraItemsCFG;
     }
 
     public void HookEvents()
@@ -270,6 +277,28 @@ public partial class HZPEvents
                 _globals.ScbaSuit[id] = false;
                 _globals.GodState[id] = false;
                 _globals.InfiniteAmmoState[id] = false;
+
+                // Extra items: reset per-round state
+                _globals.ExtraJumps.Remove(id);
+                _globals.JumpsUsed.Remove(id);
+                _globals.KnifeBlinkCharges.Remove(id);
+                _globals.KnifeBlinkCooldownEnd.Remove(id);
+                _globals.ZombieMadnessActive.Remove(id);
+
+                // Award ammo packs to surviving humans
+                bool wasZombie = false;
+                _globals.IsZombie.TryGetValue(id, out wasZombie);
+                if (!wasZombie && player.Controller != null && player.Controller.IsValid && player.Controller.PawnIsAlive)
+                {
+                    int reward = _extraItemsCFG.CurrentValue.RoundSurviveReward;
+                    if (reward > 0)
+                    {
+                        _extraItemsMenu.AddAmmoPacks(id, reward);
+                        player.SendMessage(MessageType.Chat,
+                            string.Format(_helpers.T(player, "APRoundSurviveReward"), reward,
+                                _extraItemsMenu.GetAmmoPacks(id)));
+                    }
+                }
 
                 _globals.CanBuyWeaponsThisRound.Remove(id);
 
@@ -554,11 +583,39 @@ public partial class HZPEvents
         _globals.GodState.Remove(Id);
         _globals.InfiniteAmmoState.Remove(Id);
 
-
-
+        // Extra items: reset per-death state for the victim
+        _globals.ExtraJumps.Remove(Id);
+        _globals.JumpsUsed.Remove(Id);
+        _globals.KnifeBlinkCharges.Remove(Id);
+        _globals.KnifeBlinkCooldownEnd.Remove(Id);
+        _globals.ZombieMadnessActive.Remove(Id);
 
         if (!_globals.GameStart)
             return HookResult.Continue;
+
+        // Award AP to zombie attacker for killing a human
+        _globals.IsZombie.TryGetValue(Id, out bool victimIsZombie);
+        if (!victimIsZombie)
+        {
+            var attackerId = @event.Attacker;
+            var attacker = _core.PlayerManager.GetPlayer(attackerId);
+            if (attacker != null && attacker.IsValid)
+            {
+                var aId = attacker.PlayerID;
+                _globals.IsZombie.TryGetValue(aId, out bool attackerIsZombie);
+                if (attackerIsZombie)
+                {
+                    int reward = _extraItemsCFG.CurrentValue.ZombieKillReward;
+                    if (reward > 0)
+                    {
+                        _extraItemsMenu.AddAmmoPacks(aId, reward);
+                        attacker.SendMessage(MessageType.Chat,
+                            string.Format(_helpers.T(attacker, "APZombieKillReward"), reward,
+                                _extraItemsMenu.GetAmmoPacks(aId)));
+                    }
+                }
+            }
+        }
 
         _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
         if (IsZombie && _gameMode.CanZombieReborn())
@@ -882,6 +939,11 @@ public partial class HZPEvents
 
         _globals.IsZombie[id] = _globals.GameStart;
 
+        // Give starting ammo packs to the new player
+        int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
+        if (startingAP > 0)
+            _extraItemsMenu.AddAmmoPacks(id, startingAP);
+
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)
@@ -912,6 +974,14 @@ public partial class HZPEvents
         _globals.StopZombieTimers.Remove(id);
         _globals.g_IsInvisible.Remove(id);
         _globals.ThrowerIsZombie.Remove(id);
+
+        // Extra items cleanup
+        _globals.AmmoPacks.Remove(id);
+        _globals.ExtraJumps.Remove(id);
+        _globals.JumpsUsed.Remove(id);
+        _globals.KnifeBlinkCharges.Remove(id);
+        _globals.KnifeBlinkCooldownEnd.Remove(id);
+        _globals.ZombieMadnessActive.Remove(id);
 
         _globals.InSwing[id] = false;
 

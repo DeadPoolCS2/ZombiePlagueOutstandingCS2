@@ -24,12 +24,15 @@ public class HZPCommands
     private readonly HZPAdminItemMenu _hZPAdminItemMenu;
     private readonly HZPHelpers _helpers;
     private readonly HZPWeaponsMenu _weaponsMenu;
+    private readonly HZPGameMenu _gameMenu;
+    private readonly HZPExtraItemsMenu _extraItemsMenu;
 
     public HZPCommands(ISwiftlyCore core, ILogger<HZPCommands> logger,
         HZPServices services, IOptionsMonitor<HZPMainCFG> mainCFG,
         HZPGlobals globals, HZPAdminItemMenu hZPAdminItemMenu,
         HZPZombieClassMenu hZPZombieClassMenu, HZPHelpers helpers,
-        HZPWeaponsMenu weaponsMenu)
+        HZPWeaponsMenu weaponsMenu, HZPGameMenu gameMenu,
+        HZPExtraItemsMenu extraItemsMenu)
     {
         _core = core;
         _logger = logger;
@@ -40,6 +43,8 @@ public class HZPCommands
         _hZPZombieClassMenu = hZPZombieClassMenu;
         _helpers = helpers;
         _weaponsMenu = weaponsMenu;
+        _gameMenu = gameMenu;
+        _extraItemsMenu = extraItemsMenu;
     }
 
     public void MenuCommands()
@@ -48,6 +53,20 @@ public class HZPCommands
         _core.Command.RegisterCommand(CFG.ZombieClassCommand, SelectZombieClass, true);
         _core.Command.RegisterCommand(CFG.AdminMenuItemCommand, UseItemMenu, true);
         _core.Command.RegisterCommand("sw_buyweapons", BuyWeapons, true);
+
+        // Main game menu – chat triggers and console alias
+        _core.Command.RegisterCommand("!menu", OpenGameMenu, true);
+        _core.Command.RegisterCommand("!zp", OpenGameMenu, true);
+        _core.Command.RegisterCommand("hzp_menu", OpenGameMenu, true);
+
+        // Extra items menu shortcut
+        _core.Command.RegisterCommand("!extras", OpenExtraItemsMenu, true);
+
+        // Knife blink activation
+        _core.Command.RegisterCommand("!blink", KnifeBlink, true);
+
+        // Admin: give ammo packs for testing  hzp_give_ap <target_name|#userid> <amount>
+        _core.Command.RegisterCommand("hzp_give_ap", GiveAmmoPacks, true);
     }
     public void SelectZombieClass(ICommandContext context)
     {
@@ -83,6 +102,91 @@ public class HZPCommands
             return;
 
         _weaponsMenu.OpenWeaponsMenuIfAllowed(player);
+    }
+
+    public void OpenGameMenu(ICommandContext context)
+    {
+        var player = context.Sender;
+        if (player == null || !player.IsValid) return;
+        _gameMenu.OpenGameMenu(player);
+    }
+
+    public void OpenExtraItemsMenu(ICommandContext context)
+    {
+        var player = context.Sender;
+        if (player == null || !player.IsValid) return;
+        _extraItemsMenu.OpenExtraItemsMenu(player);
+    }
+
+    public void KnifeBlink(ICommandContext context)
+    {
+        var player = context.Sender;
+        if (player == null || !player.IsValid) return;
+        _extraItemsMenu.TryExecuteKnifeBlink(player);
+    }
+
+    public void GiveAmmoPacks(ICommandContext context)
+    {
+        var sender = context.Sender;
+
+        // Require admin permission
+        if (sender != null && sender.IsValid)
+        {
+            if (!HasAdminMenuPermission(sender))
+            {
+                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "NoPermission"));
+                return;
+            }
+        }
+
+        // Parse arguments: hzp_give_ap <target> <amount>
+        string[] args = context.Args;
+        if (args.Length < 2)
+        {
+            if (sender != null && sender.IsValid)
+                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "GiveAPUsage"));
+            return;
+        }
+
+        string targetName = args[0];
+        if (!int.TryParse(args[1], out int amount) || amount <= 0)
+        {
+            if (sender != null && sender.IsValid)
+                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "GiveAPInvalidAmount"));
+            return;
+        }
+
+        var allPlayers = _core.PlayerManager.GetAllPlayers();
+        IPlayer? target = null;
+
+        // Support "#userid" or partial name match
+        if (targetName.StartsWith("#") && int.TryParse(targetName[1..], out int uid))
+        {
+            target = allPlayers.FirstOrDefault(p => p != null && p.IsValid && p.PlayerID == uid);
+        }
+        else
+        {
+            target = allPlayers.FirstOrDefault(p =>
+                p != null && p.IsValid &&
+                p.Name.Contains(targetName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (target == null || !target.IsValid)
+        {
+            if (sender != null && sender.IsValid)
+                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "GiveAPTargetNotFound"));
+            return;
+        }
+
+        _extraItemsMenu.AddAmmoPacks(target.PlayerID, amount);
+        int newTotal = _extraItemsMenu.GetAmmoPacks(target.PlayerID);
+
+        target.SendMessage(MessageType.Chat,
+            string.Format(_helpers.T(target, "GiveAPReceived"), amount, newTotal));
+
+        if (sender != null && sender.IsValid)
+            sender.SendMessage(MessageType.Chat,
+                string.Format(_helpers.T(sender, "GiveAPSuccess"), target.Name, amount, newTotal));
     }
 
     private bool HasAdminMenuPermission(IPlayer player)

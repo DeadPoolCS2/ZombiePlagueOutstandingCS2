@@ -65,6 +65,25 @@ public class HZPGlobals
 
     public Dictionary<int, bool> CanBuyWeaponsThisRound = new Dictionary<int, bool>();
 
+    // ── Extra Items / Ammo Packs ──────────────────────────────────────────────
+    /// <summary>Per-player ammo-pack balance (keyed by PlayerID).</summary>
+    public Dictionary<int, int> AmmoPacks = new Dictionary<int, int>();
+
+    // ── Multijump ─────────────────────────────────────────────────────────────
+    /// <summary>Number of extra jumps currently available to the player this round.</summary>
+    public Dictionary<int, int> ExtraJumps = new Dictionary<int, int>();
+    /// <summary>Jumps consumed since the player last touched the ground.</summary>
+    public Dictionary<int, int> JumpsUsed = new Dictionary<int, int>();
+
+    // ── Knife Blink ───────────────────────────────────────────────────────────
+    /// <summary>Remaining knife-blink charges for the player.</summary>
+    public Dictionary<int, int> KnifeBlinkCharges = new Dictionary<int, int>();
+    /// <summary>Environment.TickCount64 (ms) at which the player's blink cooldown expires.</summary>
+    public Dictionary<int, long> KnifeBlinkCooldownEnd = new Dictionary<int, long>();
+
+    // ── Zombie Madness ────────────────────────────────────────────────────────
+    /// <summary>True while a zombie has an active Madness (invulnerability) buff.</summary>
+    public Dictionary<int, bool> ZombieMadnessActive = new Dictionary<int, bool>();
 
 }
 public class ZombieRegenState
