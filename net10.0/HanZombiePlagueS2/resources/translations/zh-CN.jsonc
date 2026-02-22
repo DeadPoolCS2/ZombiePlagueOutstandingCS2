@@ -87,5 +87,67 @@
     "WeaponMenuSecondaryTitle": "副武器选择",
     "WeaponMenuSecondarySelect": "选择本轮使用的副武器",
     "WeaponsMenuNotEligible": "你当前无法使用武器选择菜单。",
-    "WeaponsMenuAlreadyUsed": "你本轮已经使用过武器选择菜单了！"
+    "WeaponsMenuAlreadyUsed": "你本轮已经使用过武器选择菜单了！",
+
+    // ── 主游戏菜单 ─────────────────────────────────────────────────────────
+    "GameMenuTitle": "ZP 游戏菜单",
+    "GameMenuHint": "W/S 导航，E 确认，SHIFT 退出",
+    "GameMenuBuyWeapons": "购买武器",
+    "GameMenuExtraItems": "购买额外道具",
+    "GameMenuZombieClass": "选择僵尸职业",
+    "GameMenuUnstuck": "解除卡位",
+    "GameMenuJoinSpectator": "加入观察者",
+
+    // ── 解除卡位 ───────────────────────────────────────────────────────────
+    "UnstuckMustBeAlive": "必须存活才能使用解除卡位功能。",
+    "UnstuckSuccess": "已尝试将你移动到附近的空闲位置。",
+    "UnstuckFailed": "无法在附近找到空闲位置。",
+
+    // ── 加入观察者 ─────────────────────────────────────────────────────────
+    "JoinSpectatorSuccess": "你已切换到观察者阵营。",
+    "JoinSpectatorFailed": "当前无法切换到观察者阵营。",
+
+    // ── 额外道具菜单 ───────────────────────────────────────────────────────
+    "ExtraItemsMenuTitle": "额外道具",
+    "ExtraItemsMenuAP": "你的弹药包：{0}",
+    "ExtraItemsNoneAvailable": "没有适合你阵营的道具。",
+    "ExtraItemsMustBeAlive": "必须存活才能购买道具。",
+    "ExtraItemsRoundNotActive": "当前无法购买道具。",
+    "ExtraItemsWrongTeam": "该道具不适用于你的阵营。",
+    "ExtraItemsNotEnoughAP": "你需要 {0} 个弹药包，但你只有 {1} 个。",
+
+    // ── 护甲 ───────────────────────────────────────────────────────────────
+    "ExtraItemsArmorSuccess": "你获得了 {0} 点护甲。剩余弹药包：{1}。",
+
+    // ── 手雷 ───────────────────────────────────────────────────────────────
+    "ExtraItemsGrenadeSuccess": "你获得了一枚{0}。剩余弹药包：{1}。",
+
+    // ── 解毒剂 ─────────────────────────────────────────────────────────────
+    "ExtraItemsAntidoteNotZombie": "你不是僵尸，无法使用解毒剂。",
+    "ExtraItemsAntidoteSuccess": "你使用了解毒剂，重新变回了人类！剩余弹药包：{0}。",
+    "ExtraItemsAntidoteSuccessToAll": "玩家 {0} 使用了解毒剂，重新变回了人类！",
+
+    // ── 僵尸狂暴 ───────────────────────────────────────────────────────────
+    "ExtraItemsMadnessAlready": "僵尸狂暴已经激活！",
+    "ExtraItemsMadnessSuccess": "僵尸狂暴激活 {0} 秒！剩余弹药包：{1}。",
+    "ExtraItemsMadnessEnd": "僵尸狂暴已结束。",
+
+    // ── 多段跳 ─────────────────────────────────────────────────────────────
+    "ExtraItemsMultijumpMax": "你已达到最大额外跳跃次数 {0}。",
+    "ExtraItemsMultijumpSuccess": "多段跳已升级至 {0} 次额外跳跃。剩余弹药包：{1}。",
+
+    // ── 刀闪 ───────────────────────────────────────────────────────────────
+    "ExtraItemsKnifeBlinkSuccess": "获得 {0} 次刀闪充能（当前：{1}）。剩余弹药包：{2}。",
+    "ExtraItemsKnifeBlinkUsed": "瞬移成功！剩余充能：{0}（冷却：{1}秒）。",
+
+    // ── 管理员给予弹药包 ───────────────────────────────────────────────────
+    "GiveAPUsage": "用法：hzp_give_ap <姓名|#userid> <数量>",
+    "GiveAPInvalidAmount": "数量必须为正整数。",
+    "GiveAPTargetNotFound": "未找到玩家。",
+    "GiveAPReceived": "你获得了 {0} 个弹药包。总计：{1}。",
+    "GiveAPSuccess": "已给予 {0} 玩家 {1} 个弹药包。新总计：{2}。",
+
+    // ── 弹药包奖励通知 ─────────────────────────────────────────────────────
+    "APRoundSurviveReward": "你存活到了本轮结束！+{0} 弹药包（总计：{1}）。",
+    "APZombieKillReward": "你感染了一名人类！+{0} 弹药包（总计：{1}）。"
 }

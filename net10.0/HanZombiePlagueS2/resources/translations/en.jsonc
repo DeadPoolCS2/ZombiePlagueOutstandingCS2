@@ -87,6 +87,68 @@
     "WeaponMenuSecondaryTitle": "Secondary Weapon Selection",
     "WeaponMenuSecondarySelect": "Choose your secondary weapon for this round",
     "WeaponsMenuNotEligible": "You are not eligible to use the weapon menu.",
-    "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!"
+    "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!",
+
+    // ── Main Game Menu ─────────────────────────────────────────────────────
+    "GameMenuTitle": "ZP Game Menu",
+    "GameMenuHint": "Use W/S to navigate, E to select, SHIFT to exit",
+    "GameMenuBuyWeapons": "Buy Weapons",
+    "GameMenuExtraItems": "Buy Extra Items",
+    "GameMenuZombieClass": "Choose Zombie Class",
+    "GameMenuUnstuck": "Unstuck",
+    "GameMenuJoinSpectator": "Join Spectator",
+
+    // ── Unstuck ────────────────────────────────────────────────────────────
+    "UnstuckMustBeAlive": "You must be alive to use Unstuck.",
+    "UnstuckSuccess": "Attempted to move you to a free position.",
+    "UnstuckFailed": "Could not find a free position nearby.",
+
+    // ── Join Spectator ─────────────────────────────────────────────────────
+    "JoinSpectatorSuccess": "You have been moved to the spectator team.",
+    "JoinSpectatorFailed": "Could not move you to spectator at this time.",
+
+    // ── Extra Items Menu ───────────────────────────────────────────────────
+    "ExtraItemsMenuTitle": "Extra Items",
+    "ExtraItemsMenuAP": "Your Ammo Packs: {0}",
+    "ExtraItemsNoneAvailable": "No items available for your team.",
+    "ExtraItemsMustBeAlive": "You must be alive to buy items.",
+    "ExtraItemsRoundNotActive": "Cannot purchase items right now.",
+    "ExtraItemsWrongTeam": "This item is not available for your team.",
+    "ExtraItemsNotEnoughAP": "You need {0} Ammo Packs but only have {1}.",
+
+    // ── Armor ──────────────────────────────────────────────────────────────
+    "ExtraItemsArmorSuccess": "You received {0} armor. Ammo Packs remaining: {1}.",
+
+    // ── Grenades ───────────────────────────────────────────────────────────
+    "ExtraItemsGrenadeSuccess": "You received a {0}. Ammo Packs remaining: {1}.",
+
+    // ── Antidote ───────────────────────────────────────────────────────────
+    "ExtraItemsAntidoteNotZombie": "You are not a zombie; antidote cannot be used.",
+    "ExtraItemsAntidoteSuccess": "You used the Antidote and became human again! Ammo Packs remaining: {0}.",
+    "ExtraItemsAntidoteSuccessToAll": "Player {0} used the Antidote and became human again!",
+
+    // ── Zombie Madness ─────────────────────────────────────────────────────
+    "ExtraItemsMadnessAlready": "Zombie Madness is already active!",
+    "ExtraItemsMadnessSuccess": "Zombie Madness activated for {0} seconds! Ammo Packs remaining: {1}.",
+    "ExtraItemsMadnessEnd": "Zombie Madness has ended.",
+
+    // ── Multijump ─────────────────────────────────────────────────────────
+    "ExtraItemsMultijumpMax": "You already have the maximum of {0} extra jumps.",
+    "ExtraItemsMultijumpSuccess": "Multi-Jump upgraded to {0} extra jumps. Ammo Packs remaining: {1}.",
+
+    // ── Knife Blink ───────────────────────────────────────────────────────
+    "ExtraItemsKnifeBlinkSuccess": "Received {0} Knife Blink charges (total: {1}). Ammo Packs remaining: {2}.",
+    "ExtraItemsKnifeBlinkUsed": "Blinked! Charges remaining: {0} (cooldown: {1}s).",
+
+    // ── Admin give-AP command ──────────────────────────────────────────────
+    "GiveAPUsage": "Usage: hzp_give_ap <name|#userid> <amount>",
+    "GiveAPInvalidAmount": "Amount must be a positive integer.",
+    "GiveAPTargetNotFound": "Player not found.",
+    "GiveAPReceived": "You received {0} Ammo Packs. Total: {1}.",
+    "GiveAPSuccess": "Gave {0} {1} Ammo Pack(s). New total: {2}.",
+
+    // ── AP reward notifications ────────────────────────────────────────────
+    "APRoundSurviveReward": "You survived the round! +{0} Ammo Packs (total: {1}).",
+    "APZombieKillReward": "You infected a human! +{0} Ammo Packs (total: {1})."
 
 }
