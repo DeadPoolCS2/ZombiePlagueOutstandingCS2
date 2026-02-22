@@ -204,11 +204,11 @@ public class HZPCommands
         int newTotal = _extraItemsMenu.GetAmmoPacks(target.PlayerID);
 
         target.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(target, "GiveAPReceived"), amount, newTotal));
+            _helpers.T(target, "GiveAPReceived", amount, newTotal));
 
         if (sender != null && sender.IsValid)
             sender.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(sender, "GiveAPSuccess"), target.Name, amount, newTotal));
+                _helpers.T(sender, "GiveAPSuccess", target.Name, amount, newTotal));
     }
 
     private bool HasAdminMenuPermission(IPlayer player)
