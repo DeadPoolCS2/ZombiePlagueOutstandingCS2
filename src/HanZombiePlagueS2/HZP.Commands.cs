@@ -96,7 +96,7 @@ public class HZPCommands
 
         if (!HasAdminMenuPermission(player))
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "NoPermission"));
+            _helpers.SendChatT(player, "NoPermission");
             return;
         }
             
@@ -157,7 +157,7 @@ public class HZPCommands
         {
             if (!HasAdminMenuPermission(sender))
             {
-                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "NoPermission"));
+                _helpers.SendChatT(sender, "NoPermission");
                 return;
             }
         }
@@ -167,7 +167,7 @@ public class HZPCommands
         if (args.Length < 2)
         {
             if (sender != null && sender.IsValid)
-                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "GiveAPUsage"));
+                _helpers.SendChatT(sender, "GiveAPUsage");
             return;
         }
 
@@ -175,7 +175,7 @@ public class HZPCommands
         if (!int.TryParse(args[1], out int amount) || amount <= 0)
         {
             if (sender != null && sender.IsValid)
-                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "GiveAPInvalidAmount"));
+                _helpers.SendChatT(sender, "GiveAPInvalidAmount");
             return;
         }
 
@@ -197,23 +197,18 @@ public class HZPCommands
         if (target == null || !target.IsValid)
         {
             if (sender != null && sender.IsValid)
-                sender.SendMessage(MessageType.Chat, _helpers.T(sender, "GiveAPTargetNotFound"));
+                _helpers.SendChatT(sender, "GiveAPTargetNotFound");
             return;
         }
 
         _extraItemsMenu.AddAmmoPacks(target.PlayerID, amount);
         int newTotal = _extraItemsMenu.GetAmmoPacks(target.PlayerID);
 
-        target.SendMessage(MessageType.Chat,
-            ChatMsg(_helpers.T(target, "GiveAPReceived", amount, newTotal)));
+        _helpers.SendChatT(target, "GiveAPReceived", amount, newTotal);
 
         if (sender != null && sender.IsValid)
-            sender.SendMessage(MessageType.Chat,
-                ChatMsg(_helpers.T(sender, "GiveAPSuccess", target.Name, amount, newTotal)));
+            _helpers.SendChatT(sender, "GiveAPSuccess", target.Name, amount, newTotal);
     }
-
-    private string ChatMsg(string message) =>
-        _helpers.ChatMsg(message);
 
     private bool HasAdminMenuPermission(IPlayer player)
     {

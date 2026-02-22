@@ -171,7 +171,7 @@ public class HZPGameMenu
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "UnstuckMustBeAlive"));
+            _helpers.SendChatT(player, "UnstuckMustBeAlive");
             return;
         }
 
@@ -198,7 +198,7 @@ public class HZPGameMenu
             break; // simple first-offset strategy
         }
 
-        player.SendMessage(MessageType.Chat, _helpers.T(player, "UnstuckSuccess"));
+        _helpers.SendChatT(player, "UnstuckSuccess");
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -212,12 +212,12 @@ public class HZPGameMenu
         try
         {
             player.SwitchTeam(Team.Spectator);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "JoinSpectatorSuccess"));
+            _helpers.SendChatT(player, "JoinSpectatorSuccess");
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[HZPGameMenu] Failed to move {Name} to spectator.", player.Name);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "JoinSpectatorFailed"));
+            _helpers.SendChatT(player, "JoinSpectatorFailed");
         }
     }
 }

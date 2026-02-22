@@ -75,7 +75,7 @@ public class HZPWeaponsMenu
 
         if (!IsEligibleHuman(player))
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "WeaponsMenuNotEligible"));
+            _helpers.SendChatT(player, "WeaponsMenuNotEligible");
             return;
         }
 
@@ -83,7 +83,7 @@ public class HZPWeaponsMenu
         _globals.CanBuyWeaponsThisRound.TryGetValue(id, out bool canBuy);
         if (!canBuy)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "WeaponsMenuAlreadyUsed"));
+            _helpers.SendChatT(player, "WeaponsMenuAlreadyUsed");
             return;
         }
 

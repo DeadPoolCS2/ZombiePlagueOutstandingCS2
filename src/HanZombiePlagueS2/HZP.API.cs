@@ -421,7 +421,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
 
         if (currentHealth >= maxHealth)
         {
-            target.SendMessage(MessageType.Chat, _helpers.T(target, "ItemAddHelathMax", maxHealth)); 
+            _helpers.SendChatT(target, "ItemAddHelathMax", maxHealth); 
             return;
         }
 
