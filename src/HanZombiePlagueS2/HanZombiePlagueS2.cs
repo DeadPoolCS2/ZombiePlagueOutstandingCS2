@@ -65,6 +65,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         {
             builder.AddJsonFile("HZPDatabaseCFG.jsonc", false, true);
         });
+        Core.Configuration.InitializeJsonWithModel<HZPDebugCFG>("HZPDebugCFG.jsonc", "HZPDebugCFG").Configure(builder =>
+        {
+            builder.AddJsonFile("HZPDebugCFG.jsonc", false, true);
+        });
 
         
         var collection = new ServiceCollection();
@@ -103,6 +107,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         collection
             .AddOptionsWithValidateOnStart<HZPDatabaseCFG>()
             .BindConfiguration("HZPDatabaseCFG");
+
+        collection
+            .AddOptionsWithValidateOnStart<HZPDebugCFG>()
+            .BindConfiguration("HZPDebugCFG");
 
         collection.AddSingleton<HZPGlobals>();
         collection.AddSingleton<HZPDatabase>();

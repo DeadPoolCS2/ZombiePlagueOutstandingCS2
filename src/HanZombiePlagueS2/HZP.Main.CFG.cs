@@ -156,6 +156,13 @@ public class HZPMainCFG
     public string ScbaSuitBrokenSound { get; set; } = string.Empty;
     public string ZombieClassCommand { get; set; } = "sw_zclass";
     public string AdminMenuItemCommand { get; set; } = "sw_zmenu";
+    public string MainMenuCommand { get; set; } = "sw_zp";
+    public string ExtraItemsCommand { get; set; } = "sw_extras";
+    public string BuyWeaponsCommand { get; set; } = "sw_buyweapons";
+    public string KnifeBlinkCommand { get; set; } = "sw_blink";
+    public string PlantMineCommand { get; set; } = "sw_plant";
+    public string TakeMineCommand { get; set; } = "sw_take";
+    public string GiveAmmoPacksCommand { get; set; } = "sw_give_ap";
     public string AdminMenuPermission { get; set; } = "";
     public string AmbSound { get; set; } = string.Empty;
     public float AmbSoundLoopTime { get; set; } = 60.0f;
