@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,35 +11,111 @@ namespace HanZombiePlagueS2;
 public class HZPDatabase
 {
     private readonly ILogger<HZPDatabase> _logger;
-    private readonly IOptionsMonitor<HZPDatabaseCFG> _dbCFG;
+    private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
 
     // Only alphanumeric and underscores are allowed in the table name to prevent SQL injection.
     private static readonly Regex _safeTableName = new(@"^[A-Za-z0-9_]+$", RegexOptions.Compiled);
 
-    public HZPDatabase(ILogger<HZPDatabase> logger, IOptionsMonitor<HZPDatabaseCFG> dbCFG)
+    public HZPDatabase(ILogger<HZPDatabase> logger, IOptionsMonitor<HZPMainCFG> mainCFG)
     {
         _logger = logger;
-        _dbCFG = dbCFG;
+        _mainCFG = mainCFG;
+    }
+
+    // ── database.jsonc support ────────────────────────────────────────────────
+
+    private sealed class DbConnectionEntry
+    {
+        [JsonPropertyName("host")] public string Host { get; set; } = "127.0.0.1";
+        [JsonPropertyName("port")] public int Port { get; set; } = 3306;
+        [JsonPropertyName("database")] public string Database { get; set; } = "";
+        [JsonPropertyName("user")] public string User { get; set; } = "root";
+        [JsonPropertyName("password")] public string Password { get; set; } = "";
+    }
+
+    private sealed class DbRegistry
+    {
+        [JsonPropertyName("default_connection")] public string DefaultConnection { get; set; } = "";
+        [JsonPropertyName("connections")] public Dictionary<string, DbConnectionEntry> Connections { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Attempts to load a named connection from configs/database.jsonc (Swiftly shared registry).
+    /// Returns null if the file or connection cannot be found.
+    /// </summary>
+    private DbConnectionEntry? TryLoadFromRegistry(string connectionName)
+    {
+        // Probe a few candidate paths relative to the current working directory,
+        // matching the directory layout expected on a Swiftly-based CS2 server.
+        // Walk up the directory tree from the current working directory looking for
+        // a configs/database.jsonc file. This is more robust than hard-coded relative paths.
+        string? dir = Directory.GetCurrentDirectory();
+        const int maxLevels = 6;
+        for (int i = 0; i < maxLevels && dir is not null; i++, dir = Directory.GetParent(dir)?.FullName)
+        {
+            string candidate = Path.Combine(dir, "configs", "database.jsonc");
+            if (!File.Exists(candidate))
+                continue;
+
+            try
+            {
+                var json = File.ReadAllText(candidate);
+                // Strip JSONC comments: both single-line // ... and block /* ... */ comments.
+                var stripped = Regex.Replace(json, @"/\*.*?\*/|//[^\r\n]*", "",
+                    RegexOptions.Singleline);
+                var registry = JsonSerializer.Deserialize<DbRegistry>(stripped,
+                    new JsonSerializerOptions { AllowTrailingCommas = true });
+                if (registry is null) continue;
+
+                var key = string.IsNullOrWhiteSpace(connectionName)
+                    ? registry.DefaultConnection
+                    : connectionName;
+
+                if (!string.IsNullOrWhiteSpace(key) &&
+                    registry.Connections.TryGetValue(key, out var entry))
+                {
+                    _logger.LogInformation("[HZP-DB] Using connection '{Key}' from {File}.", key, candidate);
+                    return entry;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("[HZP-DB] Could not parse {File}: {Ex}", candidate, ex.Message);
+            }
+        }
+
+        return null;
     }
 
     private string BuildConnectionString()
     {
-        var cfg = _dbCFG.CurrentValue;
-        return new MySqlConnectionStringBuilder
+        var cfg = _mainCFG.CurrentValue;
+        var entry = TryLoadFromRegistry(cfg.AmmoPacksConnectionName);
+
+        if (entry is not null)
         {
-            Server = cfg.Host,
-            Port = (uint)cfg.Port,
-            Database = cfg.Database,
-            UserID = cfg.User,
-            Password = cfg.Password,
-            ConnectionTimeout = 5,
-            AllowPublicKeyRetrieval = false
-        }.ConnectionString;
+            return new MySqlConnectionStringBuilder
+            {
+                Server = entry.Host,
+                Port = (uint)entry.Port,
+                Database = entry.Database,
+                UserID = entry.User,
+                Password = entry.Password,
+                ConnectionTimeout = 5,
+                AllowPublicKeyRetrieval = false
+            }.ConnectionString;
+        }
+
+        // Fall back: no database.jsonc found – DB operations will fail gracefully.
+        _logger.LogWarning("[HZP-DB] configs/database.jsonc not found or connection '{Name}' missing. " +
+            "Set AmmoPacksConnectionName in HZPMainCFG.jsonc and ensure configs/database.jsonc exists.",
+            cfg.AmmoPacksConnectionName);
+        return string.Empty;
     }
 
     private bool TryGetSafeTableName(out string tableName)
     {
-        tableName = _dbCFG.CurrentValue.TableName;
+        tableName = _mainCFG.CurrentValue.AmmoPacksTableName;
         if (!_safeTableName.IsMatch(tableName))
         {
             _logger.LogWarning("[HZP-DB] Invalid table name '{Table}' in config (only alphanumeric and underscores allowed). DB operations skipped.", tableName);
@@ -49,12 +127,13 @@ public class HZPDatabase
     /// <summary>Creates the AP table if it does not exist.</summary>
     public async Task EnsureTableAsync()
     {
-        var cfg = _dbCFG.CurrentValue;
-        if (!cfg.Enabled) return;
+        if (!_mainCFG.CurrentValue.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
+        var connStr = BuildConnectionString();
+        if (string.IsNullOrEmpty(connStr)) return;
         try
         {
-            await using var conn = new MySqlConnection(BuildConnectionString());
+            await using var conn = new MySqlConnection(connStr);
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = $"""
@@ -76,12 +155,13 @@ public class HZPDatabase
     /// <summary>Loads AP for a player. Returns null when DB is disabled or unavailable.</summary>
     public async Task<int?> LoadAmmoPacksAsync(ulong steamId)
     {
-        var cfg = _dbCFG.CurrentValue;
-        if (!cfg.Enabled) return null;
+        if (!_mainCFG.CurrentValue.AmmoPacksEnabled) return null;
         if (!TryGetSafeTableName(out var table)) return null;
+        var connStr = BuildConnectionString();
+        if (string.IsNullOrEmpty(connStr)) return null;
         try
         {
-            await using var conn = new MySqlConnection(BuildConnectionString());
+            await using var conn = new MySqlConnection(connStr);
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = $"SELECT `ammopacks` FROM `{table}` WHERE `steamid`=@sid LIMIT 1;";
@@ -100,12 +180,13 @@ public class HZPDatabase
     /// <summary>Saves AP for a player. Fire-and-forget safe to call from game thread.</summary>
     public async Task SaveAmmoPacksAsync(ulong steamId, int ammoPacks)
     {
-        var cfg = _dbCFG.CurrentValue;
-        if (!cfg.Enabled) return;
+        if (!_mainCFG.CurrentValue.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
+        var connStr = BuildConnectionString();
+        if (string.IsNullOrEmpty(connStr)) return;
         try
         {
-            await using var conn = new MySqlConnection(BuildConnectionString());
+            await using var conn = new MySqlConnection(connStr);
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = $"""
@@ -123,3 +204,4 @@ public class HZPDatabase
         }
     }
 }
+

@@ -23,7 +23,6 @@ public class HZPExtraItemsMenu
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
-    private readonly IOptionsMonitor<HanMineS2CFG> _mineCFG;
 
     public HZPExtraItemsMenu(
         ISwiftlyCore core,
@@ -32,8 +31,7 @@ public class HZPExtraItemsMenu
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        IOptionsMonitor<HZPMainCFG> mainCFG,
-        IOptionsMonitor<HanMineS2CFG> mineCFG)
+        IOptionsMonitor<HZPMainCFG> mainCFG)
     {
         _core = core;
         _logger = logger;
@@ -42,7 +40,6 @@ public class HZPExtraItemsMenu
         _menuHelper = menuHelper;
         _extraItemsCFG = extraItemsCFG;
         _mainCFG = mainCFG;
-        _mineCFG = mineCFG;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -707,7 +704,7 @@ public class HZPExtraItemsMenu
             return;
         }
 
-        var mineCfg = _mineCFG.CurrentValue;
+        var mineCfg = _mainCFG.CurrentValue.Mine;
         var cfg = _extraItemsCFG.CurrentValue;
 
         int limit = mineCfg.Limit > 0 ? mineCfg.Limit : cfg.TripMineMaxPerPlayer;
@@ -823,7 +820,7 @@ public class HZPExtraItemsMenu
             return;
         }
 
-        var mineCfg = _mineCFG.CurrentValue;
+        var mineCfg = _mainCFG.CurrentValue.Mine;
 
         // Find the closest active mine belonging to this player
         var pawn = player.PlayerPawn;
@@ -869,7 +866,7 @@ public class HZPExtraItemsMenu
     {
         if (_globals.AllMines.Count == 0) return;
 
-        var mineCfg = _mineCFG.CurrentValue;
+        var mineCfg = _mainCFG.CurrentValue.Mine;
         var cfg = _extraItemsCFG.CurrentValue;
         float tripRadius = mineCfg.TripRadius > 0f ? mineCfg.TripRadius : cfg.TripMineTripRadius;
 
@@ -933,7 +930,7 @@ public class HZPExtraItemsMenu
 
         DestroyMineEntities(mine);
 
-        var mineCfg = _mineCFG.CurrentValue;
+        var mineCfg = _mainCFG.CurrentValue.Mine;
         var cfg = _extraItemsCFG.CurrentValue;
         float radius    = mineCfg.ExplorerRadius > 0 ? mineCfg.ExplorerRadius : cfg.TripMineRadius;
         float maxDamage = mineCfg.ExplorerDamage > 0f ? mineCfg.ExplorerDamage : cfg.TripMineDamage;

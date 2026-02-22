@@ -27,13 +27,38 @@ public partial class HZPHelpers
     private readonly ILogger<HZPHelpers> _logger;
     private readonly ISwiftlyCore _core;
     private readonly HZPGlobals _globals;
+    private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
 
     public HZPHelpers(ISwiftlyCore core, ILogger<HZPHelpers> logger,
-        HZPGlobals globals)
+        HZPGlobals globals, IOptionsMonitor<HZPMainCFG> mainCFG)
     {
         _core = core;
         _logger = logger;
         _globals = globals;
+        _mainCFG = mainCFG;
+    }
+
+    /// <summary>
+    /// Prepends the configured ChatPrefix to <paramref name="message"/>.
+    /// If the message already starts with the prefix, it is returned unchanged
+    /// to prevent double-prefixing.
+    /// </summary>
+    public string ChatMsg(string message)
+    {
+        var prefix = _mainCFG.CurrentValue.ChatPrefix.TrimEnd();
+        if (string.IsNullOrEmpty(prefix))
+            return message;
+        if (message.StartsWith(prefix, StringComparison.Ordinal))
+            return message;
+        return $"{prefix} {message}";
+    }
+
+    /// <summary>Sends a prefixed localised chat message to a single player.</summary>
+    public void SendChatT(IPlayer player, string key, params object[] args)
+    {
+        if (player == null || !player.IsValid || player.IsFakeClient)
+            return;
+        player.SendMessage(MessageType.Chat, ChatMsg(T(player, key, args)));
     }
 
     public int? ServerPlayerCount()
@@ -1071,7 +1096,7 @@ public partial class HZPHelpers
             if(player.IsFakeClient)
                 continue;
 
-            player.SendMessage(MessageType.Chat, T(player, key, args));
+            player.SendMessage(MessageType.Chat, ChatMsg(T(player, key, args)));
         }
     }
 

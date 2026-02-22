@@ -1,5 +1,10 @@
 {
   // ─────────────────────────────────────────────────────────────────────────────
+  //  DEPRECATED: This file is no longer used at runtime.
+  //  Laser trip-mine settings have been merged into HZPMainCFG.jsonc under the
+  //  "Mine" section. You can safely delete this file.
+  // ─────────────────────────────────────────────────────────────────────────────
+  //
   //  HanZombiePlagueS2 – Laser Trip Mine configuration
   //  Path: configs/plugins/HanZombiePlagueS2/HanMineS2.jsonc
   //

@@ -57,18 +57,6 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         {
             builder.AddJsonFile("HZPExtraItemsCFG.jsonc", false, true);
         });
-        Core.Configuration.InitializeJsonWithModel<HanMineS2CFG>("HanMineS2.jsonc", "HanMineS2CFG").Configure(builder =>
-        {
-            builder.AddJsonFile("HanMineS2.jsonc", false, true);
-        });
-        Core.Configuration.InitializeJsonWithModel<HZPDatabaseCFG>("HZPDatabaseCFG.jsonc", "HZPDatabaseCFG").Configure(builder =>
-        {
-            builder.AddJsonFile("HZPDatabaseCFG.jsonc", false, true);
-        });
-        Core.Configuration.InitializeJsonWithModel<HZPDebugCFG>("HZPDebugCFG.jsonc", "HZPDebugCFG").Configure(builder =>
-        {
-            builder.AddJsonFile("HZPDebugCFG.jsonc", false, true);
-        });
 
         
         var collection = new ServiceCollection();
@@ -99,18 +87,6 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         collection
             .AddOptionsWithValidateOnStart<HZPExtraItemsCFG>()
             .BindConfiguration("HZPExtraItemsCFG");
-
-        collection
-            .AddOptionsWithValidateOnStart<HanMineS2CFG>()
-            .BindConfiguration("HanMineS2CFG");
-
-        collection
-            .AddOptionsWithValidateOnStart<HZPDatabaseCFG>()
-            .BindConfiguration("HZPDatabaseCFG");
-
-        collection
-            .AddOptionsWithValidateOnStart<HZPDebugCFG>()
-            .BindConfiguration("HZPDebugCFG");
 
         collection.AddSingleton<HZPGlobals>();
         collection.AddSingleton<HZPDatabase>();

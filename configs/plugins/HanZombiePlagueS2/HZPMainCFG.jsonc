@@ -173,6 +173,50 @@
 	"AmbSound": "han.zombie.amb.zriot,han.zombie.amb.classicA,han.zombie.amb.classicB,han.zombie.amb.classicC,han.zombie.amb.classicD",
 	"AmbSoundLoopTime": "60.0",
 	"AmbSoundVolume": "0.8",
-	"PrecacheAmbSound": "soundevents/hanzbambience.vsndevts,soundevents/hanzombiepanicplayer.vsndevts"
+	"PrecacheAmbSound": "soundevents/hanzbambience.vsndevts,soundevents/hanzombiepanicplayer.vsndevts",
+
+	// ── Debug / chat settings ────────────────────────────────────────────────
+	// Prefix prepended to all plugin chat messages.
+	"ChatPrefix": "[HZP]",
+	// Log command invocations to the server console.
+	"EnableCommandDebugLogs": false,
+	// Send a chat reply to the invoking player on each command invocation.
+	"EnableCommandDebugChatReply": false,
+
+	// ── Ammo Packs database (replaces HZPDatabaseCFG.jsonc) ─────────────────
+	// Set to true to enable MySQL persistence for Ammo Packs.
+	"AmmoPacksEnabled": false,
+	// Connection name from configs/database.jsonc (leave empty = use default_connection).
+	"AmmoPacksConnectionName": "",
+	// Table name for per-player ammo pack balances.
+	"AmmoPacksTableName": "hzp_ammo_packs",
+
+	// ── Laser trip-mine settings (replaces HanMineS2.jsonc) ─────────────────
+	"Mine": {
+		// Workshop model for the mine body.
+		"Model": "models/stk_sentry_guns/lasermine/stk_lasermines_one.vmdl",
+		"ModelAngleFix": "90.0",
+		// Mine glow colour  "R,G,B,A"  (0–255 each).
+		"GlowColor": "0,255,0,255",
+		// Laser beam colour  "R,G,B,A"  (0–255 each).
+		"LaserColor": "0,255,0,220",
+		"LaserSize": "2.5",
+		"MineOpenSound": "n4a_csdm_sentry.mine_set",
+		"LaserOpenSound": "n4a_csdm_sentry.mine_activate",
+		"LaserTouchSound": "n4a_csdm_sentry.elrocket_lghtning",
+		"PrecacheSoundEvent": "soundevents/n4a_csdm_sentry.vsndevts",
+		"Limit": 2,
+		"PlantTime": 1.0,
+		"TakeTime": 1.0,
+		"MineHealth": 1800,
+		"ExplodeThreshold": 1000,
+		"ExplorerRadius": 360,
+		"ExplorerDamage": 2600.0,
+		"BeamLength": 300.0,
+		"TripRadius": 40.0,
+		"PlantDistance": 80.0,
+		"OwnerOnlyPickup": true,
+		"FriendlyFire": false
+	}
   }
 }
