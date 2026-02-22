@@ -22,6 +22,44 @@
     // Cooldown in seconds between consecutive blinks
     "KnifeBlinkCooldown": 2.0,
 
+    // ── Jetpack ───────────────────────────────────────────────────────────
+    // Maximum fuel capacity (depletes while flying; refilled at round start)
+    "JetpackMaxFuel": 250.0,
+    // Upward thrust velocity while CTRL+SPACE is held (units/s)
+    "JetpackThrustForce": 350.0,
+    // Fuel consumed per second while flying
+    "JetpackFuelConsumeRate": 30.0,
+    // Base damage of a jetpack rocket at point-blank range
+    "JetpackRocketDamage": 500,
+    // Explosion radius of the jetpack rocket (units)
+    "JetpackRocketRadius": 300.0,
+    // Maximum forward range of a rocket (units)
+    "JetpackRocketRange": 750.0,
+    // Simulated rocket flight time before detonation (seconds)
+    "JetpackRocketFlightTime": 0.3,
+    // Minimum seconds between rocket shots (right-click cooldown)
+    "JetpackRocketCooldown": 2.0,
+
+    // ── Trip Mine ─────────────────────────────────────────────────────────
+    // Maximum simultaneously planted mines per player
+    "TripMineMaxPerPlayer": 2,
+    // Mine HP (future: explode if damaged below this threshold)
+    "TripMineHealth": 1800,
+    // Total damage at the mine's centre (falls off with distance)
+    "TripMineDamage": 2000.0,
+    // Explosion radius of a trip mine (units)
+    "TripMineRadius": 300.0,
+    // Length of the laser beam emitted from each mine (units)
+    "TripMineBeamLength": 300.0,
+    // Distance from the beam line within which a zombie triggers the mine
+    "TripMineTripRadius": 40.0,
+    // Forward distance from the player's eye at which the mine is planted (units)
+    "TripMinePlantDistance": 80.0,
+
+    // ── Revive Token ──────────────────────────────────────────────────────
+    // Seconds after death before the revive token respawns the player
+    "ReviveTokenRespawnDelay": 1.5,
+
     // ── Ammo Packs ───────────────────────────────────────────────────────
     // Ammo packs given to a player on connect
     "StartingAmmoPacks": 0,
@@ -90,6 +128,27 @@
         "Key": "knife_blink",
         "Name": "Knife Blink (3 charges)",
         "Price": 5,
+        "Enable": true,
+        "Team": "Human"
+      },
+      {
+        "Key": "jetpack",
+        "Name": "Jetpack (CTRL+SPACE fly / RClick rocket)",
+        "Price": 10,
+        "Enable": true,
+        "Team": "Human"
+      },
+      {
+        "Key": "trip_mine",
+        "Name": "Trip Mine (laser mine, use !mine to plant)",
+        "Price": 6,
+        "Enable": true,
+        "Team": "Human"
+      },
+      {
+        "Key": "revive_token",
+        "Name": "Revive Token (respawn once on death)",
+        "Price": 8,
         "Enable": true,
         "Team": "Human"
       }

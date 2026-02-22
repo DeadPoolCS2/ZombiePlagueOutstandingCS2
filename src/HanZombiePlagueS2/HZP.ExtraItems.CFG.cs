@@ -54,6 +54,44 @@ public class HZPExtraItemsCFG
     /// <summary>Cooldown in seconds between blinks.</summary>
     public float KnifeBlinkCooldown { get; set; } = 2f;
 
+    // ── Jetpack ───────────────────────────────────────────────────────────────
+    /// <summary>Maximum jetpack fuel capacity (depletes while flying; default 250).</summary>
+    public float JetpackMaxFuel { get; set; } = 250f;
+    /// <summary>Upward thrust velocity applied each second while flying (units/s).</summary>
+    public float JetpackThrustForce { get; set; } = 350f;
+    /// <summary>Fuel units consumed per second while flying.</summary>
+    public float JetpackFuelConsumeRate { get; set; } = 30f;
+    /// <summary>Base damage dealt to zombies by a rocket at point-blank range.</summary>
+    public int JetpackRocketDamage { get; set; } = 500;
+    /// <summary>Explosion radius of the jetpack rocket (units).</summary>
+    public float JetpackRocketRadius { get; set; } = 300f;
+    /// <summary>Maximum forward distance the rocket can travel (units).</summary>
+    public float JetpackRocketRange { get; set; } = 750f;
+    /// <summary>Simulated rocket flight time in seconds before detonation.</summary>
+    public float JetpackRocketFlightTime { get; set; } = 0.3f;
+    /// <summary>Minimum seconds between rocket shots.</summary>
+    public float JetpackRocketCooldown { get; set; } = 2f;
+
+    // ── Trip Mine ─────────────────────────────────────────────────────────────
+    /// <summary>Maximum number of mines a single player may have planted simultaneously.</summary>
+    public int TripMineMaxPerPlayer { get; set; } = 2;
+    /// <summary>HP of each planted mine before it explodes from damage.</summary>
+    public int TripMineHealth { get; set; } = 1800;
+    /// <summary>Total damage dealt to zombies at the mine's centre (falls off with distance).</summary>
+    public float TripMineDamage { get; set; } = 2000f;
+    /// <summary>Explosion radius of a trip mine (units).</summary>
+    public float TripMineRadius { get; set; } = 300f;
+    /// <summary>Length of the laser beam emitted by the mine (units).</summary>
+    public float TripMineBeamLength { get; set; } = 300f;
+    /// <summary>Distance from the beam line within which a zombie triggers the mine.</summary>
+    public float TripMineTripRadius { get; set; } = 40f;
+    /// <summary>Forward distance from the player's eye at which the mine is planted (units).</summary>
+    public float TripMinePlantDistance { get; set; } = 80f;
+
+    // ── Revive Token ──────────────────────────────────────────────────────────
+    /// <summary>Seconds after death before the revive token respawns the player.</summary>
+    public float ReviveTokenRespawnDelay { get; set; } = 1.5f;
+
     // ── Ammo Packs ───────────────────────────────────────────────────────────
     /// <summary>Starting ammo packs given to a player when they connect.</summary>
     public int StartingAmmoPacks { get; set; } = 0;

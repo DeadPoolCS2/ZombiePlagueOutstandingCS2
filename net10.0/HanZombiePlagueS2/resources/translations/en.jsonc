@@ -149,6 +149,22 @@
 
     // ── AP reward notifications ────────────────────────────────────────────
     "APRoundSurviveReward": "You survived the round! +{0} Ammo Packs (total: {1}).",
-    "APZombieKillReward": "You infected a human! +{0} Ammo Packs (total: {1})."
+    "APZombieKillReward": "You infected a human! +{0} Ammo Packs (total: {1}).",
+
+    // ── Jetpack ───────────────────────────────────────────────────────────
+    "ExtraItemsJetpackSuccess": "Jetpack equipped! Fuel: {0}. Hold CTRL+SPACE to fly, right-click to fire rockets. Ammo Packs remaining: {1}.",
+    "ExtraItemsJetpackRefueled": "Jetpack refueled to {0} units. Ammo Packs remaining: {1}.",
+    "ExtraItemsJetpackRocketFired": "Rocket launched!",
+
+    // ── Trip Mine ─────────────────────────────────────────────────────────
+    "ExtraItemsTripMineSuccess": "Trip mine charge added (you now have {0} charge(s)). Type !mine to plant. Ammo Packs remaining: {1}.",
+    "TripMinePlanted": "Mine planted ({0}/{1} active). Zombies crossing the laser beam will trigger the explosion!",
+    "TripMineNoCharges": "You have no trip mine charges. Buy one from the Extra Items menu.",
+    "TripMineMaxReached": "You already have the maximum of {0} active mines.",
+
+    // ── Revive Token ──────────────────────────────────────────────────────
+    "ExtraItemsReviveTokenSuccess": "Revive Token purchased! You will automatically respawn once if you die this round. Ammo Packs remaining: {0}.",
+    "ExtraItemsReviveTokenAlready": "You already have a Revive Token active!",
+    "ReviveTokenUsed": "Your Revive Token activated! You have been revived."
 
 }
