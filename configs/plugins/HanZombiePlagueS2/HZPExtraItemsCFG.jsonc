@@ -43,12 +43,12 @@
     // ── Trip Mine ─────────────────────────────────────────────────────────
     // Maximum simultaneously planted mines per player
     "TripMineMaxPerPlayer": 2,
-    // Mine HP (future: explode if damaged below this threshold)
+    // Mine HP; explodes when damaged to ExplodeThreshold (see HanMineS2.jsonc)
     "TripMineHealth": 1800,
     // Total damage at the mine's centre (falls off with distance)
-    "TripMineDamage": 2000.0,
+    "TripMineDamage": 2600.0,
     // Explosion radius of a trip mine (units)
-    "TripMineRadius": 300.0,
+    "TripMineRadius": 360.0,
     // Length of the laser beam emitted from each mine (units)
     "TripMineBeamLength": 300.0,
     // Distance from the beam line within which a zombie triggers the mine
@@ -140,7 +140,7 @@
       },
       {
         "Key": "trip_mine",
-        "Name": "Trip Mine (laser mine, use !mine to plant)",
+        "Name": "Trip Mine (laser mine, sw_plant / !plant to plant, sw_take / !take to retrieve)",
         "Price": 6,
         "Enable": true,
         "Team": "Human"

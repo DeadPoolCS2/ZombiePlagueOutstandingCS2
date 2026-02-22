@@ -57,6 +57,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         {
             builder.AddJsonFile("HZPExtraItemsCFG.jsonc", false, true);
         });
+        Core.Configuration.InitializeJsonWithModel<HanMineS2CFG>("HanMineS2.jsonc", "HanMineS2CFG").Configure(builder =>
+        {
+            builder.AddJsonFile("HanMineS2.jsonc", false, true);
+        });
 
         
         var collection = new ServiceCollection();
@@ -87,6 +91,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         collection
             .AddOptionsWithValidateOnStart<HZPExtraItemsCFG>()
             .BindConfiguration("HZPExtraItemsCFG");
+
+        collection
+            .AddOptionsWithValidateOnStart<HanMineS2CFG>()
+            .BindConfiguration("HanMineS2CFG");
 
         collection.AddSingleton<HZPGlobals>();
         collection.AddSingleton<HZPEvents>();

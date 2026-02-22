@@ -1,0 +1,77 @@
+{
+  // ─────────────────────────────────────────────────────────────────────────────
+  //  HanZombiePlagueS2 – Laser Trip Mine configuration
+  //  Path: configs/plugins/HanZombiePlagueS2/HanMineS2.jsonc
+  //
+  //  Field naming follows HanLaserTripmineS2 (https://github.com/H-AN/HanLaserTripmineS2)
+  //  as closely as practical for the ZombiePlague context.
+  //
+  //  Workshop model/sound assets (required):
+  //    https://steamcommunity.com/workshop/filedetails/?id=3618032051
+  //
+  //  Commands:
+  //    sw_plant  /  !plant  – Plant a mine at your current position (human only).
+  //    sw_take   /  !take   – Recover your nearest planted mine (owner only).
+  // ─────────────────────────────────────────────────────────────────────────────
+  "HanMineS2CFG": {
+    // ── Visual ────────────────────────────────────────────────────────────────
+    // Workshop model for the mine body.
+    // Requires workshop addon: https://steamcommunity.com/workshop/filedetails/?id=3618032051
+    "Model": "models/stk_sentry_guns/lasermine/stk_lasermines_one.vmdl",
+    // Yaw correction applied when spawning the model prop (degrees).
+    "ModelAngleFix": "90.0",
+    // Mine glow colour  "R,G,B,A"  (0–255 each).  Default: green.
+    "GlowColor": "0,255,0,255",
+    // Laser beam colour  "R,G,B,A"  (0–255 each).  Default: green.
+    "LaserColor": "0,255,0,220",
+    // Laser beam width in engine units.
+    "LaserSize": "2.5",
+
+    // ── Sounds ────────────────────────────────────────────────────────────────
+    // Played when the mine is successfully planted.
+    "MineOpenSound": "n4a_csdm_sentry.mine_set",
+    // Played when the laser beam activates.
+    "LaserOpenSound": "n4a_csdm_sentry.mine_activate",
+    // Played when a zombie trips the laser.
+    "LaserTouchSound": "n4a_csdm_sentry.elrocket_lghtning",
+    // Sound event file to precache on map load.
+    "PrecacheSoundEvent": "soundevents/n4a_csdm_sentry.vsndevts",
+
+    // ── Limits ────────────────────────────────────────────────────────────────
+    // Maximum simultaneously active mines per player.  Matches ZP 1.6 default.
+    "Limit": 2,
+
+    // ── Timing ────────────────────────────────────────────────────────────────
+    // Seconds between triggering plant and the mine actually appearing.
+    "PlantTime": 1.0,
+    // Seconds between triggering take and the mine being recovered.
+    "TakeTime": 1.0,
+
+    // ── Mine health ───────────────────────────────────────────────────────────
+    // Full HP of a freshly planted mine.
+    "MineHealth": 1800,
+    // When a mine's HP is reduced to this value or below it detonates.
+    "ExplodeThreshold": 1000,
+
+    // ── Explosion ─────────────────────────────────────────────────────────────
+    // Explosion radius in engine units.  Matches ZombiePlagueOutstanding 1.6 value.
+    "ExplorerRadius": 360,
+    // Maximum explosion damage at the mine centre (linear falloff to 10% at edge).
+    // Matches ZombiePlagueOutstanding 1.6 value.  Only zombies are damaged.
+    "ExplorerDamage": 2600.0,
+
+    // ── Beam geometry ─────────────────────────────────────────────────────────
+    // Length of the laser beam projected from the mine (engine units).
+    "BeamLength": 300.0,
+    // Maximum distance from the beam centreline that triggers the mine.
+    "TripRadius": 40.0,
+    // Forward distance from the player's eye at which the mine is placed.
+    "PlantDistance": 80.0,
+
+    // ── Ownership rules ───────────────────────────────────────────────────────
+    // true  – only the mine owner can recover their own mine with !take.
+    "OwnerOnlyPickup": true,
+    // false – explosion never damages human team-mates (always false for ZP balance).
+    "FriendlyFire": false
+  }
+}

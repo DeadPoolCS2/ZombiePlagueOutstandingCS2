@@ -65,9 +65,13 @@ public class HZPCommands
         // Knife blink activation
         _core.Command.RegisterCommand("!blink", KnifeBlink, true);
 
-        // Trip mine planting
-        _core.Command.RegisterCommand("!mine", PlantMine, true);
-        _core.Command.RegisterCommand("hzp_mine", PlantMine, true);
+        // Trip mine – plant
+        _core.Command.RegisterCommand("sw_plant", PlantMine, true);
+        _core.Command.RegisterCommand("!plant", PlantMine, true);
+
+        // Trip mine – take back
+        _core.Command.RegisterCommand("sw_take", TakeMine, true);
+        _core.Command.RegisterCommand("!take", TakeMine, true);
 
         // Admin: give ammo packs for testing  hzp_give_ap <target_name|#userid> <amount>
         _core.Command.RegisterCommand("hzp_give_ap", GiveAmmoPacks, true);
@@ -134,6 +138,13 @@ public class HZPCommands
         var player = context.Sender;
         if (player == null || !player.IsValid) return;
         _extraItemsMenu.TryPlantTripMine(player);
+    }
+
+    public void TakeMine(ICommandContext context)
+    {
+        var player = context.Sender;
+        if (player == null || !player.IsValid) return;
+        _extraItemsMenu.TryTakeTripMine(player);
     }
 
     public void GiveAmmoPacks(ICommandContext context)
