@@ -1,0 +1,10 @@
+{
+  "HZPDebugCFG": {
+    // When true, command invocations are logged to the server console.
+    "EnableCommandDebugLogs": false,
+    // When true, command invocations produce a chat reply visible to the invoking player.
+    "EnableCommandDebugChatReply": false,
+    // Prefix prepended to plugin chat messages (e.g. confirmation replies, debug replies).
+    "ChatPrefix": "[HZP]"
+  }
+}

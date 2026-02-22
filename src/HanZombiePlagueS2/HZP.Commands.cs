@@ -19,6 +19,7 @@ public class HZPCommands
     private readonly ISwiftlyCore _core;
     private readonly HZPServices _services;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
+    private readonly IOptionsMonitor<HZPDebugCFG> _debugCFG;
     private readonly HZPGlobals _globals;
     private readonly HZPZombieClassMenu _hZPZombieClassMenu;
     private readonly HZPAdminItemMenu _hZPAdminItemMenu;
@@ -29,6 +30,7 @@ public class HZPCommands
 
     public HZPCommands(ISwiftlyCore core, ILogger<HZPCommands> logger,
         HZPServices services, IOptionsMonitor<HZPMainCFG> mainCFG,
+        IOptionsMonitor<HZPDebugCFG> debugCFG,
         HZPGlobals globals, HZPAdminItemMenu hZPAdminItemMenu,
         HZPZombieClassMenu hZPZombieClassMenu, HZPHelpers helpers,
         HZPWeaponsMenu weaponsMenu, HZPGameMenu gameMenu,
@@ -38,6 +40,7 @@ public class HZPCommands
         _logger = logger;
         _services = services;
         _mainCFG = mainCFG;
+        _debugCFG = debugCFG;
         _globals = globals;
         _hZPAdminItemMenu = hZPAdminItemMenu;
         _hZPZombieClassMenu = hZPZombieClassMenu;
@@ -56,31 +59,26 @@ public class HZPCommands
         _core.Command.RegisterCommand(CFG.AdminMenuItemCommand, UseItemMenu, true);
         _logger.LogInformation("[HZP] Registered admin menu command: {Cmd}", CFG.AdminMenuItemCommand);
 
-        _core.Command.RegisterCommand("sw_buyweapons", BuyWeapons, true);
-        _logger.LogInformation("[HZP] Registered command: sw_buyweapons");
+        _core.Command.RegisterCommand(CFG.BuyWeaponsCommand, BuyWeapons, true);
+        _logger.LogInformation("[HZP] Registered buy weapons command: {Cmd}", CFG.BuyWeaponsCommand);
 
-        // Main game menu – register as base names so the framework maps !cmd / /cmd in chat
-        _core.Command.RegisterCommand("zp", OpenGameMenu, true);
-        _core.Command.RegisterCommand("menu", OpenGameMenu, true);
-        _core.Command.RegisterCommand("hzp_menu", OpenGameMenu, true);
-        _logger.LogInformation("[HZP] Registered game menu commands: zp, menu, hzp_menu (chat: !zp /zp !menu /menu)");
+        _core.Command.RegisterCommand(CFG.MainMenuCommand, OpenGameMenu, true);
+        _logger.LogInformation("[HZP] Registered main menu command: {Cmd}", CFG.MainMenuCommand);
 
-        // Extra items menu shortcut
-        _core.Command.RegisterCommand("extras", OpenExtraItemsMenu, true);
-        _logger.LogInformation("[HZP] Registered extra items command: extras (chat: !extras /extras)");
+        _core.Command.RegisterCommand(CFG.ExtraItemsCommand, OpenExtraItemsMenu, true);
+        _logger.LogInformation("[HZP] Registered extra items command: {Cmd}", CFG.ExtraItemsCommand);
 
-        // Knife blink activation
-        _core.Command.RegisterCommand("blink", KnifeBlink, true);
-        _logger.LogInformation("[HZP] Registered blink command: blink (chat: !blink /blink)");
+        _core.Command.RegisterCommand(CFG.KnifeBlinkCommand, KnifeBlink, true);
+        _logger.LogInformation("[HZP] Registered knife blink command: {Cmd}", CFG.KnifeBlinkCommand);
 
-        // Trip mine – plant / take back
-        _core.Command.RegisterCommand("sw_plant", PlantMine, true);
-        _core.Command.RegisterCommand("sw_take", TakeMine, true);
-        _logger.LogInformation("[HZP] Registered trip mine commands: sw_plant, sw_take");
+        _core.Command.RegisterCommand(CFG.PlantMineCommand, PlantMine, true);
+        _logger.LogInformation("[HZP] Registered plant mine command: {Cmd}", CFG.PlantMineCommand);
 
-        // Admin: give ammo packs  hzp_give_ap <target_name|#userid> <amount>
-        _core.Command.RegisterCommand("hzp_give_ap", GiveAmmoPacks, true);
-        _logger.LogInformation("[HZP] Registered admin command: hzp_give_ap");
+        _core.Command.RegisterCommand(CFG.TakeMineCommand, TakeMine, true);
+        _logger.LogInformation("[HZP] Registered take mine command: {Cmd}", CFG.TakeMineCommand);
+
+        _core.Command.RegisterCommand(CFG.GiveAmmoPacksCommand, GiveAmmoPacks, true);
+        _logger.LogInformation("[HZP] Registered give ammo packs command: {Cmd}", CFG.GiveAmmoPacksCommand);
     }
     public void SelectZombieClass(ICommandContext context)
     {
@@ -210,12 +208,15 @@ public class HZPCommands
         int newTotal = _extraItemsMenu.GetAmmoPacks(target.PlayerID);
 
         target.SendMessage(MessageType.Chat,
-            _helpers.T(target, "GiveAPReceived", amount, newTotal));
+            ChatMsg(_helpers.T(target, "GiveAPReceived", amount, newTotal)));
 
         if (sender != null && sender.IsValid)
             sender.SendMessage(MessageType.Chat,
-                _helpers.T(sender, "GiveAPSuccess", target.Name, amount, newTotal));
+                ChatMsg(_helpers.T(sender, "GiveAPSuccess", target.Name, amount, newTotal)));
     }
+
+    private string ChatMsg(string message) =>
+        $"{_debugCFG.CurrentValue.ChatPrefix} {message}";
 
     private bool HasAdminMenuPermission(IPlayer player)
     {
