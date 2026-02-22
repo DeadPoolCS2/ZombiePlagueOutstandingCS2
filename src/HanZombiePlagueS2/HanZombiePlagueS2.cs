@@ -61,6 +61,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         {
             builder.AddJsonFile("HanMineS2.jsonc", false, true);
         });
+        Core.Configuration.InitializeJsonWithModel<HZPDatabaseCFG>("HZPDatabaseCFG.jsonc", "HZPDatabaseCFG").Configure(builder =>
+        {
+            builder.AddJsonFile("HZPDatabaseCFG.jsonc", false, true);
+        });
 
         
         var collection = new ServiceCollection();
@@ -96,7 +100,12 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
             .AddOptionsWithValidateOnStart<HanMineS2CFG>()
             .BindConfiguration("HanMineS2CFG");
 
+        collection
+            .AddOptionsWithValidateOnStart<HZPDatabaseCFG>()
+            .BindConfiguration("HZPDatabaseCFG");
+
         collection.AddSingleton<HZPGlobals>();
+        collection.AddSingleton<HZPDatabase>();
         collection.AddSingleton<HZPEvents>();
         collection.AddSingleton<HZPHelpers>();
         collection.AddSingleton<HZPServices>();
@@ -142,6 +151,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         _Events.HookZombieSoundEvents();
         _Commands.Command();
         _Commands.MenuCommands();
+
+        // Initialise DB table in background (non-blocking)
+        var db = ServiceProvider.GetRequiredService<HZPDatabase>();
+        _ = db.EnsureTableAsync();
     }
 
 
