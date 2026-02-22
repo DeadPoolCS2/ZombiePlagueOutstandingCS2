@@ -23,6 +23,7 @@ public class HZPExtraItemsMenu
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
+    private readonly IOptionsMonitor<HanMineS2CFG> _mineCFG;
 
     public HZPExtraItemsMenu(
         ISwiftlyCore core,
@@ -31,7 +32,8 @@ public class HZPExtraItemsMenu
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        IOptionsMonitor<HZPMainCFG> mainCFG)
+        IOptionsMonitor<HZPMainCFG> mainCFG,
+        IOptionsMonitor<HanMineS2CFG> mineCFG)
     {
         _core = core;
         _logger = logger;
@@ -40,6 +42,7 @@ public class HZPExtraItemsMenu
         _menuHelper = menuHelper;
         _extraItemsCFG = extraItemsCFG;
         _mainCFG = mainCFG;
+        _mineCFG = mineCFG;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -85,7 +88,27 @@ public class HZPExtraItemsMenu
     {
         _globals.IsNemesis.TryGetValue(playerId, out bool isNemesis);
         _globals.IsAssassin.TryGetValue(playerId, out bool isAssassin);
-        return isNemesis || isAssassin;
+        _globals.IsSurvivor.TryGetValue(playerId, out bool isSurvivor);
+        _globals.IsSniper.TryGetValue(playerId, out bool isSniper);
+        _globals.IsHero.TryGetValue(playerId, out bool isHero);
+        return isNemesis || isAssassin || isSurvivor || isSniper || isHero;
+    }
+
+    /// <summary>Parses a "R,G,B,A" string (0–255 each) into a SwiftlyS2 Color.</summary>
+    private static SwiftlyS2.Shared.Natives.Color ParseColor(string rgba, byte defaultR, byte defaultG, byte defaultB, byte defaultA)
+    {
+        try
+        {
+            var parts = rgba.Split(',');
+            if (parts.Length >= 4)
+                return new SwiftlyS2.Shared.Natives.Color(
+                    byte.Parse(parts[0].Trim()),
+                    byte.Parse(parts[1].Trim()),
+                    byte.Parse(parts[2].Trim()),
+                    byte.Parse(parts[3].Trim()));
+        }
+        catch { }
+        return new SwiftlyS2.Shared.Natives.Color(defaultR, defaultG, defaultB, defaultA);
     }
 
     private bool ItemAllowedForPlayer(ExtraItemEntry item, int playerId)
@@ -650,7 +673,7 @@ public class HZPExtraItemsMenu
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Trip Mine – plant & tick check
+    //  Trip Mine – plant, take & tick check
     // ─────────────────────────────────────────────────────────────────────────
 
     public void TryPlantTripMine(IPlayer player)
@@ -671,6 +694,12 @@ public class HZPExtraItemsMenu
             return;
         }
 
+        if (IsSpecialRole(id))
+        {
+            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemSpecialRoleCantUse"));
+            return;
+        }
+
         _globals.TripMineCharges.TryGetValue(id, out int charges);
         if (charges <= 0)
         {
@@ -678,13 +707,15 @@ public class HZPExtraItemsMenu
             return;
         }
 
+        var mineCfg = _mineCFG.CurrentValue;
         var cfg = _extraItemsCFG.CurrentValue;
 
+        int limit = mineCfg.Limit > 0 ? mineCfg.Limit : cfg.TripMineMaxPerPlayer;
         int activeMines = _globals.AllMines.Count(m => m.OwnerId == id && !m.Exploded);
-        if (activeMines >= cfg.TripMineMaxPerPlayer)
+        if (activeMines >= limit)
         {
             player.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(player, "TripMineMaxReached"), cfg.TripMineMaxPerPlayer));
+                string.Format(_helpers.T(player, "TripMineMaxReached"), limit));
             return;
         }
 
@@ -697,41 +728,50 @@ public class HZPExtraItemsMenu
         QAngle angles = pawn.EyeAngles;
         angles.ToDirectionVectors(out Vector fwd, out _, out _);
 
+        float plantDist = mineCfg.PlantDistance;
+        float beamLen   = mineCfg.BeamLength;
+
         // Place mine at PlantDistance ahead of eye (simulates placing on a wall)
         var minePos = new Vector(
-            origin.Value.X + fwd.X * cfg.TripMinePlantDistance,
-            origin.Value.Y + fwd.Y * cfg.TripMinePlantDistance,
-            origin.Value.Z + PlayerEyeHeight + fwd.Z * cfg.TripMinePlantDistance
+            origin.Value.X + fwd.X * plantDist,
+            origin.Value.Y + fwd.Y * plantDist,
+            origin.Value.Z + PlayerEyeHeight + fwd.Z * plantDist
         );
 
         // Laser beam extends further in the same forward direction
         var beamEnd = new Vector(
-            minePos.X + fwd.X * cfg.TripMineBeamLength,
-            minePos.Y + fwd.Y * cfg.TripMineBeamLength,
-            minePos.Z + fwd.Z * cfg.TripMineBeamLength
+            minePos.X + fwd.X * beamLen,
+            minePos.Y + fwd.Y * beamLen,
+            minePos.Z + fwd.Z * beamLen
         );
 
         _globals.TripMineCharges[id] = charges - 1;
 
         var mine = new TripMineData
         {
-            OwnerId   = id,
+            OwnerId      = id,
             MinePosition = minePos,
-            BeamEnd   = beamEnd,
-            Health    = cfg.TripMineHealth,
-            Exploded  = false
+            BeamEnd      = beamEnd,
+            Health       = mineCfg.MineHealth > 0 ? mineCfg.MineHealth : cfg.TripMineHealth,
+            Exploded     = false
         };
         _globals.AllMines.Add(mine);
+
+        // Parse configurable colors (defaults: green beam, green glow)
+        var beamColor = ParseColor(mineCfg.LaserColor, 0, 255, 0, 220);
+        if (!float.TryParse(mineCfg.LaserSize, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out float beamWidth))
+            beamWidth = 2.5f;
 
         // Create entities on the next world update
         _core.Scheduler.NextWorldUpdate(() =>
         {
-            // Red laser beam
+            // Configurable-color laser beam
             var beamEnt = _core.EntitySystem.CreateEntityByDesignerName<CBeam>("beam");
             if (beamEnt != null && beamEnt.IsValid && beamEnt.IsValidEntity)
             {
-                beamEnt.Render = new SwiftlyS2.Shared.Natives.Color(255, 0, 0, 220);
-                beamEnt.Width = 2.5f;
+                beamEnt.Render = beamColor;
+                beamEnt.Width = beamWidth;
                 beamEnt.HaloScale = 1.5f;
                 beamEnt.Teleport(minePos, new QAngle(), new Vector(0, 0, 0));
                 beamEnt.EndPos.X = beamEnd.X;
@@ -755,7 +795,73 @@ public class HZPExtraItemsMenu
         });
 
         player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "TripMinePlanted"), activeMines + 1, cfg.TripMineMaxPerPlayer));
+            string.Format(_helpers.T(player, "TripMinePlanted"), activeMines + 1, limit));
+    }
+
+    /// <summary>Recovers the owner's nearest planted mine, returning one charge.</summary>
+    public void TryTakeTripMine(IPlayer player)
+    {
+        if (player == null || !player.IsValid) return;
+
+        var controller = player.Controller;
+        if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
+
+        if (!_globals.GameStart) return;
+
+        int id = player.PlayerID;
+
+        _globals.IsZombie.TryGetValue(id, out bool isZombie);
+        if (isZombie)
+        {
+            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemZombieCantUse"));
+            return;
+        }
+
+        if (IsSpecialRole(id))
+        {
+            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemSpecialRoleCantUse"));
+            return;
+        }
+
+        var mineCfg = _mineCFG.CurrentValue;
+
+        // Find the closest active mine belonging to this player
+        var pawn = player.PlayerPawn;
+        if (pawn == null || !pawn.IsValid) return;
+        var origin = pawn.AbsOrigin;
+        if (origin == null) return;
+
+        TripMineData? nearest = null;
+        float nearestDistSqr = float.MaxValue;
+        foreach (var mine in _globals.AllMines)
+        {
+            if (mine.Exploded) continue;
+            if (mineCfg.OwnerOnlyPickup && mine.OwnerId != id) continue;
+
+            float distSqr = _helpers.DistanceSquared(origin.Value, mine.MinePosition);
+            if (distSqr < nearestDistSqr)
+            {
+                nearestDistSqr = distSqr;
+                nearest = mine;
+            }
+        }
+
+        if (nearest == null)
+        {
+            player.SendMessage(MessageType.Chat, _helpers.T(player, "TripMineNoneToTake"));
+            return;
+        }
+
+        // Remove the mine and return the charge
+        nearest.Exploded = true;
+        DestroyMineEntities(nearest);
+        _globals.AllMines.RemoveAll(m => m.Exploded);
+
+        _globals.TripMineCharges.TryGetValue(id, out int currentCharges);
+        _globals.TripMineCharges[id] = currentCharges + 1;
+
+        player.SendMessage(MessageType.Chat,
+            string.Format(_helpers.T(player, "TripMineTaken"), currentCharges + 1));
     }
 
     /// <summary>Called every tick from HZPEvents – checks whether any zombie crosses an active beam.</summary>
@@ -763,8 +869,9 @@ public class HZPExtraItemsMenu
     {
         if (_globals.AllMines.Count == 0) return;
 
+        var mineCfg = _mineCFG.CurrentValue;
         var cfg = _extraItemsCFG.CurrentValue;
-        float tripRadius = cfg.TripMineTripRadius;
+        float tripRadius = mineCfg.TripRadius > 0f ? mineCfg.TripRadius : cfg.TripMineTripRadius;
 
         bool anyExploded = false;
         foreach (var mine in _globals.AllMines)
@@ -826,8 +933,10 @@ public class HZPExtraItemsMenu
 
         DestroyMineEntities(mine);
 
+        var mineCfg = _mineCFG.CurrentValue;
         var cfg = _extraItemsCFG.CurrentValue;
-        float radius  = cfg.TripMineRadius;
+        float radius    = mineCfg.ExplorerRadius > 0 ? mineCfg.ExplorerRadius : cfg.TripMineRadius;
+        float maxDamage = mineCfg.ExplorerDamage > 0f ? mineCfg.ExplorerDamage : cfg.TripMineDamage;
         float radiusSqr = radius * radius;
 
         var shooter = _core.PlayerManager.GetPlayer(mine.OwnerId);
@@ -850,7 +959,7 @@ public class HZPExtraItemsMenu
 
             float dist = MathF.Sqrt(distSqr);
             float falloff = radius > 0f ? 1f - (dist / radius) : 1f;
-            float dmg = cfg.TripMineDamage * Math.Max(0.1f, falloff);
+            float dmg = maxDamage * Math.Max(0.1f, falloff);
 
             if (shooter != null && shooter.IsValid)
                 _helpers.ApplyDamage(shooter, target, dmg, DamageTypes_t.DMG_BLAST);

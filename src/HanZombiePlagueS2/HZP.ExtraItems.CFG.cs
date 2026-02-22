@@ -78,9 +78,9 @@ public class HZPExtraItemsCFG
     /// <summary>HP of each planted mine before it explodes from damage.</summary>
     public int TripMineHealth { get; set; } = 1800;
     /// <summary>Total damage dealt to zombies at the mine's centre (falls off with distance).</summary>
-    public float TripMineDamage { get; set; } = 2000f;
+    public float TripMineDamage { get; set; } = 2600f;
     /// <summary>Explosion radius of a trip mine (units).</summary>
-    public float TripMineRadius { get; set; } = 300f;
+    public float TripMineRadius { get; set; } = 360f;
     /// <summary>Length of the laser beam emitted by the mine (units).</summary>
     public float TripMineBeamLength { get; set; } = 300f;
     /// <summary>Distance from the beam line within which a zombie triggers the mine.</summary>

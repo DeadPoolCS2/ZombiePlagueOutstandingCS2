@@ -372,6 +372,8 @@ For full documentation, including all methods, events, and parameters, refer to 
 | `hzp_menu` | Open the main game menu (console) |
 | `!extras` | Open the extra items menu directly |
 | `!blink` | Activate Knife Blink (if purchased) |
+| `sw_plant` / `!plant` | Plant a trip mine at your current position (human only; requires a mine charge) |
+| `sw_take` / `!take` | Recover your nearest planted trip mine (owner only) |
 | `hzp_give_ap <name\|#userid> <amount>` | Admin: give ammo packs to a player |
 
 ### Main Menu Options
@@ -409,7 +411,7 @@ All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.
 | Multi-Jump (+1 extra jump, stackable) | Human | 4 AP | |
 | Knife Blink (3 teleport charges, use `!blink`) | Human | 5 AP | |
 | **Jetpack** | Human | 10 AP | Hold CTRL+SPACE to fly; right-click to fire a rocket |
-| **Trip Mine** | Human | 6 AP | Use `!mine` to plant; laser beam triggers explosion when a zombie crosses it |
+| **Trip Mine** | Human | 6 AP | Use `sw_plant` / `!plant` to plant; `sw_take` / `!take` to recover; laser beam triggers explosion when a zombie crosses it |
 | **Revive Token** | Human | 8 AP | Automatically respawns you once on death; blocked in special modes |
 
 #### Jetpack Controls & Notes
@@ -419,10 +421,44 @@ All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.
 - The jetpack is automatically removed when the player becomes a zombie, dies, or disconnects.
 
 #### Trip Mine Controls & Notes
-- **Buy** a mine from the Extra Items menu (gives 1 charge, max 2 active at once).
-- **Plant**: Type `!mine` in chat (or `hzp_mine`) while aiming at the surface you want to attach the mine to.
-- A red laser beam is projected from the mine. Any zombie that enters within ~40 units of the beam triggers an explosion.
+- **Buy** a mine from the Extra Items menu (gives 1 charge, max 2 active at once by default).
+- **Plant**: Type `sw_plant` (console) or `/plant` (chat) while aiming at the surface you want to attach the mine to.
+- **Recover**: Type `sw_take` (console) or `/take` (chat) to retrieve your nearest planted mine (owner-only; returns 1 charge).
+- A green laser beam is projected from the mine. Any zombie that enters within ~40 units of the beam triggers an explosion.
+- Explosion radius: **360 units**, max damage: **2600** (linear falloff, zombies only; no friendly fire).
+- Mine HP: **1800**; the mine also detonates when its HP drops to **1000 or below**.
+- Blocked for zombies and special roles (Survivor, Sniper, Nemesis, Assassin, Hero).
 - All mines are cleaned up on round end and when the owner disconnects or becomes a zombie.
+
+> **Workshop dependency (models & sounds)**  
+> The mine model and sound assets require the following Steam Workshop addon:  
+> https://steamcommunity.com/workshop/filedetails/?id=3618032051
+
+#### Mine Configuration
+Mine-specific settings are in `configs/plugins/HanZombiePlagueS2/HanMineS2.jsonc` (field naming follows HanLaserTripmineS2 format):
+
+```jsonc
+{
+  "HanMineS2CFG": {
+    "Model":            "models/stk_sentry_guns/lasermine/stk_lasermines_one.vmdl",
+    "GlowColor":        "0,255,0,255",   // mine glow – R,G,B,A  (default: green)
+    "LaserColor":       "0,255,0,220",   // laser beam – R,G,B,A (default: green)
+    "LaserSize":        "2.5",           // beam width
+    "Limit":            2,               // max active mines per player
+    "PlantTime":        1.0,             // seconds before mine appears after sw_plant
+    "TakeTime":         1.0,             // seconds before mine is recovered after sw_take
+    "MineHealth":       1800,
+    "ExplodeThreshold": 1000,            // mine detonates when HP ≤ this
+    "ExplorerRadius":   360,             // explosion radius (units)
+    "ExplorerDamage":   2600.0,          // max explosion damage (linear falloff)
+    "BeamLength":       300.0,
+    "TripRadius":       40.0,
+    "PlantDistance":    80.0,
+    "OwnerOnlyPickup":  true,
+    "FriendlyFire":     false
+  }
+}
+```
 
 #### Revive Token Notes
 - Buying the token while alive stores it for the current round.
@@ -452,10 +488,11 @@ All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.
     "JetpackRocketCooldown": 2.0,  // Cooldown between rockets (seconds)
     // ── Trip Mine ─────────────────────────────────────────────────────────
     "TripMineMaxPerPlayer": 2,     // Max simultaneously planted mines per player
-    "TripMineDamage": 2000.0,      // Explosion damage at the mine's centre
-    "TripMineRadius": 300.0,       // Explosion radius (units)
+    "TripMineDamage": 2600.0,      // Explosion damage at the mine's centre (ZP 1.6 value)
+    "TripMineRadius": 360.0,       // Explosion radius (units) (ZP 1.6 value)
     "TripMineBeamLength": 300.0,   // Length of the laser beam (units)
     "TripMineTripRadius": 40.0,    // Distance from beam to trigger explosion
+    // Mine-specific settings (colors, health, plant/take time) are in HanMineS2.jsonc
     // ── Ammo Packs ────────────────────────────────────────────────────────
     "StartingAmmoPacks": 0,        // AP given on connect
     "RoundSurviveReward": 3,       // AP for surviving as human
@@ -465,7 +502,7 @@ All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.
       { "Key": "armor",        "Name": "Armor",                           "Price": 3,  "Enable": true, "Team": "Human"  },
       { "Key": "antidote",     "Name": "Antidote",                        "Price": 8,  "Enable": true, "Team": "Zombie" },
       { "Key": "jetpack",      "Name": "Jetpack",                         "Price": 10, "Enable": true, "Team": "Human"  },
-      { "Key": "trip_mine",    "Name": "Trip Mine (!mine to plant)",       "Price": 6,  "Enable": true, "Team": "Human"  },
+      { "Key": "trip_mine",    "Name": "Trip Mine (sw_plant / !plant to plant)",    "Price": 6,  "Enable": true, "Team": "Human"  },
       { "Key": "revive_token", "Name": "Revive Token",                    "Price": 8,  "Enable": true, "Team": "Human"  },
       // ... add more items here
     ]

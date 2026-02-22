@@ -157,10 +157,13 @@
     "ExtraItemsJetpackRocketFired": "Rocket launched!",
 
     // ── Trip Mine ─────────────────────────────────────────────────────────
-    "ExtraItemsTripMineSuccess": "Trip mine charge added (you now have {0} charge(s)). Type !mine to plant. Ammo Packs remaining: {1}.",
+    "ExtraItemsTripMineSuccess": "Trip mine charge added (you now have {0} charge(s)). Use sw_plant or /plant to plant. Ammo Packs remaining: {1}.",
     "TripMinePlanted": "Mine planted ({0}/{1} active). Zombies crossing the laser beam will trigger the explosion!",
     "TripMineNoCharges": "You have no trip mine charges. Buy one from the Extra Items menu.",
     "TripMineMaxReached": "You already have the maximum of {0} active mines.",
+    "TripMineNoneToTake": "No mine found nearby to recover.",
+    "TripMineTaken": "Mine recovered! You now have {0} charge(s).",
+    "ItemSpecialRoleCantUse": "Special roles cannot use this item.",
 
     // ── Revive Token ──────────────────────────────────────────────────────
     "ExtraItemsReviveTokenSuccess": "Revive Token purchased! You will automatically respawn once if you die this round. Ammo Packs remaining: {0}.",

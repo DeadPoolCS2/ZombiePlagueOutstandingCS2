@@ -380,6 +380,8 @@ For full documentation, including all methods, events, and parameters, refer to 
 | `hzp_menu` | Open the main game menu (console) |
 | `!extras` | Open the extra items menu directly |
 | `!blink` | Activate Knife Blink (if purchased) |
+| `sw_plant` / `!plant` | Plant a trip mine at your current position (human only; requires a mine charge) |
+| `sw_take` / `!take` | Recover your nearest planted trip mine (owner only) |
 | `hzp_give_ap <name\|#userid> <amount>` | Admin: give ammo packs to a player |
 
 ### Main Menu Options
@@ -510,8 +512,12 @@ Can also be opened via **Buy Weapons** in the main menu or `sw_buyweapons` comma
 9. **Zombie Madness**: As a zombie, buy Zombie Madness. Have a human shoot you during the active window and verify you take no damage.
 10. **Multi-Jump**: Buy Multi-Jump as a human. Jump and press Space again in the air — verify you get an extra jump.
 11. **Knife Blink**: Buy Knife Blink. Type `!blink` to teleport forward. Verify charges decrease and cooldown is respected.
-12. **Unstuck**: Use the Unstuck option from the main menu while alive — verify you are teleported to a free position.
-13. **Join Spectator**: Use Join Spectator from the main menu — verify you move to the spectator team.
-14. **Zombie Class**: Use Choose Zombie Class from the main menu and select a class. Verify it takes effect after next respawn.
+12. **Trip Mine – plant**: Buy a Trip Mine as a human. Type `sw_plant` or `/plant`. Verify a green laser beam appears (max 2 at once).
+13. **Trip Mine – take**: With a planted mine, type `sw_take` or `/take`. Verify the mine is removed and your charge count increases by 1.
+14. **Trip Mine – trip explosion**: Buy and plant a mine. Have a zombie walk through the beam. Verify explosion triggers, only zombies are damaged (no human friendly fire), and the mine is removed.
+15. **Trip Mine – special role blocking**: As a Survivor, Sniper, Hero, Nemesis, or Assassin, attempt to use `sw_plant`. Verify the action is denied.
+16. **Unstuck**: Use the Unstuck option from the main menu while alive — verify you are teleported to a free position.
+17. **Join Spectator**: Use Join Spectator from the main menu — verify you move to the spectator team.
+18. **Zombie Class**: Use Choose Zombie Class from the main menu and select a class. Verify it takes effect after next respawn.
 
 
