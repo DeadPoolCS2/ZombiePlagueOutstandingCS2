@@ -63,6 +63,8 @@ public class HZPGlobals
     public Dictionary<int, bool> GodState = new Dictionary<int, bool>();
     public Dictionary<int, bool> InfiniteAmmoState = new Dictionary<int, bool>();
 
+    public Dictionary<int, bool> CanBuyWeaponsThisRound = new Dictionary<int, bool>();
+
 
 }
 public class ZombieRegenState

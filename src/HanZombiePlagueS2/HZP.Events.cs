@@ -271,6 +271,8 @@ public partial class HZPEvents
                 _globals.GodState[id] = false;
                 _globals.InfiniteAmmoState[id] = false;
 
+                _globals.CanBuyWeaponsThisRound.Remove(id);
+
                 _service.StopAssassinTimer();
                 _helpers.SetUnInvisibility(player);
 
@@ -903,6 +905,7 @@ public partial class HZPEvents
         _globals.ScbaSuit.Remove(id);
         _globals.GodState.Remove(id);
         _globals.InfiniteAmmoState.Remove(id);
+        _globals.CanBuyWeaponsThisRound.Remove(id);
 
         _globals.g_ZombieIdleStates.Remove(id);
         _globals.g_ZombieRegenStates.Remove(id);

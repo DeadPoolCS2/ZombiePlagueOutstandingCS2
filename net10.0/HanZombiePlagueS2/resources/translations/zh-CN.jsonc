@@ -80,5 +80,12 @@
     "AssassinMode": "暗杀者模式",
     "SniperMode": "狙击手模式",
     "AssassinVSSniper": "狙击手 VS 暗杀者",
-    "HeroMode": "英雄模式"
+    "HeroMode": "英雄模式",
+
+    "WeaponMenuPrimaryTitle": "主武器选择",
+    "WeaponMenuPrimarySelect": "选择本轮使用的主武器",
+    "WeaponMenuSecondaryTitle": "副武器选择",
+    "WeaponMenuSecondarySelect": "选择本轮使用的副武器",
+    "WeaponsMenuNotEligible": "你当前无法使用武器选择菜单。",
+    "WeaponsMenuAlreadyUsed": "你本轮已经使用过武器选择菜单了！"
 }
