@@ -127,10 +127,16 @@ public class HZPDatabase
     /// <summary>Creates the AP table if it does not exist.</summary>
     public async Task EnsureTableAsync()
     {
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled) return;
+        var cfg = _mainCFG.CurrentValue;
+        if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
         var connStr = BuildConnectionString();
         if (string.IsNullOrEmpty(connStr)) return;
+
+        var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
+        if (cfg.EnableCommandDebugLogs)
+            _logger.LogInformation("[HZP-DB] EnsureTable: connection='{Conn}' table='{Table}'", connName, table);
+
         try
         {
             await using var conn = new MySqlConnection(connStr);
@@ -155,10 +161,16 @@ public class HZPDatabase
     /// <summary>Loads AP for a player. Returns null when DB is disabled or unavailable.</summary>
     public async Task<int?> LoadAmmoPacksAsync(ulong steamId)
     {
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled) return null;
+        var cfg = _mainCFG.CurrentValue;
+        if (!cfg.AmmoPacksEnabled) return null;
         if (!TryGetSafeTableName(out var table)) return null;
         var connStr = BuildConnectionString();
         if (string.IsNullOrEmpty(connStr)) return null;
+
+        var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
+        if (cfg.EnableCommandDebugLogs)
+            _logger.LogInformation("[HZP-DB] LoadAmmoPacks: connection='{Conn}' table='{Table}' steamid={SteamId}", connName, table, steamId);
+
         try
         {
             await using var conn = new MySqlConnection(connStr);
@@ -167,8 +179,16 @@ public class HZPDatabase
             cmd.CommandText = $"SELECT `ammopacks` FROM `{table}` WHERE `steamid`=@sid LIMIT 1;";
             cmd.Parameters.AddWithValue("@sid", steamId);
             var result = await cmd.ExecuteScalarAsync();
-            if (result is null || result is DBNull) return null;
-            return Convert.ToInt32(result);
+            if (result is null || result is DBNull)
+            {
+                if (cfg.EnableCommandDebugLogs)
+                    _logger.LogInformation("[HZP-DB] LoadAmmoPacks: no row found for steamid={SteamId} (new player).", steamId);
+                return null;
+            }
+            int ap = Convert.ToInt32(result);
+            if (cfg.EnableCommandDebugLogs)
+                _logger.LogInformation("[HZP-DB] LoadAmmoPacks: steamid={SteamId} ap={AP} SUCCESS.", steamId, ap);
+            return ap;
         }
         catch (Exception ex)
         {
@@ -177,13 +197,19 @@ public class HZPDatabase
         }
     }
 
-    /// <summary>Saves AP for a player. Fire-and-forget safe to call from game thread.</summary>
+    /// <summary>Saves AP for a player (UPSERT). Fire-and-forget safe to call from game thread.</summary>
     public async Task SaveAmmoPacksAsync(ulong steamId, int ammoPacks)
     {
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled) return;
+        var cfg = _mainCFG.CurrentValue;
+        if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
         var connStr = BuildConnectionString();
         if (string.IsNullOrEmpty(connStr)) return;
+
+        var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
+        if (cfg.EnableCommandDebugLogs)
+            _logger.LogInformation("[HZP-DB] SaveAmmoPacks: connection='{Conn}' table='{Table}' steamid={SteamId} ap={AP}", connName, table, steamId, ammoPacks);
+
         try
         {
             await using var conn = new MySqlConnection(connStr);
@@ -197,10 +223,63 @@ public class HZPDatabase
             cmd.Parameters.AddWithValue("@sid", steamId);
             cmd.Parameters.AddWithValue("@ap", ammoPacks);
             await cmd.ExecuteNonQueryAsync();
+            if (cfg.EnableCommandDebugLogs)
+                _logger.LogInformation("[HZP-DB] SaveAmmoPacks: steamid={SteamId} ap={AP} SUCCESS.", steamId, ammoPacks);
         }
         catch (Exception ex)
         {
             _logger.LogWarning("[HZP-DB] SaveAmmoPacks({SteamId},{AP}) failed: {Ex}", steamId, ammoPacks, ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Saves ammo packs for a batch of players (failsafe on map change / plugin unload).
+    /// Each element is (SteamID64, ammoPacks).
+    /// </summary>
+    public async Task SaveAllPlayersAsync(IEnumerable<(ulong steamId, int ammoPacks)> players)
+    {
+        var cfg = _mainCFG.CurrentValue;
+        if (!cfg.AmmoPacksEnabled) return;
+        if (!TryGetSafeTableName(out var table)) return;
+        var connStr = BuildConnectionString();
+        if (string.IsNullOrEmpty(connStr)) return;
+
+        var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
+        var playerList = players.ToList();
+        if (playerList.Count == 0) return;
+
+        try
+        {
+            await using var conn = new MySqlConnection(connStr);
+            await conn.OpenAsync();
+
+            foreach (var (steamId, ammoPacks) in playerList)
+            {
+                if (cfg.EnableCommandDebugLogs)
+                    _logger.LogInformation("[HZP-DB] SaveAllPlayers: connection='{Conn}' table='{Table}' steamid={SteamId} ap={AP}", connName, table, steamId, ammoPacks);
+                try
+                {
+                    await using var cmd = conn.CreateCommand();
+                    cmd.CommandText = $"""
+                        INSERT INTO `{table}` (`steamid`, `ammopacks`)
+                        VALUES (@sid, @ap)
+                        ON DUPLICATE KEY UPDATE `ammopacks` = @ap;
+                        """;
+                    cmd.Parameters.AddWithValue("@sid", steamId);
+                    cmd.Parameters.AddWithValue("@ap", ammoPacks);
+                    await cmd.ExecuteNonQueryAsync();
+                    if (cfg.EnableCommandDebugLogs)
+                        _logger.LogInformation("[HZP-DB] SaveAllPlayers: steamid={SteamId} ap={AP} SUCCESS.", steamId, ammoPacks);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("[HZP-DB] SaveAllPlayers({SteamId},{AP}) failed: {Ex}", steamId, ammoPacks, ex.Message);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("[HZP-DB] SaveAllPlayers: could not open connection: {Ex}", ex.Message);
         }
     }
 }

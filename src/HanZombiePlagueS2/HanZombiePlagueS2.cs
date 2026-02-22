@@ -144,6 +144,17 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
 
     public override void Unload()
     {
+        // Failsafe: persist every connected player's AP before the plugin unloads.
+        try
+        {
+            _Events.SaveAllConnectedPlayersAsync().GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            // Log but do not block unload.
+            Core.Logger.LogWarning("[HZP] Unload AP save failed: {Ex}", ex.Message);
+        }
+
         _apiInstance!.Dispose();
         ServiceProvider!.Dispose();
     }

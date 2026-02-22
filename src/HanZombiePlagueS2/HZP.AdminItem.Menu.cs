@@ -110,8 +110,8 @@ public class HZPAdminItemMenu
                 string Custom = string.IsNullOrEmpty(CFG.HumandefaultModel) ? Default : CFG.HumandefaultModel;
 
                 _helpers.TVaccine(clicker, maxHealth, CFG.HumanInitialSpeed, Custom, CFG.TVaccineSound, 1.0f);
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTVaccineSuccess"));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(player, "ItemTVaccineSuccessToAll", clicker.Name));
+                _helpers.SendChatT(clicker, "ItemTVaccineSuccess");
+                _helpers.SendChatToAllT("ItemTVaccineSuccessToAll", clicker.Name);
             });
         };
 
@@ -136,8 +136,8 @@ public class HZPAdminItemMenu
 
                 _services.SetPlayerZombie(clicker);
 
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTVirusSuccess"));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTVirusSuccess", clicker.Name));
+                _helpers.SendChatT(clicker, "ItemTVirusSuccess");
+                _helpers.SendChatToAllT("ItemTVirusSuccess", clicker.Name);
             });
         };
 
@@ -164,14 +164,14 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (!IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemHumanCantUse"));
+                    _helpers.SendChatT(clicker, "ItemHumanCantUse");
                     return;
                 }
 
                 _helpers.TVirusGrenade(clicker);
 
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTVirusGrenadeSuccess"));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTVirusGrenadeSuccessToAll", clicker.Name));
+                _helpers.SendChatT(clicker, "ItemTVirusGrenadeSuccess");
+                _helpers.SendChatToAllT("ItemTVirusGrenadeSuccessToAll", clicker.Name);
             });
         };
 
@@ -198,20 +198,20 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    player.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
 
                 _globals.ScbaSuit.TryGetValue(Id, out bool IsHaveScbaSuit);
                 if (IsHaveScbaSuit)
                 {
-                    player.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemSCBASuitAlready"));
+                    _helpers.SendChatT(clicker, "ItemSCBASuitAlready");
                     return;
                 }
 
                 _helpers.GiveScbaSuit(clicker, CFG.ScbaSuitGetSound);
-                player.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemSCBASuitSuccess"));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemSCBASuitSuccessToAll", clicker.Name));
+                _helpers.SendChatT(clicker, "ItemSCBASuitSuccess");
+                _helpers.SendChatToAllT("ItemSCBASuitSuccessToAll", clicker.Name);
             });
         };
 
@@ -239,14 +239,14 @@ public class HZPAdminItemMenu
                 _globals.GodState.TryGetValue(Id, out bool IsGodState);
                 if (IsGodState)
                 {
-                    player.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemGodModeAlready"));
+                    _helpers.SendChatT(clicker, "ItemGodModeAlready");
                     return;
                 }
 
                 float time = 20f;
                 _helpers.SetGodState(clicker, time);
-                player.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemGodModeSuccess", time));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemGodModeSuccessToAll", clicker.Name, time));
+                _helpers.SendChatT(clicker, "ItemGodModeSuccess", time);
+                _helpers.SendChatToAllT("ItemGodModeSuccessToAll", clicker.Name, time);
             });
         };
 
@@ -273,7 +273,7 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
                     
@@ -312,14 +312,14 @@ public class HZPAdminItemMenu
 
                 if (currentHealth >= maxHealth)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemAddHelathMax", maxHealth));
+                    _helpers.SendChatT(clicker, "ItemAddHelathMax", maxHealth);
                     return;
                 }
 
                 _helpers.AddHealth(clicker, maxHealth, value, CFG.AddHealthSound);
 
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemAddHelathSuccess", value, pawn.Health, maxHealth));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemAddHelathSuccessToAll", clicker.Name, value, maxHealth));
+                _helpers.SendChatT(clicker, "ItemAddHelathSuccess", value, pawn.Health, maxHealth);
+                _helpers.SendChatToAllT("ItemAddHelathSuccessToAll", clicker.Name, value, maxHealth);
             });
         };
 
@@ -346,14 +346,14 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
 
                 _globals.InfiniteAmmoState.TryGetValue(Id, out bool IsInfiniteAmmoState);
                 if (IsInfiniteAmmoState)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemInfiniteAmmoAlready"));
+                    _helpers.SendChatT(clicker, "ItemInfiniteAmmoAlready");
                     return;
                 }
 
@@ -361,8 +361,8 @@ public class HZPAdminItemMenu
                 _helpers.SetInfiniteAmmoState(clicker, time);
 
 
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemInfiniteAmmoSuccess", time));
-                _core.PlayerManager.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemInfiniteAmmoSuccessToAll", clicker.Name, time));
+                _helpers.SendChatT(clicker, "ItemInfiniteAmmoSuccess", time);
+                _helpers.SendChatToAllT("ItemInfiniteAmmoSuccessToAll", clicker.Name, time);
             });
         };
 
@@ -389,11 +389,11 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
                 _helpers.GiveFireGrenade(clicker);
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemFireGrenadeSuccess"));
+                _helpers.SendChatT(clicker, "ItemFireGrenadeSuccess");
             });
         };
 
@@ -420,11 +420,11 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
                 _helpers.GiveLightGrenade(clicker);
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemLightGrenadeSuccess"));
+                _helpers.SendChatT(clicker, "ItemLightGrenadeSuccess");
             });
         };
 
@@ -451,11 +451,11 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
                 _helpers.GiveFreezeGrenade(clicker);
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemFreezeGrenadeSuccess"));
+                _helpers.SendChatT(clicker, "ItemFreezeGrenadeSuccess");
             });
         };
 
@@ -482,11 +482,11 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
                 _helpers.GiveTeleprotGrenade(clicker);
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemTeleportGrenadeSuccess"));
+                _helpers.SendChatT(clicker, "ItemTeleportGrenadeSuccess");
             });
         };
 
@@ -513,11 +513,11 @@ public class HZPAdminItemMenu
                 _globals.IsZombie.TryGetValue(Id, out bool IsZombie);
                 if (IsZombie)
                 {
-                    clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemZombieCantUse"));
+                    _helpers.SendChatT(clicker, "ItemZombieCantUse");
                     return;
                 }
                 _helpers.GiveIncGrenade(clicker);
-                clicker.SendMessage(MessageType.Chat, _helpers.T(clicker, "ItemIncGrenadeSuccess"));
+                _helpers.SendChatT(clicker, "ItemIncGrenadeSuccess");
             });
         };
 

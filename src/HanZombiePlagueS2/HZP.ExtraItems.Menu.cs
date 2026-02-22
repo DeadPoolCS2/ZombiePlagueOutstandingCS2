@@ -131,13 +131,13 @@ public class HZPExtraItemsMenu
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsMustBeAlive"));
+            _helpers.SendChatT(player, "ExtraItemsMustBeAlive");
             return;
         }
 
         if (!_globals.GameStart)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsRoundNotActive"));
+            _helpers.SendChatT(player, "ExtraItemsRoundNotActive");
             return;
         }
 
@@ -203,13 +203,13 @@ public class HZPExtraItemsMenu
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsMustBeAlive"));
+            _helpers.SendChatT(player, "ExtraItemsMustBeAlive");
             return;
         }
 
         if (!_globals.GameStart)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsRoundNotActive"));
+            _helpers.SendChatT(player, "ExtraItemsRoundNotActive");
             return;
         }
 
@@ -217,22 +217,20 @@ public class HZPExtraItemsMenu
 
         if (!ItemAllowedForPlayer(item, playerId))
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsWrongTeam"));
+            _helpers.SendChatT(player, "ExtraItemsWrongTeam");
             return;
         }
 
         int ap = GetAmmoPacks(playerId);
         if (ap < item.Price)
         {
-            player.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(player, "ExtraItemsNotEnoughAP"), item.Price, ap));
+            _helpers.SendChatT(player, "ExtraItemsNotEnoughAP", item.Price, ap);
             return;
         }
 
         if (!SpendAmmoPacks(playerId, item.Price))
         {
-            player.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(player, "ExtraItemsNotEnoughAP"), item.Price, ap));
+            _helpers.SendChatT(player, "ExtraItemsNotEnoughAP", item.Price, ap);
             return;
         }
 
@@ -294,32 +292,28 @@ public class HZPExtraItemsMenu
         pawn.ArmorValue = cfg.ArmorAmount;
         pawn.ArmorValueUpdated();
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsArmorSuccess"), cfg.ArmorAmount, remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsArmorSuccess", cfg.ArmorAmount, remainingAP);
     }
 
     private void ApplyHEGrenade(IPlayer player, int remainingAP)
     {
         _helpers.GiveFireGrenade(player);
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsGrenadeSuccess"),
-                _helpers.T(player, "ItemFireGrenade"), remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsGrenadeSuccess",
+            _helpers.T(player, "ItemFireGrenade"), remainingAP);
     }
 
     private void ApplyFlashGrenade(IPlayer player, int remainingAP)
     {
         _helpers.GiveLightGrenade(player);
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsGrenadeSuccess"),
-                _helpers.T(player, "ItemLightGrenade"), remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsGrenadeSuccess",
+            _helpers.T(player, "ItemLightGrenade"), remainingAP);
     }
 
     private void ApplySmokeGrenade(IPlayer player, int remainingAP)
     {
         _helpers.GiveFreezeGrenade(player);
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsGrenadeSuccess"),
-                _helpers.T(player, "ItemFreezeGrenade"), remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsGrenadeSuccess",
+            _helpers.T(player, "ItemFreezeGrenade"), remainingAP);
     }
 
     private void ApplyAntidote(IPlayer player, int remainingAP)
@@ -329,7 +323,7 @@ public class HZPExtraItemsMenu
         {
             AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
                 .FirstOrDefault(i => i.Key == "antidote")?.Price ?? 0);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsAntidoteNotZombie"));
+            _helpers.SendChatT(player, "ExtraItemsAntidoteNotZombie");
             return;
         }
 
@@ -337,7 +331,7 @@ public class HZPExtraItemsMenu
         {
             AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
                 .FirstOrDefault(i => i.Key == "antidote")?.Price ?? 0);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemTVaccineError"));
+            _helpers.SendChatT(player, "ItemTVaccineError");
             return;
         }
 
@@ -349,10 +343,8 @@ public class HZPExtraItemsMenu
         _helpers.TVaccine(player, mainCFG.HumanMaxHealth, mainCFG.HumanInitialSpeed,
             defaultModel, mainCFG.TVaccineSound, 1.0f);
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsAntidoteSuccess"), remainingAP));
-        _core.PlayerManager.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsAntidoteSuccessToAll"), player.Name));
+        _helpers.SendChatT(player, "ExtraItemsAntidoteSuccess", remainingAP);
+        _helpers.SendChatToAllT("ExtraItemsAntidoteSuccessToAll", player.Name);
     }
 
     private void ApplyZombieMadness(IPlayer player, int remainingAP)
@@ -362,7 +354,7 @@ public class HZPExtraItemsMenu
         {
             AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
                 .FirstOrDefault(i => i.Key == "zombie_madness")?.Price ?? 0);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemHumanCantUse"));
+            _helpers.SendChatT(player, "ItemHumanCantUse");
             return;
         }
 
@@ -371,21 +363,20 @@ public class HZPExtraItemsMenu
         {
             AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
                 .FirstOrDefault(i => i.Key == "zombie_madness")?.Price ?? 0);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsMadnessAlready"));
+            _helpers.SendChatT(player, "ExtraItemsMadnessAlready");
             return;
         }
 
         float duration = _extraItemsCFG.CurrentValue.MadnessDuration;
         _globals.ZombieMadnessActive[playerId] = true;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsMadnessSuccess"), duration, remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsMadnessSuccess", duration, remainingAP);
 
         _core.Scheduler.DelayBySeconds(duration, () =>
         {
             if (player == null || !player.IsValid) return;
             _globals.ZombieMadnessActive[playerId] = false;
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsMadnessEnd"));
+            _helpers.SendChatT(player, "ExtraItemsMadnessEnd");
         });
     }
 
@@ -398,16 +389,14 @@ public class HZPExtraItemsMenu
         if (currentExtra >= cfg.MultijumpMax)
         {
             AddAmmoPacks(playerId, cfg.Items.FirstOrDefault(i => i.Key == "multijump")?.Price ?? 0);
-            player.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(player, "ExtraItemsMultijumpMax"), cfg.MultijumpMax));
+            _helpers.SendChatT(player, "ExtraItemsMultijumpMax", cfg.MultijumpMax);
             return;
         }
 
         int newExtra = Math.Min(currentExtra + cfg.MultijumpIncrement, cfg.MultijumpMax);
         _globals.ExtraJumps[playerId] = newExtra;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsMultijumpSuccess"), newExtra, remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsMultijumpSuccess", newExtra, remainingAP);
     }
 
     private void ApplyKnifeBlink(IPlayer player, int remainingAP)
@@ -419,8 +408,7 @@ public class HZPExtraItemsMenu
         int newCharges = currentCharges + cfg.KnifeBlinkCharges;
         _globals.KnifeBlinkCharges[playerId] = newCharges;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsKnifeBlinkSuccess"), cfg.KnifeBlinkCharges, newCharges, remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsKnifeBlinkSuccess", cfg.KnifeBlinkCharges, newCharges, remainingAP);
     }
 
     private void ApplyJetpack(IPlayer player, int remainingAP)
@@ -433,8 +421,7 @@ public class HZPExtraItemsMenu
         {
             // Refuel instead of blocking purchase
             _globals.JetpackFuel[playerId] = cfg.JetpackMaxFuel;
-            player.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(player, "ExtraItemsJetpackRefueled"), cfg.JetpackMaxFuel, remainingAP));
+            _helpers.SendChatT(player, "ExtraItemsJetpackRefueled", cfg.JetpackMaxFuel, remainingAP);
             return;
         }
 
@@ -443,8 +430,7 @@ public class HZPExtraItemsMenu
         _globals.JetpackLastFuelTime[playerId] = 0f;
         _globals.JetpackRocketCooldownEnd[playerId] = 0f;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsJetpackSuccess"), cfg.JetpackMaxFuel, remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsJetpackSuccess", cfg.JetpackMaxFuel, remainingAP);
     }
 
     private void ApplyTripMine(IPlayer player, int remainingAP)
@@ -455,8 +441,7 @@ public class HZPExtraItemsMenu
         int newCharges = currentCharges + 1;
         _globals.TripMineCharges[playerId] = newCharges;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsTripMineSuccess"), newCharges, remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsTripMineSuccess", newCharges, remainingAP);
     }
 
     private void ApplyReviveToken(IPlayer player, int remainingAP)
@@ -468,14 +453,13 @@ public class HZPExtraItemsMenu
         {
             AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
                 .FirstOrDefault(i => i.Key == "revive_token")?.Price ?? 0);
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsReviveTokenAlready"));
+            _helpers.SendChatT(player, "ExtraItemsReviveTokenAlready");
             return;
         }
 
         _globals.HasReviveToken[playerId] = true;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsReviveTokenSuccess"), remainingAP));
+        _helpers.SendChatT(player, "ExtraItemsReviveTokenSuccess", remainingAP);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -527,9 +511,7 @@ public class HZPExtraItemsMenu
         _globals.KnifeBlinkCharges[playerId] = charges - 1;
         _globals.KnifeBlinkCooldownEnd[playerId] = nowMs + (long)(cfg.KnifeBlinkCooldown * 1000);
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "ExtraItemsKnifeBlinkUsed"),
-                charges - 1, cfg.KnifeBlinkCooldown));
+        _helpers.SendChatT(player, "ExtraItemsKnifeBlinkUsed", charges - 1, cfg.KnifeBlinkCooldown);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -633,7 +615,7 @@ public class HZPExtraItemsMenu
             ExplodeJetpackRocket(player, id, impactPos, cfg.JetpackRocketDamage, cfg.JetpackRocketRadius);
         });
 
-        player.SendMessage(MessageType.Chat, _helpers.T(player, "ExtraItemsJetpackRocketFired"));
+        _helpers.SendChatT(player, "ExtraItemsJetpackRocketFired");
     }
 
     private void ExplodeJetpackRocket(IPlayer shooter, int shooterId, Vector pos, int damage, float radius)
@@ -687,20 +669,20 @@ public class HZPExtraItemsMenu
         _globals.IsZombie.TryGetValue(id, out bool isZombie);
         if (isZombie)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemZombieCantUse"));
+            _helpers.SendChatT(player, "ItemZombieCantUse");
             return;
         }
 
         if (IsSpecialRole(id))
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemSpecialRoleCantUse"));
+            _helpers.SendChatT(player, "ItemSpecialRoleCantUse");
             return;
         }
 
         _globals.TripMineCharges.TryGetValue(id, out int charges);
         if (charges <= 0)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "TripMineNoCharges"));
+            _helpers.SendChatT(player, "TripMineNoCharges");
             return;
         }
 
@@ -711,8 +693,7 @@ public class HZPExtraItemsMenu
         int activeMines = _globals.AllMines.Count(m => m.OwnerId == id && !m.Exploded);
         if (activeMines >= limit)
         {
-            player.SendMessage(MessageType.Chat,
-                string.Format(_helpers.T(player, "TripMineMaxReached"), limit));
+            _helpers.SendChatT(player, "TripMineMaxReached", limit);
             return;
         }
 
@@ -791,8 +772,7 @@ public class HZPExtraItemsMenu
             }
         });
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "TripMinePlanted"), activeMines + 1, limit));
+        _helpers.SendChatT(player, "TripMinePlanted", activeMines + 1, limit);
     }
 
     /// <summary>Recovers the owner's nearest planted mine, returning one charge.</summary>
@@ -810,13 +790,13 @@ public class HZPExtraItemsMenu
         _globals.IsZombie.TryGetValue(id, out bool isZombie);
         if (isZombie)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemZombieCantUse"));
+            _helpers.SendChatT(player, "ItemZombieCantUse");
             return;
         }
 
         if (IsSpecialRole(id))
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "ItemSpecialRoleCantUse"));
+            _helpers.SendChatT(player, "ItemSpecialRoleCantUse");
             return;
         }
 
@@ -845,7 +825,7 @@ public class HZPExtraItemsMenu
 
         if (nearest == null)
         {
-            player.SendMessage(MessageType.Chat, _helpers.T(player, "TripMineNoneToTake"));
+            _helpers.SendChatT(player, "TripMineNoneToTake");
             return;
         }
 
@@ -857,8 +837,7 @@ public class HZPExtraItemsMenu
         _globals.TripMineCharges.TryGetValue(id, out int currentCharges);
         _globals.TripMineCharges[id] = currentCharges + 1;
 
-        player.SendMessage(MessageType.Chat,
-            string.Format(_helpers.T(player, "TripMineTaken"), currentCharges + 1));
+        _helpers.SendChatT(player, "TripMineTaken", currentCharges + 1);
     }
 
     /// <summary>Called every tick from HZPEvents – checks whether any zombie crosses an active beam.</summary>

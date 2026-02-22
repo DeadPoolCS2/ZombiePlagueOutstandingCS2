@@ -304,9 +304,8 @@ public partial class HZPEvents
                     if (reward > 0)
                     {
                         _extraItemsMenu.AddAmmoPacks(id, reward);
-                        player.SendMessage(MessageType.Chat,
-                            _helpers.T(player, "APRoundSurviveReward", reward,
-                                _extraItemsMenu.GetAmmoPacks(id)));
+                        _helpers.SendChatT(player, "APRoundSurviveReward", reward,
+                            _extraItemsMenu.GetAmmoPacks(id));
                     }
                 }
 
@@ -624,9 +623,8 @@ public partial class HZPEvents
                     if (reward > 0)
                     {
                         _extraItemsMenu.AddAmmoPacks(aId, reward);
-                        attacker.SendMessage(MessageType.Chat,
-                            _helpers.T(attacker, "APZombieKillReward", reward,
-                                _extraItemsMenu.GetAmmoPacks(aId)));
+                        _helpers.SendChatT(attacker, "APZombieKillReward", reward,
+                            _extraItemsMenu.GetAmmoPacks(aId));
                     }
                 }
             }
@@ -687,7 +685,7 @@ public partial class HZPEvents
                         pawn.SetModel(defaultModel);
                     });
 
-                    p.SendMessage(MessageType.Chat, _helpers.T(p, "ReviveTokenUsed"));
+                    _helpers.SendChatT(p, "ReviveTokenUsed");
                 });
                 return HookResult.Continue;
             }
@@ -901,6 +899,30 @@ public partial class HZPEvents
         {
             _globals.RoundVoxGroup = _helpers.PickRandomActiveGroup(VoxList);
         }
+
+        // Failsafe: persist every connected player's AP on map change.
+        _ = SaveAllConnectedPlayersAsync();
+    }
+
+    /// <summary>
+    /// Collects current ammo pack balances for all connected human players and
+    /// persists them to the database. Used as a failsafe on map change and unload.
+    /// </summary>
+    public async Task SaveAllConnectedPlayersAsync()
+    {
+        var snapshot = new List<(ulong steamId, int ap)>();
+        foreach (var player in _core.PlayerManager.GetAllPlayers())
+        {
+            if (player == null || !player.IsValid || player.IsFakeClient)
+                continue;
+            ulong steamId = player.SteamID;
+            if (steamId == 0) continue;
+            int ap = _extraItemsMenu.GetAmmoPacks(player.PlayerID);
+            snapshot.Add((steamId, ap));
+        }
+
+        if (snapshot.Count > 0)
+            await _database.SaveAllPlayersAsync(snapshot);
     }
     private void Event_OnEntityTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)
     {
