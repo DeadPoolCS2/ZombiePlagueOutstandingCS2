@@ -89,6 +89,7 @@ public partial class HZPEvents
         _core.Event.OnPrecacheResource += Event_OnPrecacheResource;
         _core.Event.OnTick += Event_OnTickSpeed;
         _core.Event.OnTick += Event_OnTickNoRecoil;
+        _core.Event.OnTick += Event_OnTickMultijump;
 
         _core.GameEvent.HookPre<EventWeaponFire>(OnHumanWeaponFire);
         _core.Event.OnEntityTakeDamage += Event_OnHumanTakeDamage;
@@ -284,8 +285,7 @@ public partial class HZPEvents
                 _globals.KnifeBlinkCharges.Remove(id);
                 _globals.KnifeBlinkCooldownEnd.Remove(id);
                 _globals.ZombieMadnessActive.Remove(id);
-
-                // Award ammo packs to surviving humans
+                _globals.PrevJumpPressed.Remove(id);
                 bool wasZombie = false;
                 _globals.IsZombie.TryGetValue(id, out wasZombie);
                 if (!wasZombie && player.Controller != null && player.Controller.IsValid && player.Controller.PawnIsAlive)
@@ -589,6 +589,7 @@ public partial class HZPEvents
         _globals.KnifeBlinkCharges.Remove(Id);
         _globals.KnifeBlinkCooldownEnd.Remove(Id);
         _globals.ZombieMadnessActive.Remove(Id);
+        _globals.PrevJumpPressed.Remove(Id);
 
         if (!_globals.GameStart)
             return HookResult.Continue;
@@ -915,6 +916,14 @@ public partial class HZPEvents
             if (IsGodState)
             {
                 @event.Info.Damage = 0;
+                return;
+            }
+
+            _globals.ZombieMadnessActive.TryGetValue(victimId, out bool madnessActive);
+            if (madnessActive)
+            {
+                @event.Info.Damage = 0;
+                return;
             }
         }
     }
@@ -982,6 +991,7 @@ public partial class HZPEvents
         _globals.KnifeBlinkCharges.Remove(id);
         _globals.KnifeBlinkCooldownEnd.Remove(id);
         _globals.ZombieMadnessActive.Remove(id);
+        _globals.PrevJumpPressed.Remove(id);
 
         _globals.InSwing[id] = false;
 
@@ -1112,6 +1122,45 @@ public partial class HZPEvents
             pawn.AimPunchAngleVel.Yaw = 0;
             pawn.AimPunchAngleVel.Roll = 0;
             pawn.AimPunchTickFraction = 0;
+        }
+    }
+
+    private void Event_OnTickMultijump()
+    {
+        const float JumpVelocityZ = 300f; // upward impulse for mid-air jumps
+
+        foreach (var player in _core.PlayerManager.GetAlive())
+        {
+            if (player == null || !player.IsValid)
+                continue;
+
+            int id = player.PlayerID;
+            _globals.ExtraJumps.TryGetValue(id, out int extraJumps);
+            if (extraJumps <= 0)
+                continue;
+
+            var pawn = player.PlayerPawn;
+            if (pawn == null || !pawn.IsValid)
+                continue;
+
+            // Detect jump button press this tick
+            bool jumpPressed = (player.PressedButtons & GameButtonFlags.Space) != 0;
+            _globals.PrevJumpPressed.TryGetValue(id, out bool prevJumpPressed);
+            _globals.PrevJumpPressed[id] = jumpPressed;
+
+            // Only act on a fresh press (rising edge)
+            if (!jumpPressed || prevJumpPressed)
+                continue;
+
+            // Only grant extra jump when player is airborne (not on ground)
+            bool onGround = pawn.GroundEntity.IsValid;
+            if (onGround)
+                continue;
+
+            // Consume one extra jump and apply upward impulse
+            _globals.ExtraJumps[id] = extraJumps - 1;
+            var vel = pawn.AbsVelocity;
+            pawn.Teleport(null, null, new SwiftlyS2.Shared.Natives.Vector(vel.X, vel.Y, JumpVelocityZ));
         }
     }
 

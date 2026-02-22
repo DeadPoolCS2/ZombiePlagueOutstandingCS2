@@ -16,313 +16,502 @@
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z31PY52N)
 
-## 视频
-https://www.bilibili.com/video/BV1c3cJzrEWn
+## video
+https://www.youtube.com/watch?v=DVeR5u28M_s
 </div>
 
 ---
 
-插件可以配合以下创意工坊资源使用
+Example Workshop files
 ```
-音效 : 3644652779
-丧尸模型 : 3170427476
+sound : 3644652779
+zombie models : 3170427476
 ```
 
 ---
 
 <div align="center">
-  <a href="./README.md"><img src="https://flagcdn.com/48x36/cn.png" alt="中文" width="48" height="36" /> <strong>中文版</strong></a>  
+  <a href="./README.en.md"><img src="https://flagcdn.com/48x36/gb.png" alt="English" width="48" height="36" /> <strong>English</strong></a>  
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="./README.en.md"><img src="https://flagcdn.com/48x36/gb.png" alt="English" width="48" height="36" /> <strong>English</strong></a>
+  <a href="./README.md"><img src="https://flagcdn.com/48x36/cn.png" alt="中文" width="48" height="36" /> <strong>中文版</strong></a>
 </div>
 
 <hr>
 
 # Han Zombie Plague S2
 
-**僵尸瘟疫插件**  
-适用于 Counter-Strike 2 游戏的僵尸瘟疫模式插件。提供丰富的游戏模式、特殊丧尸/人类角色、道具系统、API 支持，让你的服务器充满乐趣与挑战！
+**Zombie Plague Plugin**  
+A Zombie Plague mode plugin for Counter-Strike 2. Featuring rich game modes, special zombie/human classes, prop systems, full API support — bring endless fun and challenge to your server!
 
-## 特色功能总览
+## Feature Overview
 
-- **10 种多样化游戏模式**：从经典感染到特殊角色对抗，支持自由配置。
-- **特殊职业系统**：母体丧尸、复仇之神（Nemesis）、暗杀者（Assassin）、幸存者（Survivor）、狙击手（Sniper）、英雄（Hero）等，每个角色有独立属性（血量、速度、重力、伤害、模型、武器）。
-- **道具与技能**：T 病毒炸弹（感染范围）、燃烧手雷、照明弹、冰冻弹、传送手雷、防化服（免疫感染）、神模式、无限子弹、无限弹夹、无后坐力。
-- **自定义配置**：每个模式独立开关无限子弹、丧尸复活；全局配置击退力、生成点、音效、环境音乐等。
-- **玩家互动**：菜单选择丧尸偏好（存数据库）、管理员菜单、击杀伤害 HUD 显示。
-- **API 支持**：完整事件系统（感染、角色选择、胜利等），供其他插件扩展自定义逻辑。
-- **音效与视觉**：专属音效（感染、道具使用）、玩家外发光、FOV 调整、环境氛围音循环。
-- **平衡优化**：击退系统（头部/身体/地面/空中不同倍率）、英雄击退独立配置。
+- **10 Diverse Game Modes**: From classic infection to special class confrontations, all fully configurable.
+- **Special Class System**: Mother Zombie, Nemesis, Assassin, Survivor, Sniper, Hero, etc. Each class has independent attributes (health, speed, gravity, damage, model, weapon).
+- **Props & Abilities**: T-Virus Grenade (infection area), Incendiary Grenade, Flashbang, Freeze Grenade, Teleport Grenade, SCBA Suit (infection immunity), God Mode, Infinite Ammo, Infinite Clip, No Recoil.
+- **Custom Configuration**: Per-mode toggle for infinite ammo & zombie respawn; global settings for knockback force, spawn points, sound effects, ambient music, etc.
+- **Player Interaction**: Menu-based zombie class preference selection (saved to database), admin menu, kill damage HUD display.
+- **API Support**: Complete event system (infection, class selection, victory, etc.) for other plugins to extend custom logic.
+- **Sound & Visuals**: Dedicated sound effects (infection, prop usage), player glow outline, FOV adjustment, looping ambient atmosphere sounds.
+- **Balance Optimization**: Knockback system with separate multipliers (head/body/ground/air), independent hero knockback config.
 
-## 游戏模式
+## Game Modes
 
-插件提供 **10 种经典与创新模式**，每个模式支持独立配置：
-- **丧尸复活开关**（ZombieCanReborn）
-- **人类无限子弹**（EnableInfiniteClipMode）
-- **模式权重**（Weight，用于随机选择模式）
+The plugin provides **10 classic and innovative modes**, each with independent configuration:
+- **Zombie Respawn Toggle** (`ZombieCanReborn`)
+- **Human Infinite Ammo** (`EnableInfiniteClipMode`)
+- **Mode Weight** (`Weight`, used for random mode selection)
 
-1. **普通感染模式**  
-   选择 1 名（可配置数量）母体丧尸开始感染人类。经典逐步扩散玩法。
+1. **Normal Infection Mode**  
+   Select 1 player (configurable count) as Mother Zombie to start infecting humans. Classic progressive spread gameplay.
 
-2. **多重感染模式**  
-   选择一半玩家作为母体丧尸，同时开始感染。快速进入高强度混战。
+2. **Multi Infection Mode**  
+   Select half the players as Mother Zombies to start infecting simultaneously. Fast entry into high-intensity chaos.
 
-3. **幸存者模式**  
-   选择 1 名人类作为幸存者，获得 M249 机枪 + 特殊属性（高血量、高速、低重力、高伤害，可配置），其他玩家变为丧尸，进行单人生存战。
+3. **Survivor Mode**  
+   Select 1 human as Survivor, equipped with M249 machine gun + special attributes (high health, speed, low gravity, high damage — all configurable). All others become zombies for a lone survival battle.
 
-4. **狙击手模式**  
-   选择 1 名人类作为狙击手，获得狙击枪（AWP）+ 特殊属性（高血量、高速、低重力、高伤害，可配置），其他玩家变为丧尸，进行精准射击对抗。
+4. **Sniper Mode**  
+   Select 1 human as Sniper, equipped with sniper rifle (AWP) + special attributes (high health, speed, low gravity, high damage — configurable). All others become zombies for precision shooting vs horde.
 
-5. **军团模式（对抗模式）**  
-   一半玩家直接变为丧尸，无感染阶段，人类 vs 丧尸火力厮杀。
+5. **Swarm Mode (Confrontation Mode)**  
+   Half the players instantly become zombies (no infection phase) for direct human vs zombie firepower battle.
 
-6. **瘟疫模式**  
-   一半玩家变为丧尸 + 1 名幸存者 + 1 名复仇之神，进行多方大乱斗。
+6. **Plague Mode**  
+   Half the players become zombies + 1 Survivor + 1 Nemesis for epic multi-faction chaos battle.
 
-7. **暗杀者模式**  
-   选择 1 名丧尸作为暗杀者（远距离隐身、近距离/受击显形，可配置隐身距离），无感染，进行潜行刺杀战。
+7. **Assassin Mode**  
+   Select 1 zombie as Assassin (invisible at long range, visible when close or attacked — invisibility distance configurable). No infection — stealth assassination gameplay.
 
-8. **复仇之神模式**  
-   选择 1 名丧尸作为复仇之神（高属性 boss），无感染，单挑全人类。
+8. **Nemesis Mode**  
+   Select 1 zombie as Nemesis (high-stat boss). No infection — ultimate single boss vs all humans.
 
-9. **英雄模式**  
-   存活到最后 x 名（可配置数量）人类自动变为英雄，获得超强属性，继续战斗。
+9. **Hero Mode**  
+   The last x surviving humans (count configurable) automatically become Heroes with ultra-strong attributes and continue the fight.
 
-10. **狙击手 vs 暗杀者**  
-    一半玩家变为丧尸 + 1 名狙击手 + 1 名暗杀者，三方混战对决。
+10. **Sniper vs Assassin Mode**  
+    Half the players become zombies + 1 Sniper + 1 Assassin — intense three-way faction battle.
 
-## 配置说明
+## Configuration Guide
 
-主要配置文件：`HZPMainCFG.json`。
+Main configuration file: `HZPMainCFG.json`.
 
-### 全局配置
-| 参数 | 说明 | 示例值 |
-|------|------|--------|
-| `RoundReadyTime` | 回合准备时间（秒） | 22.0 |
-| `RoundTime` | 回合持续时间（分钟） | 4.0 |
-| `HumandefaultModel` | 人类默认模型路径 | "characters/models/ctm_st6/ctm_st6_variante.vmdl" |
-| `HumanMaxHealth` | 人类最大血量 | 225 |
-| `HumanInitialSpeed` | 人类初始速度 | 1.0 |
-| `HumanInitialGravity` | 人类初始重力 | 0.8 |
-| `EnableDamageHud` | 显示击杀伤害 HUD | true |
-| `EnableInfiniteReserveAmmo` | 人类无限备用弹药 | true |
-| `EnableWeaponNoRecoil` | 武器无后坐力 | true |
-| `HumanSpawnPoints` | 人类生成点（CT/T/DM） | "CT,T,DM" |
-| `ZombieSpawnPoints` | 丧尸生成点 | "CT,T,DM" |
-| `KnockZombieForce` | 击退丧尸力度 | 250.0 |
-| `StunZombieTime` | 击退丧尸眩晕时间（秒） | 0.1 |
-| `AmbSound` | 环境氛围音列表（逗号分隔） | "han.zombie.amb.zriot,..." |
-| `AmbSoundLoopTime` | 氛围音循环间隔（秒） | 60.0 |
-| `AmbSoundVolume` | 氛围音音量 | 0.8 |
+## Global Configuration
 
-### 击退系统（KnockBack）
-- `HumanKnockBackHeadMultiply`：头部击退倍率（2.0）
-- `HumanKnockBackBodyMultiply`：身体击退倍率（1.0）
-- `HumanKnockBackGroundMultiply`：地面击退倍率（1.0）
-- `HumanKnockBackAirMultiply`：空中击退倍率（0.5）
-- `HumanHeroKnockBackMultiply`：英雄击退倍率（1.0）
+Main configuration file: `HZPMainCFG.json`.
 
-### 道具配置
-| 道具 | 开关 | 生成给予 | 范围/持续时间 | 伤害/效果 | 音效 |
-|------|------|----------|--------------|----------|------|
-| T 病毒炸弹 | - | - | 300.0 | 可感染英雄 | "han.zombieplague.grenadedote" |
-| 燃烧手雷 | `FireGrenade` | `SpawnGiveFireGrenade` | 300.0 / 5.0s | 500 + 10/s | "han.zombieplague.grenadedote" |
-| 燃烧弹 | - | `SpawnGiveIncGrenade` | - | - | - |
-| 照明弹 | `LightGrenade` | `SpawnGiveLightGrenade` | 1000.0 / 30.0s | 致盲/强光 | "C4.ExplodeTriggerTrip" |
-| 冰冻弹 | `FreezeGrenade` | `SpawnGiveFreezeGrenade` | 300.0 / 10.0s | 冻结 | "han.zombieplague.grenadedote" |
-| 传送手雷 | `TelportGrenade` | `SpawnGiveTelportGrenade` | - | 传送 | - |
-| T 病毒血清 | - | - | - | 变回人类 | "HealthShot.Pickup" |
-| 防化服 | `CanUseScbaSuit` | - | 免疫感染 | - | 拾取/破损音效 |
+The following table lists the key global settings that apply to all modes (unless overridden by mode-specific options).
 
-### 模式配置示例
-每个模式有独立 `Enable`（开关）、`Name`（显示名）、`Weight`（随机权重）。
+| Parameter                  | Description                                      | Example Value                                      |
+|----------------------------|--------------------------------------------------|----------------------------------------------------|
+| `RoundReadyTime`           | Round preparation time (seconds)                 | 22.0                                               |
+| `RoundTime`                | Round duration (minutes)                         | 4.0                                                |
+| `HumandefaultModel`        | Default human model path                         | "characters/models/ctm_st6/ctm_st6_variante.vmdl" |
+| `HumanMaxHealth`           | Maximum health for humans                        | 225                                                |
+| `HumanInitialSpeed`        | Initial movement speed for humans (multiplier)   | 1.0                                                |
+| `HumanInitialGravity`      | Initial gravity scale for humans                 | 0.8                                                |
+| `EnableDamageHud`          | Show kill damage HUD                             | true                                               |
+| `EnableInfiniteReserveAmmo`| Infinite reserve ammo for humans                 | true                                               |
+| `EnableWeaponNoRecoil`     | Weapons have no recoil                           | true                                               |
+| `HumanSpawnPoints`         | Human spawn points (CT/T/DM)                     | "CT,T,DM"                                          |
+| `ZombieSpawnPoints`        | Zombie spawn points (CT/T/DM)                    | "CT,T,DM"                                          |
+| `KnockZombieForce`         | Knockback force applied to zombies               | 250.0                                              |
+| `StunZombieTime`           | Stun duration when knocking back zombies (seconds) | 0.1                                              |
+| `AmbSound`                 | List of ambient atmosphere sounds (comma-separated) | "han.zombie.amb.zriot,..."                       |
+| `AmbSoundLoopTime`         | Ambient sound loop interval (seconds)            | 60.0                                               |
+| `AmbSoundVolume`           | Ambient sound volume                             | 0.8                                                |
 
-- **普通感染**：`MotherZombieCount`（母体数量，默认 1）
-- **幸存者**：`SurvivorHealth`（1000）、`SurvivorSpeed`（3.0）、模型/武器自定义
-- **狙击手**：`SniperHealth`（500）、`SniperWeapon`（"weapon_awp"）
-- **暗杀者**：`InvisibilityDist`（隐身距离，200.0）
-- **英雄**：`HeroCount`（3 名）
+### Knockback System
 
-完整 JSON 配置见仓库 `configs/` 文件夹。
+The knockback system allows customizable force when humans shoot zombies, helping balance gameplay and prevent zombies from rushing too easily.
 
-## 安装指南
+- `HumanKnockBackHeadMultiply`: Headshot knockback multiplier (2.0)  
+- `HumanKnockBackBodyMultiply`: Body shot knockback multiplier (1.0)  
+- `HumanKnockBackGroundMultiply`: Ground knockback multiplier (1.0)  
+- `HumanKnockBackAirMultiply`: Airborne knockback multiplier (0.5)  
+- `HumanHeroKnockBackMultiply`: Knockback multiplier when the shooter is a Hero (1.0)
 
-1. 下载插件包，解压到 `addons/swiftlys2/plugins/`。
-2. 启动服务器。
-3. 配置 `HZPMainCFG.json`。
-4. 确保依赖：swiftlys2 框架支持。
+### Props Configuration
 
-## 命令列表
+| Prop              | Toggle Parameter          | Auto-Give on Spawn Parameter | Range / Duration     | Damage / Effect                  | Sound Effect                          |
+|-------------------|---------------------------|------------------------------|----------------------|----------------------------------|---------------------------------------|
+| T-Virus Grenade   | -                         | -                            | 300.0               | Can infect Heroes                | "han.zombieplague.grenadedote"       |
+| Incendiary Grenade| `FireGrenade`             | `SpawnGiveFireGrenade`       | 300.0 / 5.0s        | 500 initial + 10/s burning       | "han.zombieplague.grenadedote"       |
+| Incendiary Bomb   | -                         | `SpawnGiveIncGrenade`        | -                   | Burning damage                   | -                                     |
+| Flashbang / Light Grenade | `LightGrenade`    | `SpawnGiveLightGrenade`      | 1000.0 / 30.0s      | Blinding / strong light effect   | "C4.ExplodeTriggerTrip"               |
+| Freeze Grenade    | `FreezeGrenade`           | `SpawnGiveFreezeGrenade`     | 300.0 / 10.0s       | Freezes target                   | "han.zombieplague.grenadedote"       |
+| Teleport Grenade  | `TelportGrenade`          | `SpawnGiveTelportGrenade`    | -                   | Teleports player                 | -                                     |
+| T-Virus Serum     | -                         | -                            | -                   | Turns zombie back to human (special zombies immune) | "HealthShot.Pickup"                   |
+| SCBA Suit (Chemical Suit) | `CanUseScbaSuit`  | -                            | -                   | Immune to infection              | Pickup: "Player.PickupPistol"<br>Broken: "Breakable.Flesh" |
 
-- `!zclass` 或 `sw_zclass`：打开丧尸职业选择菜单（玩家偏好,可自由定义指令）
-- `!zmenu` 或 `sw_zmenu`：管理员菜单（需权限 `AdminMenuPermission`,不填写为所有人可以使用）
+### Mode Configuration Examples
+
+Each mode has its own independent settings:
+- `Enable`: Toggle the mode on/off
+- `Name`: Display name in-game
+- `Weight`: Random selection weight (higher = more likely to be chosen)
+
+Specific per-mode parameters:
+- **Normal Infection**: `MotherZombieCount` (number of Mother Zombies, default 1)
+- **Survivor**: `SurvivorHealth` (1000), `SurvivorSpeed` (3.0), custom model/weapon paths
+- **Sniper**: `SniperHealth` (500), `SniperWeapon` ("weapon_awp")
+- **Assassin**: `InvisibilityDist` (invisibility distance, 200.0)
+- **Hero**: `HeroCount` (number of Heroes, e.g. 3)
+
+For the full JSON configuration, see the `configs/` folder in the repository.
+
+## Installation Guide
+
+1. Download the plugin package and extract it to `addons/swiftlys2/plugins/`.
+2. Start (or restart) the server.
+3. Edit and configure `HZPMainCFG.json` (and other config files as needed).
+4. Ensure dependencies: The plugin requires the SwiftlyS2 framework to be installed and running.
+
+After installation, load the map or use the command to reload the plugin if necessary. Check server console/logs for any loading errors.
+
+## Commands List
+
+- `!zclass` or `sw_zclass`: Opens the zombie class selection menu (player preference, command can be freely customized in config).
+- `!zmenu` or `sw_zmenu`: Opens the admin menu (requires permission `AdminMenuPermission`; if left empty, accessible to everyone).
 
 ---
 
-## 丧尸职业配置
+## Zombie Class Configuration
 
-插件支持丰富的丧尸职业系统，分为两类配置文件：
+The plugin supports a rich zombie class system, divided into two separate configuration files:
 
-- **HZPZombieClassCFG.json**：普通丧尸职业列表（ZombieClassList）。  
-  这些是常规感染后玩家可能变成的丧尸类型（如红骷髅、白骷髅、异形女王等）。
+- **HZPZombieClassCFG.json**: List of normal zombie classes (`ZombieClassList`).  
+  These are the standard zombie types players may become after normal infection (e.g., Red Skull, White Skull, Xenomorph Queen, etc.).
 
-- **HZPSpecialClassCFG.json**：特殊丧尸职业列表（SpecialClassList）。  
-  这些是模式中指定的特殊角色（如母体僵尸、复仇之神、暗杀者等）。
+- **HZPSpecialClassCFG.json**: List of special zombie classes (`SpecialClassList`).  
+  These are the special roles used in specific modes (e.g., Mother Zombie, Nemesis, Assassin, etc.).
 
-**两个文件格式完全相同**，只是为了区分普通丧尸与特殊丧尸而分开存放。  
-每个丧尸职业都包含以下结构：
+**Both files use exactly the same format** — they are separated only to distinguish between normal zombies and special (mode-specific) zombies.
+
+Each zombie class follows this structure:
 
 ```json
 {
-  "Name": "职业名称",          // 必须唯一，用于主配置匹配
-  "Enable": true,               // 是否启用此职业
-  "PrecacheSoundEvent": "...",  // 预缓存音效事件文件
-  "Stats": { ... },             // 属性数值
-  "Models": { ... },            // 模型路径
-  "Sounds": { ... }             // 各种音效
+  "Name": "Class Name",          // Must be unique, used for matching in main config
+  "Enable": true,                // Whether this class is enabled
+  "PrecacheSoundEvent": "...",   // Path to pre-cache sound event file
+  "Stats": { ... },              // Numerical stats / attributes
+  "Models": { ... },             // Model paths
+  "Sounds": { ... }              // Various sound effects
 }
 ```
 ---
 
-主配置与丧尸职业匹配机制
-在主配置文件 HZPMainCFG.json 中，特殊模式通过名称字段匹配丧尸职业，例如：
+Main Config Matching Mechanism for Zombie Classes
+In the main configuration file HZPMainCFG.json, special modes match zombie classes by name fields. Example:
 ```
 "Nemesis": {
   "Enable": true,
-  "Name": "复仇之神模式",
-  "NemesisNames": "复仇之神",   // 必须与 HZPSpecialClassCFG.json 中的 "Name" 完全一致
+  "Name": "Nemesis Mode",
+  "NemesisNames": "Nemesis",   // Must exactly match the "Name" in HZPSpecialClassCFG.json
   "Weight": 50,
   ...
 }
 ```
-NemesisNames、AssassinNames、SurvivorNames 等字段的值，必须精确匹配对应配置文件中的 "Name"。
-如果名称不匹配、职业未启用或不存在，插件将无法加载该角色，可能导致模式异常。
+Fields like NemesisNames, AssassinNames, SurvivorNames, etc., must exactly match the "Name" value in the corresponding config file (HZPSpecialClassCFG.json or HZPZombieClassCFG.json).
+If the name does not match, the class is disabled (Enable: false), or the class does not exist, the plugin will fail to load that role, which may cause mode errors or fallback to default behavior.
 
 ---
 
-| 参数                | 说明                               | 示例值    | 备注                                 |
-|---------------------|------------------------------------|-----------|--------------------------------------|
-| Health             | 普通状态最大血量                   | 8000     | -                                    |
-| MotherZombieHealth | 作为母体丧尸时的最大血量           | 18000    | 仅在母体模式生效                     |
-| Speed              | 移动速度倍率（1.0 = 默认人类速度） | 1.0 ~ 2.5| 越高越快                             |
-| Damage             | 近战攻击伤害基值                   | 50.0     | 爪/刀伤害                            |
-| Gravity            | 重力缩放（值越小跳越高、落得慢）   | 0.7      | 通常 0.2~1.0                         |
-| Fov                | 视野角度（FOV）                    | 110      | 丧尸视角更宽                         |
-| EnableRegen        | 是否启用自动回血                   | true     | -                                    |
-| HpRegenSec         | 回血间隔时间（秒）                 | 5.0      | -                                    |
-| HpRegenHp          | 每次回血量                         | 30       | -                                    |
-| ZombieSoundVolume  | 丧尸相关音效音量                   | 1.0      | 0.0~1.0                              |
-| IdleInterval       | 闲置音效播放间隔（秒）             | 70.0     | -                                    |
-| 参数                  | 说明                          | 示例路径示例                                                                 |
-|-----------------------|-------------------------------|-----------------------------------------------------------------------------|
-| ModelPath             | 丧尸主体模型路径              | characters/models/voikanaa/feral_ghoul_fonv/feral_ghoul_fonv.vmdl         |
-| CustomKinfeModelPath  | 自定义爪子/刀模型路径（可选） | ""（使用默认）                                                              |
-| 参数          | 说明                         | 示例音效键                              |
-|---------------|------------------------------|-----------------------------------------|
-| SoundInfect  | 被感染时播放的声音           | han.human.mandeath                      |
-| SoundPain    | 疼痛/受伤音效                | han.hl.zombie.pain                      |
-| SoundHurt    | 受伤音效                     | han.zombie.manclassic_hurt              |
-| SoundDeath   | 死亡音效                     | han.zombie.manclassic_death             |
-| IdleSound    | 闲置/呼吸音效（可多选，逗号分隔） | han.hl.nihilanth.idle,han.hl.nihilanth.idleb |
-| RegenSound   | 回血音效                     | han.zombie.state.manheal                |
-| BurnSound    | 被燃烧时的音效               | han.zombieplague.zburn                  |
-| ExplodeSound | 爆炸/特殊死亡音效            | han.hl.zombie.idle                      |
-| HitSound     | 攻击命中敌人音效             | han.zombie.classic_hit                  |
-| HitWallSound | 攻击打墙音效                 | han.zombie.classic_hitwall              |
-| SwingSound   | 挥爪/攻击挥空音效            | han.zombie.classic_swing                |
-| 职业名称     | 普通血量 | 母体血量 | 速度 | 重力 | FOV | 回血间隔/量    | 特色描述                     |
-|--------------|----------|----------|------|------|-----|----------------|------------------------------|
-| 红骷髅       | 8000    | 18000   | 1.0 | 0.7 | 110 | 5.0s / 30     | 高耐久、自动回血             |
-| 白骷髅       | 3000    | 13000   | 1.1 | 0.8 | 110 | 5.0s / 30     | 中等血量、略快速度           |
-| frozen       | 5000    | 15000   | 1.7 | 0.7 | 110 | 1.0s / 150    | 高回血速率（已禁用）         |
-| 胖子         | 5000    | 15000   | 1.7 | 0.8 | 110 | 1.0s / 150    | 高回血速率（已禁用）         |
-| 异形女王     | 2500    | 12500   | 2.0 | 0.2 | 110 | 10.0s / 5     | 极低重力、高速、女性音效     |
-| 女科学家丧尸 | 1800    | 12000   | 1.8 | 0.5 | 110 | 10.0s / 5     | 高速、女性音效               |
-| 职业名称     | 普通血量 | 母体血量 | 速度 | 重力 | FOV | 回血间隔/量    | 特色描述                     |
-|--------------|----------|----------|------|------|-----|----------------|------------------------------|
-| 母体僵尸     | 15000   | 20000   | 1.5 | 0.5 | 110 | 1.0s / 50     | 初始感染源、高伤害（150）    |
-| 复仇之神     | 30000   | 50000   | 2.0 | 0.3 | 120 | 1.0s / 50     | 终极 boss、超高血量、低重力 |
-| 暗杀者       | 15000   | 35000   | 2.5 | 0.4 | 120 | 2.0s / 60     | 超高速、配合隐身机制         |
+### Stats (Attributes) Parameters
 
+| Parameter           | Description                                      | Example Value | Notes                                      |
+|---------------------|--------------------------------------------------|---------------|--------------------------------------------|
+| Health              | Maximum health in normal state                   | 8000         | -                                          |
+| MotherZombieHealth  | Maximum health when acting as Mother Zombie      | 18000        | Only applies in Mother Zombie modes        |
+| Speed               | Movement speed multiplier (1.0 = default human speed) | 1.0 ~ 2.5 | Higher value = faster movement             |
+| Damage              | Base melee attack damage                         | 50.0         | Claw/knife damage                          |
+| Gravity             | Gravity scale (lower value = higher jumps, slower fall) | 0.7    | Typically 0.2 ~ 1.0                        |
+| Fov                 | Field of View (FOV)                              | 110          | Wider view for zombies                     |
+| EnableRegen         | Enable automatic health regeneration             | true         | -                                          |
+| HpRegenSec          | Health regeneration interval (seconds)           | 5.0          | -                                          |
+| HpRegenHp           | Health restored per regeneration tick            | 30           | -                                          |
+| ZombieSoundVolume   | Volume of zombie-related sounds                  | 1.0          | Range: 0.0 ~ 1.0                           |
+| IdleInterval        | Interval between idle sounds (seconds)           | 70.0         | -                                          |
+
+### Models Parameters
+
+| Parameter             | Description                              | Example Path                                                          |
+|-----------------------|------------------------------------------|-----------------------------------------------------------------------|
+| ModelPath             | Main zombie model path                   | characters/models/voikanaa/feral_ghoul_fonv/feral_ghoul_fonv.vmdl   |
+| CustomKinfeModelPath  | Custom claw/knife model path (optional)  | "" (uses default)                                                     |
+
+### Sounds Parameters
+
+| Parameter     | Description                          | Example Sound Key(s)                          |
+|---------------|--------------------------------------|-----------------------------------------------|
+| SoundInfect   | Sound played when infected           | han.human.mandeath                            |
+| SoundPain     | Pain/injury sound                    | han.hl.zombie.pain                            |
+| SoundHurt     | Hurt sound                           | han.zombie.manclassic_hurt                    |
+| SoundDeath    | Death sound                          | han.zombie.manclassic_death                   |
+| IdleSound     | Idle/breathing sound (multiple allowed, comma-separated) | han.hl.nihilanth.idle,han.hl.nihilanth.idleb |
+| RegenSound    | Health regeneration sound            | han.zombie.state.manheal                      |
+| BurnSound     | Sound when burning                   | han.zombieplague.zburn                        |
+| ExplodeSound  | Explosion/special death sound        | han.hl.zombie.idle                            |
+| HitSound      | Sound when hitting an enemy          | han.zombie.classic_hit                        |
+| HitWallSound  | Sound when hitting a wall            | han.zombie.classic_hitwall                    |
+| SwingSound    | Sound when swinging claw/missing attack | han.zombie.classic_swing                   |
+
+### Normal Zombie Classes
+
+| Class Name          | Normal Health | Mother Health | Speed | Gravity | FOV | Regen Interval / Amount | Special Notes                          |
+|---------------------|---------------|---------------|-------|---------|-----|-------------------------|----------------------------------------|
+| Red Skull           | 8000         | 18000        | 1.0  | 0.7    | 110 | 5.0s / 30              | High durability, auto-regen            |
+| White Skull         | 3000         | 13000        | 1.1  | 0.8    | 110 | 5.0s / 30              | Medium health, slightly faster speed   |
+| frozen              | 5000         | 15000        | 1.7  | 0.7    | 110 | 1.0s / 150             | High regen rate (disabled)             |
+| Fat Guy             | 5000         | 15000        | 1.7  | 0.8    | 110 | 1.0s / 150             | High regen rate (disabled)             |
+| Xenomorph Queen     | 2500         | 12500        | 2.0  | 0.2    | 110 | 10.0s / 5              | Extremely low gravity, high speed, female sounds |
+| Female Scientist Zombie | 1800     | 12000        | 1.8  | 0.5    | 110 | 10.0s / 5              | High speed, female sounds              |
+
+### Special Zombie Classes
+
+| Class Name     | Normal Health | Mother Health | Speed | Gravity | FOV | Regen Interval / Amount | Special Notes                              |
+|----------------|---------------|---------------|-------|---------|-----|-------------------------|--------------------------------------------|
+| Mother Zombie  | 15000        | 20000        | 1.5  | 0.5    | 110 | 1.0s / 50              | Initial infection source, high damage (150) |
+| Nemesis        | 30000        | 50000        | 2.0  | 0.3    | 120 | 1.0s / 50              | Ultimate boss, ultra-high health, low gravity |
+| Assassin       | 15000        | 35000        | 2.5  | 0.4    | 120 | 2.0s / 60              | Ultra-high speed, pairs with invisibility mechanic |
 ---
 
-## 音效广播系统（Vox 系统）
+## Sound Broadcast System (Vox System)
 
-插件内置强大的音效广播系统（Vox），用于在游戏关键时刻播放语音播报（如回合开始、倒计时、模式宣布、胜利宣言等），增强沉浸感和氛围。
+The plugin includes a powerful sound broadcast system (Vox) that automatically plays voice announcements at key game moments (such as round start, countdown, mode announcement, victory declaration, etc.), greatly enhancing immersion and atmosphere.
 
-配置文件：**HZPVoxCFG.json**
+Configuration file: **HZPVoxCFG.json**
 
-### Vox 系统结构
+### Vox System Structure
 
-VoxList 是一个数组，每个元素代表一组完整的播报语音包（例如 CSOL 男性、CSOL 女性、HL1 男性等）。
+`VoxList` is an array, where each element represents a complete voice broadcast package (e.g., CSOL Male, CSOL Female, HL1 Male, etc.).
 
-每个语音包的结构如下：
+Each voice package follows this structure:
 
 ```json
 {
-  "Name": "语音包名称",          // 仅用于显示和识别
-  "Enable": true,                 // 是否启用此语音包
-  "PrecacheSoundEvent": "...",    // 预缓存的音效事件文件路径（必须填写）
-  "RoundMusicVox": "...",         // 回合开始音乐/语音（可多选，逗号分隔）
-  "SecRemainVox": "...",          // 剩余 20 秒提醒语音
-  "CoundDownVox": "...",          // 倒计时语音（10~1 秒，可多选）
-  "ZombieSpawnVox": "...",        // 丧尸生成/出现语音
-  "NormalInfectionVox": "...",    // 普通感染模式宣布语音
-  "MultiInfectionVox": "...",     // 多重感染模式宣布语音
-  "NemesisVox": "...",            // 复仇之神模式宣布语音
-  "SurvivorVox": "...",           // 幸存者模式宣布语音
-  "SwarmVox": "...",              // 军团模式宣布语音
-  "PlagueVox": "...",             // 瘟疫模式宣布语音
-  "AssassinVox": "...",           // 暗杀者模式宣布语音
-  "SniperVox": "...",             // 狙击手模式宣布语音
-  "AVSVox": "...",                // 狙击手 vs 暗杀者模式宣布语音
-  "HeroVox": "...",               // 英雄模式宣布语音
-  "HumanWinVox": "...",           // 人类胜利语音（可多选）
-  "ZombieWinVox": "..."           // 丧尸胜利语音（可多选）
+  "Name": "Voice Package Name",          // Only for display and identification
+  "Enable": true,                        // Whether this voice package is enabled
+  "PrecacheSoundEvent": "...",           // Path to pre-cache sound event file (required)
+  "RoundMusicVox": "...",                // Round start music/voice (multiple allowed, comma-separated)
+  "SecRemainVox": "...",                 // 20 seconds remaining reminder voice
+  "CoundDownVox": "...",                 // Countdown voice (10~1 seconds, multiple allowed)
+  "ZombieSpawnVox": "...",               // Zombie spawn/appearance voice
+  "NormalInfectionVox": "...",           // Normal Infection mode announcement voice
+  "MultiInfectionVox": "...",            // Multi Infection mode announcement voice
+  "NemesisVox": "...",                   // Nemesis mode announcement voice
+  "SurvivorVox": "...",                  // Survivor mode announcement voice
+  "SwarmVox": "...",                     // Swarm mode announcement voice
+  "PlagueVox": "...",                    // Plague mode announcement voice
+  "AssassinVox": "...",                  // Assassin mode announcement voice
+  "SniperVox": "...",                    // Sniper mode announcement voice
+  "AVSVox": "...",                       // Sniper vs Assassin mode announcement voice
+  "HeroVox": "...",                      // Hero mode announcement voice
+  "HumanWinVox": "...",                  // Human victory voice (multiple allowed)
+  "ZombieWinVox": "..."                  // Zombie victory voice (multiple allowed)
 }
 ```
 
-| 参数              | 触发时机                     | 示例语音键（可多选，逗号分隔） | 备注 |
-|-------------------|------------------------------|--------------------------------|------|
-| RoundMusicVox    | 回合正式开始（准备时间结束） | han.zombie.round.class_start   | 常用于背景音乐或开场语音 |
-| SecRemainVox     | 回合剩余 20 秒时             | han.zombie.round.20secremain   | 提醒玩家时间紧迫 |
-| CoundDownVox     | 倒计时 10~1 秒（每秒一个）   | han.zombie.round.mancdone,...  | 支持 10 个独立语音，按顺序播放 |
-| ZombieSpawnVox   | 丧尸生成或母体出现时         | han.zombie.round.manzbcome     | 增加紧张感 |
-| NormalInfectionVox | 普通感染模式宣布             | han.zombieplague.end.horror    | 模式专属语音 |
-| MultiInfectionVox | 多重感染模式宣布             | han.zombieplague.end.horror    | - |
-| NemesisVox       | 复仇之神模式宣布             | han.zombieplague.type.nemesis  | - |
-| SurvivorVox      | 幸存者模式宣布               | han.zombieplague.type.survivor | - |
-| SwarmVox         | 军团模式宣布                 | han.zombieplague.end.horror    | - |
-| PlagueVox        | 瘟疫模式宣布                 | han.zombieplague.end.plague    | - |
-| AssassinVox      | 暗杀者模式宣布               | han.zombieplague.type.nemesis  | - |
-| SniperVox        | 狙击手模式宣布               | han.zombieplague.type.survivor | - |
-| AVSVox           | 狙击手 vs 暗杀者模式宣布     | han.zombieplague.type.nemesis  | - |
-| HeroVox          | 英雄模式宣布                 | han.zombieplague.type.survivor | - |
-| HumanWinVox      | 人类胜利时                   | han.zombie.round.manhmwin      | 可多选随机播放 |
-| ZombieWinVox     | 丧尸胜利时                   | han.zombie.round.manzbwin      | 可多选随机播放 |
-| 语音包名称     | 风格来源     | 启用状态 | 特色描述                             |
-|----------------|--------------|----------|--------------------------------------|
-| CSOL男性播报   | CSOL 风格男性 | true    | 经典男性播报，倒计时清晰有力，胜利语音激昂 |
-| CSOL女性播报   | CSOL 风格女性 | true    | 女性声线，倒计时温柔但紧张，适合多样氛围 |
-| HL1男性播报    | Half-Life 1 男性 | true    | 复古 HL1 播报风格，带有经典感染音和胜利宣言 |
-| HL1女性播报    | Half-Life 1 女性 | true    | HL1 女性语音，独特复古氛围，剩余时间提醒特别 |
-| 僵尸瘟疫播报   | Zombie Plague 经典 | true    | 混合多种经典语音，胜利语音丰富多样，随机播放效果强 |
+### Vox Parameters / Voice Trigger Events
 
-**自定义提示**：
-- 每个语音包可独立启用/禁用（"Enable": true/false）。
-- 同一事件可填写多个语音键（逗号分隔），系统会**随机播放**其中一个，增加多样性。
-- 所有语音必须在指定的 PrecacheSoundEvent 文件中预缓存。
-- 你可以添加自己的语音包（如日语、韩语、本地化语音），只要音效文件路径正确即可。
+| Parameter          | Trigger Timing                          | Example Sound Key(s) (multiple allowed, comma-separated) | Notes                                      |
+|--------------------|-----------------------------------------|-----------------------------------------------------------|--------------------------------------------|
+| RoundMusicVox      | Round officially starts (prep time ends) | han.zombie.round.class_start                             | Often used for background music or opening voice |
+| SecRemainVox       | 20 seconds remaining in round           | han.zombie.round.20secremain                             | Reminds players time is running out        |
+| CoundDownVox       | Countdown 10~1 seconds (one per second) | han.zombie.round.mancdone,...                            | Supports 10 separate voices, played in sequence |
+| ZombieSpawnVox     | Zombie spawn or Mother Zombie appears   | han.zombie.round.manzbcome                               | Builds tension                             |
+| NormalInfectionVox | Normal Infection mode announcement      | han.zombieplague.end.horror                              | Mode-specific voice                        |
+| MultiInfectionVox  | Multi Infection mode announcement       | han.zombieplague.end.horror                              | -                                          |
+| NemesisVox         | Nemesis mode announcement               | han.zombieplague.type.nemesis                            | -                                          |
+| SurvivorVox        | Survivor mode announcement              | han.zombieplague.type.survivor                           | -                                          |
+| SwarmVox           | Swarm / Legion mode announcement        | han.zombieplague.end.horror                              | -                                          |
+| PlagueVox          | Plague mode announcement                | han.zombieplague.end.plague                              | -                                          |
+| AssassinVox        | Assassin mode announcement              | han.zombieplague.type.nemesis                            | -                                          |
+| SniperVox          | Sniper mode announcement                | han.zombieplague.type.survivor                           | -                                          |
+| AVSVox             | Sniper vs Assassin mode announcement    | han.zombieplague.type.nemesis                            | -                                          |
+| HeroVox            | Hero mode announcement                  | han.zombieplague.type.survivor                           | -                                          |
+| HumanWinVox        | Humans win                              | han.zombie.round.manhmwin                                | Multiple allowed — random playback         |
+| ZombieWinVox       | Zombies win                             | han.zombie.round.manzbwin                                | Multiple allowed — random playback         |
+### Voice Package Examples (HZPVoxCFG.json)
 
-**推荐玩法**：
-- 服务器可根据活动主题切换语音包（例如万圣节用恐怖风格，节日用欢快风格）。
-- 结合不同语音包与模式使用，能让游戏更有主题感（如 HL1 语音包配复古地图，CSOL 语音包配高强度对抗）。
+| Voice Package Name   | Style Source          | Enabled | Special Features                                                                 |
+|----------------------|-----------------------|---------|----------------------------------------------------------------------------------|
+| CSOL Male Broadcast  | CSOL Male Style       | true   | Classic male announcer, clear and powerful countdown, exciting victory voice   |
+| CSOL Female Broadcast| CSOL Female Style     | true   | Female voice, gentle yet tense countdown, suitable for varied atmospheres       |
+| HL1 Male Broadcast   | Half-Life 1 Male      | true   | Retro HL1 style, classic infection sounds and victory announcements             |
+| HL1 Female Broadcast | Half-Life 1 Female    | true   | HL1 female voice, unique retro atmosphere, special remaining time reminders     |
+| Zombie Plague Broadcast | Zombie Plague Classic | true   | Mix of various classic voices, rich victory announcements, strong random playback effect |
+
+**Customization Tips**:
+- Each voice package can be independently enabled or disabled (`"Enable": true/false`).
+- For the same event, you can list multiple sound keys (comma-separated) — the system will **randomly play** one of them for variety.
+- All voices must be pre-cached in the specified `PrecacheSoundEvent` file.
+- You can add your own custom voice packages (e.g., Japanese, Korean, or localized voices) as long as the sound file paths are correct.
+
+**Recommended Usage**:
+- Servers can switch voice packages based on event themes (e.g., horror style for Halloween, cheerful for holidays).
+- Combining different voice packages with modes creates stronger thematic immersion (e.g., HL1 package with retro maps, CSOL package with high-intensity matches).
 
 ---
 
 
-## API 支持
+## API Support
 
-完整 API 接口（IHanZombiePlagueAPI），支持事件监听（如感染、胜利）、玩家状态查询、强制设置角色等。详见 [HanZombiePlagueAPI.xml](API/net10.0/HanZombiePlagueAPI.xml) 。 
+Full API interface (`IHanZombiePlagueAPI`) is provided, supporting event listening (e.g., infection, victory), player status queries, forced class setting, and more.  
+See details in [HanZombiePlagueAPI.xml](API/net10.0/HanZombiePlagueAPI.xml)
+
+This API allows other plugins to:
+- Listen to key events (e.g., `HZP_OnPlayerInfect`, `HZP_OnNemesisSelected`, `HZP_OnGameStart`, `HZP_OnHumanWin`, etc.)
+- Query player states (is zombie? is Nemesis? current mode? etc.)
+- Forcefully set player roles/classes (e.g., make someone a Survivor, Nemesis, or Hero)
+- Interact with game flow (check win conditions, give props, set glow/FOV/god mode, etc.)
+
+For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
+
+---
+
+## Main Game Menu & Extra Items System
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `!menu` / `!zp` | Open the main game menu (chat) |
+| `hzp_menu` | Open the main game menu (console) |
+| `!extras` | Open the extra items menu directly |
+| `!blink` | Activate Knife Blink (if purchased) |
+| `hzp_give_ap <name\|#userid> <amount>` | Admin: give ammo packs to a player |
+
+### Main Menu Options
+
+1. **Buy Weapons** – Opens the round-start weapons menu (human only, once per round).
+2. **Buy Extra Items** – Opens the extra items shop.
+3. **Choose Zombie Class** – Opens the zombie class preference menu.
+4. **Unstuck** – Teleports you to a nearby free position if you are stuck.
+5. **Join Spectator** – Moves you to the spectator team.
+
+### Ammo Packs (AP)
+
+Ammo Packs are the currency for the Extra Items shop.
+
+| Source | Amount (configurable) |
+|--------|----------------------|
+| Connect | `StartingAmmoPacks` (default 0) |
+| Surviving a round as human | `RoundSurviveReward` (default 3) |
+| Zombie kills a human | `ZombieKillReward` (default 2) |
+
+Admins can grant AP with: `hzp_give_ap <player> <amount>`
+
+### Extra Items
+
+All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.jsonc`.
+
+| Item | Team | Default Price |
+|------|------|--------------|
+| Armor | Human | 3 AP |
+| HE Grenade | Human | 2 AP |
+| Flash Grenade | Human | 2 AP |
+| Smoke Grenade | Human | 2 AP |
+| Antidote (cure to human) | Zombie | 8 AP |
+| Zombie Madness (temporary invulnerability) | Zombie | 6 AP |
+| Multi-Jump (+1 extra jump, stackable) | Human | 4 AP |
+| Knife Blink (3 teleport charges, use `!blink`) | Human | 5 AP |
+
+### Configuration – HZPExtraItemsCFG.jsonc
+
+```jsonc
+{
+  "HZPExtraItemsCFG": {
+    "ArmorAmount": 100,           // Armor points given by Armor item
+    "MultijumpIncrement": 1,      // Extra jumps per purchase
+    "MultijumpMax": 3,            // Maximum extra jumps allowed
+    "MadnessDuration": 10.0,      // Zombie Madness duration (seconds)
+    "KnifeBlinkCharges": 3,       // Blink charges per purchase
+    "KnifeBlinkDistance": 300.0,  // Blink distance (engine units)
+    "KnifeBlinkCooldown": 2.0,    // Cooldown between blinks (seconds)
+    "StartingAmmoPacks": 0,       // AP given on connect
+    "RoundSurviveReward": 3,      // AP for surviving as human
+    "ZombieKillReward": 2,        // AP for zombie killing a human
+    "Items": [
+      { "Key": "armor",         "Name": "Armor (100 AP)",                       "Price": 3, "Enable": true, "Team": "Human"  },
+      { "Key": "he_grenade",    "Name": "HE Grenade",                           "Price": 2, "Enable": true, "Team": "Human"  },
+      { "Key": "flash_grenade", "Name": "Flash Grenade",                        "Price": 2, "Enable": true, "Team": "Human"  },
+      { "Key": "smoke_grenade", "Name": "Smoke Grenade",                        "Price": 2, "Enable": true, "Team": "Human"  },
+      { "Key": "antidote",      "Name": "Antidote (cure to human)",             "Price": 8, "Enable": true, "Team": "Zombie" },
+      { "Key": "zombie_madness","Name": "Zombie Madness (10s invulnerability)", "Price": 6, "Enable": true, "Team": "Zombie" },
+      { "Key": "multijump",     "Name": "Multi-Jump (+1 jump)",                 "Price": 4, "Enable": true, "Team": "Human"  },
+      { "Key": "knife_blink",   "Name": "Knife Blink (3 charges)",              "Price": 5, "Enable": true, "Team": "Human"  }
+    ]
+  }
+}
+```
+
+Items can be disabled by setting `"Enable": false`. Custom items can be added by extending the source code.
+
+---
+
+## Round-Start Weapons Menu
+
+Shown automatically at round start to eligible humans (when `GiveMenuOnRoundStart: true`).  
+Can also be opened via **Buy Weapons** in the main menu or `sw_buyweapons` command (once per round).
+
+### Configuration – HZPWeaponsCFG.jsonc
+
+```jsonc
+{
+  "HZPWeaponsCFG": {
+    // Enable the weapon selection menu system
+    "EnableWeaponsMenu": true,
+    // Show weapon menus to eligible humans at round start
+    "GiveMenuOnRoundStart": true,
+    // Allow players to re-open weapon menu via main menu / sw_buyweapons (once per round)
+    "AllowOpenFromGameMenu": true,
+    // Reserve ammo given to each weapon chosen from the menu
+    "ReserveAmmoAmount": 9999,
+    "PrimaryWeapons": [
+      { "Name": "AK-47",    "Classname": "weapon_ak47" },
+      { "Name": "M4A4",     "Classname": "weapon_m4a1" },
+      { "Name": "M4A1-S",   "Classname": "weapon_m4a1_silencer" },
+      { "Name": "AWP",      "Classname": "weapon_awp" },
+      { "Name": "FAMAS",    "Classname": "weapon_famas" },
+      { "Name": "Galil AR", "Classname": "weapon_galilar" },
+      { "Name": "SG 553",   "Classname": "weapon_sg556" },
+      { "Name": "AUG",      "Classname": "weapon_aug" }
+    ],
+    "SecondaryWeapons": [
+      { "Name": "Desert Eagle",  "Classname": "weapon_deagle" },
+      { "Name": "P250",          "Classname": "weapon_p250" },
+      { "Name": "USP-S",         "Classname": "weapon_usp_silencer" },
+      { "Name": "Glock-18",      "Classname": "weapon_glock" },
+      { "Name": "Dual Berettas", "Classname": "weapon_elite" }
+    ],
+    // Supported classnames: weapon_hegrenade, weapon_flashbang, weapon_smokegrenade, weapon_incgrenade, weapon_decoy
+    "DefaultGrenades": [
+      "weapon_hegrenade",
+      "weapon_flashbang",
+      "weapon_smokegrenade"
+    ]
+  }
+}
+```
+
+---
+
+## Manual Test Steps
+
+1. **Install** the plugin and start a CS2 server.
+2. **Main Menu**: Type `!menu` or `!zp` in chat, or run `hzp_menu` in console. Verify all 5 options appear.
+3. **Weapons Menu**: At round start (as a human) the weapons menu should auto-open. Also test via **Buy Weapons** in the main menu.
+4. **Extra Items Menu**: Type `!extras` or select **Buy Extra Items** from the main menu. Verify AP balance is shown and items match your team.
+5. **Give Ammo Packs**: Use `hzp_give_ap <yourname> 20` to grant 20 AP. Verify the target receives a chat notification.
+6. **Armor**: Buy Armor from the extra items menu. Verify armor increases in the HUD.
+7. **Grenades**: Buy HE/Flash/Smoke Grenade and verify the corresponding grenade is added to inventory.
+8. **Antidote**: As a zombie, buy Antidote. Verify you switch to CT team and become human.
+9. **Zombie Madness**: As a zombie, buy Zombie Madness. Have a human shoot you during the active window and verify you take no damage.
+10. **Multi-Jump**: Buy Multi-Jump as a human. Jump and press Space again in the air — verify you get an extra jump.
+11. **Knife Blink**: Buy Knife Blink. Type `!blink` to teleport forward. Verify charges decrease and cooldown is respected.
+12. **Unstuck**: Use the Unstuck option from the main menu while alive — verify you are teleported to a free position.
+13. **Join Spectator**: Use Join Spectator from the main menu — verify you move to the spectator team.
+14. **Zombie Class**: Use Choose Zombie Class from the main menu and select a class. Verify it takes effect after next respawn.
 
 
