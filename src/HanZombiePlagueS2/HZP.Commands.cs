@@ -51,30 +51,36 @@ public class HZPCommands
     {
         var CFG = _mainCFG.CurrentValue;
         _core.Command.RegisterCommand(CFG.ZombieClassCommand, SelectZombieClass, true);
-        _core.Command.RegisterCommand(CFG.AdminMenuItemCommand, UseItemMenu, true);
-        _core.Command.RegisterCommand("sw_buyweapons", BuyWeapons, true);
+        _logger.LogInformation("[HZP] Registered zombie class command: {Cmd}", CFG.ZombieClassCommand);
 
-        // Main game menu – chat triggers and console alias
-        _core.Command.RegisterCommand("!menu", OpenGameMenu, true);
-        _core.Command.RegisterCommand("!zp", OpenGameMenu, true);
+        _core.Command.RegisterCommand(CFG.AdminMenuItemCommand, UseItemMenu, true);
+        _logger.LogInformation("[HZP] Registered admin menu command: {Cmd}", CFG.AdminMenuItemCommand);
+
+        _core.Command.RegisterCommand("sw_buyweapons", BuyWeapons, true);
+        _logger.LogInformation("[HZP] Registered command: sw_buyweapons");
+
+        // Main game menu – register as base names so the framework maps !cmd / /cmd in chat
+        _core.Command.RegisterCommand("zp", OpenGameMenu, true);
+        _core.Command.RegisterCommand("menu", OpenGameMenu, true);
         _core.Command.RegisterCommand("hzp_menu", OpenGameMenu, true);
+        _logger.LogInformation("[HZP] Registered game menu commands: zp, menu, hzp_menu (chat: !zp /zp !menu /menu)");
 
         // Extra items menu shortcut
-        _core.Command.RegisterCommand("!extras", OpenExtraItemsMenu, true);
+        _core.Command.RegisterCommand("extras", OpenExtraItemsMenu, true);
+        _logger.LogInformation("[HZP] Registered extra items command: extras (chat: !extras /extras)");
 
         // Knife blink activation
-        _core.Command.RegisterCommand("!blink", KnifeBlink, true);
+        _core.Command.RegisterCommand("blink", KnifeBlink, true);
+        _logger.LogInformation("[HZP] Registered blink command: blink (chat: !blink /blink)");
 
-        // Trip mine – plant
+        // Trip mine – plant / take back
         _core.Command.RegisterCommand("sw_plant", PlantMine, true);
-        _core.Command.RegisterCommand("!plant", PlantMine, true);
-
-        // Trip mine – take back
         _core.Command.RegisterCommand("sw_take", TakeMine, true);
-        _core.Command.RegisterCommand("!take", TakeMine, true);
+        _logger.LogInformation("[HZP] Registered trip mine commands: sw_plant, sw_take");
 
-        // Admin: give ammo packs for testing  hzp_give_ap <target_name|#userid> <amount>
+        // Admin: give ammo packs  hzp_give_ap <target_name|#userid> <amount>
         _core.Command.RegisterCommand("hzp_give_ap", GiveAmmoPacks, true);
+        _logger.LogInformation("[HZP] Registered admin command: hzp_give_ap");
     }
     public void SelectZombieClass(ICommandContext context)
     {

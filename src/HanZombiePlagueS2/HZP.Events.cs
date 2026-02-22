@@ -40,6 +40,7 @@ public partial class HZPEvents
     private readonly HanZombiePlagueAPI _api;
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
+    private readonly HZPDatabase _database;
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -50,7 +51,8 @@ public partial class HZPEvents
         IOptionsMonitor<HZPSpecialClassCFG> specialClassCFG,
         HanZombiePlagueAPI api,
         HZPExtraItemsMenu extraItemsMenu,
-        IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG)
+        IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
+        HZPDatabase database)
     {
         _core = core;
         _logger = logger;
@@ -67,6 +69,7 @@ public partial class HZPEvents
         _api = api;
         _extraItemsMenu = extraItemsMenu;
         _extraItemsCFG = extraItemsCFG;
+        _database = database;
     }
 
     public void HookEvents()
@@ -1006,11 +1009,31 @@ public partial class HZPEvents
 
         _globals.IsZombie[id] = _globals.GameStart;
 
-        // Give starting ammo packs to the new player
+        // Load AP from DB (async) or fall back to starting packs
+        var player = _core.PlayerManager.GetPlayer(id);
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
-        if (startingAP > 0)
+        if (player != null && player.IsValid && !player.IsFakeClient)
+        {
+            ulong steamId = player.SteamID;
+            _ = Task.Run(async () =>
+            {
+                int? savedAP = await _database.LoadAmmoPacksAsync(steamId);
+                _core.Scheduler.NextWorldUpdate(() =>
+                {
+                    // Guard: player may have disconnected before the DB responded
+                    var current = _core.PlayerManager.GetPlayer(id);
+                    if (current == null || !current.IsValid) return;
+                    if (savedAP.HasValue)
+                        _extraItemsMenu.SetAmmoPacks(id, savedAP.Value);
+                    else if (startingAP > 0)
+                        _extraItemsMenu.AddAmmoPacks(id, startingAP);
+                });
+            });
+        }
+        else if (startingAP > 0)
+        {
             _extraItemsMenu.AddAmmoPacks(id, startingAP);
-
+        }
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)
@@ -1021,6 +1044,15 @@ public partial class HZPEvents
         }
 
         var id = @event.PlayerId;
+
+        // Persist AP to DB before clearing in-memory state
+        var player = _core.PlayerManager.GetPlayer(id);
+        if (player != null && player.IsValid && !player.IsFakeClient)
+        {
+            ulong steamId = player.SteamID;
+            int currentAP = _extraItemsMenu.GetAmmoPacks(id);
+            _ = _database.SaveAmmoPacksAsync(steamId, currentAP);
+        }
 
         _helpers.ClearPlayerBurn(id);
         _globals.IsZombie.Remove(id);
@@ -1067,7 +1099,6 @@ public partial class HZPEvents
             }
         });
 
-        var player = _core.PlayerManager.GetPlayer(id);
         if (player != null && player.IsValid)
         {
             _helpers.RemoveGlow(player);
