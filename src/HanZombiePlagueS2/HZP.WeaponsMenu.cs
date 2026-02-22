@@ -44,25 +44,9 @@ public class HZPWeaponsMenu
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
             return false;
 
-        var id = player.PlayerID;
-
-        _globals.IsZombie.TryGetValue(id, out bool isZombie);
-        if (isZombie) return false;
-
-        _globals.IsSurvivor.TryGetValue(id, out bool isSurvivor);
-        if (isSurvivor) return false;
-
-        _globals.IsSniper.TryGetValue(id, out bool isSniper);
-        if (isSniper) return false;
-
-        _globals.IsNemesis.TryGetValue(id, out bool isNemesis);
-        if (isNemesis) return false;
-
-        _globals.IsAssassin.TryGetValue(id, out bool isAssassin);
-        if (isAssassin) return false;
-
-        _globals.IsHero.TryGetValue(id, out bool isHero);
-        if (isHero) return false;
+        // Only CT team players are eligible
+        if (controller.Team != Team.CT)
+            return false;
 
         return true;
     }
@@ -76,14 +60,6 @@ public class HZPWeaponsMenu
         if (!IsEligibleHuman(player))
         {
             _helpers.SendChatT(player, "WeaponsMenuNotEligible");
-            return;
-        }
-
-        var id = player.PlayerID;
-        _globals.CanBuyWeaponsThisRound.TryGetValue(id, out bool canBuy);
-        if (!canBuy)
-        {
-            _helpers.SendChatT(player, "WeaponsMenuAlreadyUsed");
             return;
         }
 

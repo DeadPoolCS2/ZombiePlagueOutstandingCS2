@@ -1,8 +1,8 @@
 {
 	"ServerInfoHotReload": "配置文件 HZPMainCFG 已经热重载更新 !",
     "ServerGameBegin": "游戏将在 1 秒后重新开始",
-    "ServerGameHumanWin": "人类胜利",
-    "ServerGameZombieWin": "僵尸胜利",
+    "ServerGameHumanWin": "人类胜利 !!!",
+    "ServerGameZombieWin": "僵尸胜利 !!!",
     "GameInfoBecomeHero": "玩家 {0} 成为了英雄!!",
     "GameInfoBecomeSurvivor": "玩家 {0} 成为了幸存者!!",
     "GameInfoBecomeSniper": "玩家 {0} 成为了狙击手!!",
@@ -168,5 +168,8 @@
     // ── 复活令牌 ───────────────────────────────────────────────────────────
     "ExtraItemsReviveTokenSuccess": "复活令牌已购买！本轮死亡时将自动复活一次。剩余弹药包：{0}。",
     "ExtraItemsReviveTokenAlready": "你已拥有激活的复活令牌！",
-    "ReviveTokenUsed": "复活令牌已激活！你已被复活。"
+    "ReviveTokenUsed": "复活令牌已激活！你已被复活。",
+
+    // ── 新回合开始公告 ─────────────────────────────────────────────────────
+    "RoundStartAnnounce": "新回合开始。| 你的积分：{0} | 在线玩家：{1}"
 }

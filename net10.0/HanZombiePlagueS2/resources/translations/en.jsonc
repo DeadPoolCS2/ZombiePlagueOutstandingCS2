@@ -1,8 +1,8 @@
 {
     "ServerInfoHotReload": "Configuration file HZPMainCFG has been hot reloaded!",
     "ServerGameBegin": "The game will restart in 1 second",
-    "ServerGameHumanWin": "Humans Win",
-    "ServerGameZombieWin": "Zombies Win",
+    "ServerGameHumanWin": "Humans WIN !!!",
+    "ServerGameZombieWin": "Zombies WIN !!!",
     "GameInfoBecomeHero": "Player {0} has become a Hero!!",
     "GameInfoBecomeSurvivor": "Player {0} has become a Survivor!!",
     "GameInfoBecomeSniper": "Player {0} has become a Sniper!!",
@@ -168,6 +168,9 @@
     // ── Revive Token ──────────────────────────────────────────────────────
     "ExtraItemsReviveTokenSuccess": "Revive Token purchased! You will automatically respawn once if you die this round. Ammo Packs remaining: {0}.",
     "ExtraItemsReviveTokenAlready": "You already have a Revive Token active!",
-    "ReviveTokenUsed": "Your Revive Token activated! You have been revived."
+    "ReviveTokenUsed": "Your Revive Token activated! You have been revived.",
+
+    // ── Round start announcement ───────────────────────────────────────────
+    "RoundStartAnnounce": "New round begins. | Your credits: {0} | Players connected: {1}"
 
 }
