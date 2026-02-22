@@ -30,13 +30,15 @@ public partial class HZPServices
     private readonly HZPGameMode _gameMode;
 
     private readonly HanZombiePlagueAPI _api;
+    private readonly HZPWeaponsMenu _weaponsMenu;
     public HZPServices(ISwiftlyCore core, ILogger<HZPServices> logger,
         HZPGlobals globals, HZPHelpers helpers, 
         IOptionsMonitor<HZPMainCFG> mainCFG,
         IOptionsMonitor<HZPZombieClassCFG> zombieClassCFG,
         PlayerZombieState zombieState, HZPGameMode gameMode,
         IOptionsMonitor<HZPSpecialClassCFG> specialClassCFG,
-        HanZombiePlagueAPI api)
+        HanZombiePlagueAPI api,
+        HZPWeaponsMenu weaponsMenu)
     {
         _core = core;
         _logger = logger;
@@ -48,6 +50,7 @@ public partial class HZPServices
         _gameMode = gameMode;
         _specialClassCFG = specialClassCFG;
         _api = api;
+        _weaponsMenu = weaponsMenu;
     }
 
     public void SelectMotherZombie(int count)
@@ -524,6 +527,12 @@ public partial class HZPServices
             CheckEndTimer();
             SwitchMode();
             _helpers.SetAmbSounds(CFG, _globals);
+
+            _core.Scheduler.DelayBySeconds(0.5f, () =>
+            {
+                if (_globals.GameStart)
+                    _weaponsMenu.ShowPrimaryMenuToAllEligible();
+            });
 
             var modeVox = _gameMode.SelectModeVox();
             if (_globals.RoundVoxGroup != null && !string.IsNullOrEmpty(modeVox))

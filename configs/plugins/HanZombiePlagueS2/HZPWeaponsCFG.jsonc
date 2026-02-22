@@ -1,0 +1,39 @@
+{
+  "HZPWeaponsCFG": {
+    // Enable the weapon selection menu system
+    "EnableWeaponsMenu": true,
+    // Show weapon menus to eligible humans at round start
+    "GiveMenuOnRoundStart": true,
+    // Allow players to re-open weapon menu via sw_buyweapons command (once per round)
+    "AllowOpenFromGameMenu": true,
+    // Reserve ammo given to each weapon chosen from the menu
+    "ReserveAmmoAmount": 9999,
+    // Primary weapon list shown in primary weapon menu
+    "PrimaryWeapons": [
+      { "Name": "AK-47",     "Classname": "weapon_ak47" },
+      { "Name": "M4A4",      "Classname": "weapon_m4a1" },
+      { "Name": "M4A1-S",    "Classname": "weapon_m4a1_silencer" },
+      { "Name": "AWP",       "Classname": "weapon_awp" },
+      { "Name": "FAMAS",     "Classname": "weapon_famas" },
+      { "Name": "Galil AR",  "Classname": "weapon_galilar" },
+      { "Name": "SG 553",    "Classname": "weapon_sg556" },
+      { "Name": "AUG",       "Classname": "weapon_aug" }
+    ],
+    // Secondary weapon list shown in secondary weapon menu
+    "SecondaryWeapons": [
+      { "Name": "Desert Eagle", "Classname": "weapon_deagle" },
+      { "Name": "P250",         "Classname": "weapon_p250" },
+      { "Name": "USP-S",        "Classname": "weapon_usp_silencer" },
+      { "Name": "Glock-18",     "Classname": "weapon_glock" },
+      { "Name": "Dual Berettas","Classname": "weapon_elite" }
+    ],
+    // Default grenades given after secondary selection.
+    // Supported classnames: weapon_hegrenade, weapon_flashbang, weapon_smokegrenade,
+    //                       weapon_incgrenade, weapon_decoy
+    "DefaultGrenades": [
+      "weapon_hegrenade",
+      "weapon_flashbang",
+      "weapon_smokegrenade"
+    ]
+  }
+}

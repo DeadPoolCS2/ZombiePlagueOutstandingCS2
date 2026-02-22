@@ -23,11 +23,13 @@ public class HZPCommands
     private readonly HZPZombieClassMenu _hZPZombieClassMenu;
     private readonly HZPAdminItemMenu _hZPAdminItemMenu;
     private readonly HZPHelpers _helpers;
+    private readonly HZPWeaponsMenu _weaponsMenu;
 
     public HZPCommands(ISwiftlyCore core, ILogger<HZPCommands> logger,
         HZPServices services, IOptionsMonitor<HZPMainCFG> mainCFG,
         HZPGlobals globals, HZPAdminItemMenu hZPAdminItemMenu,
-        HZPZombieClassMenu hZPZombieClassMenu, HZPHelpers helpers)
+        HZPZombieClassMenu hZPZombieClassMenu, HZPHelpers helpers,
+        HZPWeaponsMenu weaponsMenu)
     {
         _core = core;
         _logger = logger;
@@ -37,14 +39,15 @@ public class HZPCommands
         _hZPAdminItemMenu = hZPAdminItemMenu;
         _hZPZombieClassMenu = hZPZombieClassMenu;
         _helpers = helpers;
+        _weaponsMenu = weaponsMenu;
     }
 
     public void MenuCommands()
     {
         var CFG = _mainCFG.CurrentValue;
         _core.Command.RegisterCommand(CFG.ZombieClassCommand, SelectZombieClass, true);
-
         _core.Command.RegisterCommand(CFG.AdminMenuItemCommand, UseItemMenu, true);
+        _core.Command.RegisterCommand("sw_buyweapons", BuyWeapons, true);
     }
     public void SelectZombieClass(ICommandContext context)
     {
@@ -71,6 +74,15 @@ public class HZPCommands
             
 
         _hZPAdminItemMenu.OpenAdminItemMenu(player);
+    }
+
+    public void BuyWeapons(ICommandContext context)
+    {
+        var player = context.Sender;
+        if (player == null || !player.IsValid)
+            return;
+
+        _weaponsMenu.OpenWeaponsMenuIfAllowed(player);
     }
 
     private bool HasAdminMenuPermission(IPlayer player)

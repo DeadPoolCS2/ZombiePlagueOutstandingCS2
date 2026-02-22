@@ -80,6 +80,13 @@
     "AssassinMode": "Assassin Mode",
     "SniperMode": "Sniper Mode",
     "AssassinVSSniper": "Assassin VS Sniper",
-    "HeroMode": "Hero Mode"
+    "HeroMode": "Hero Mode",
+
+    "WeaponMenuPrimaryTitle": "Primary Weapon Selection",
+    "WeaponMenuPrimarySelect": "Choose your primary weapon for this round",
+    "WeaponMenuSecondaryTitle": "Secondary Weapon Selection",
+    "WeaponMenuSecondarySelect": "Choose your secondary weapon for this round",
+    "WeaponsMenuNotEligible": "You are not eligible to use the weapon menu.",
+    "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!"
 
 }
