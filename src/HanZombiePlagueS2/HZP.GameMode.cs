@@ -69,6 +69,11 @@ public class HZPGameMode
         return GameModeType.Normal;
     }
 
+    public void SetMode(GameModeType mode)
+    {
+        CurrentMode = mode;
+    }
+
     public void ResetMode()
     {
         CurrentMode = GameModeType.Normal;
