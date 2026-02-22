@@ -1094,10 +1094,30 @@ public partial class HZPHelpers
     public string T(IPlayer? player, string key, params object[] args)
     {
         if (player == null || !player.IsValid)
-            return string.Format(key, args);
+        {
+            if (args.Length == 0)
+                return key;
+            try
+            {
+                return string.Format(key, args);
+            }
+            catch (FormatException)
+            {
+                _logger.LogWarning("Translation key '{Key}' produced an invalid format string (args count: {Count}). Returning raw string.", key, args.Length);
+                return key;
+            }
+        }
 
         var localizer = _core.Translation.GetPlayerLocalizer(player);
-        return localizer[key, args];
+        try
+        {
+            return localizer[key, args];
+        }
+        catch (FormatException)
+        {
+            _logger.LogWarning("Translation key '{Key}' produced an invalid format string for player '{Player}' (args count: {Count}). Returning raw localized string.", key, player.Name, args.Length);
+            return localizer[key];
+        }
     }
 
     public void CheckGrenadeSpawned(CEntityInstance entity)

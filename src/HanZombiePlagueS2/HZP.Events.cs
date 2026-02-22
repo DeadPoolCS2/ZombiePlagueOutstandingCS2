@@ -302,7 +302,7 @@ public partial class HZPEvents
                     {
                         _extraItemsMenu.AddAmmoPacks(id, reward);
                         player.SendMessage(MessageType.Chat,
-                            string.Format(_helpers.T(player, "APRoundSurviveReward"), reward,
+                            _helpers.T(player, "APRoundSurviveReward", reward,
                                 _extraItemsMenu.GetAmmoPacks(id)));
                     }
                 }
@@ -622,7 +622,7 @@ public partial class HZPEvents
                     {
                         _extraItemsMenu.AddAmmoPacks(aId, reward);
                         attacker.SendMessage(MessageType.Chat,
-                            string.Format(_helpers.T(attacker, "APZombieKillReward"), reward,
+                            _helpers.T(attacker, "APZombieKillReward", reward,
                                 _extraItemsMenu.GetAmmoPacks(aId)));
                     }
                 }
