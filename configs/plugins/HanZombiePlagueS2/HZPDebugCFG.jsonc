@@ -1,10 +1,11 @@
 {
+  // DEPRECATED: This file is no longer used at runtime.
+  // Debug and chat prefix settings have been moved into HZPMainCFG.jsonc
+  // (ChatPrefix, EnableCommandDebugLogs, EnableCommandDebugChatReply).
+  // You can safely delete this file.
   "HZPDebugCFG": {
-    // When true, command invocations are logged to the server console.
     "EnableCommandDebugLogs": false,
-    // When true, command invocations produce a chat reply visible to the invoking player.
     "EnableCommandDebugChatReply": false,
-    // Prefix prepended to plugin chat messages (e.g. confirmation replies, debug replies).
     "ChatPrefix": "[HZP]"
   }
 }

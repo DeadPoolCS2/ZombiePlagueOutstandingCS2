@@ -1,14 +1,15 @@
 {
+  // DEPRECATED: This file is no longer used at runtime.
+  // Database connection settings have been moved to HZPMainCFG.jsonc (AmmoPacksEnabled,
+  // AmmoPacksConnectionName, AmmoPacksTableName) and the shared configs/database.jsonc
+  // connection registry. You can safely delete this file.
   "HZPDatabaseCFG": {
-    // Set to true to enable MySQL persistence for Ammo Packs.
-    // When false (default), AP is stored in memory only and resets on server restart.
     "Enabled": false,
     "Host": "127.0.0.1",
     "Port": 3306,
     "Database": "zombieplague",
     "User": "root",
     "Password": "",
-    // Table used to store per-player ammo pack balances.
     "TableName": "hzp_ammopacks"
   }
 }

@@ -19,7 +19,6 @@ public class HZPCommands
     private readonly ISwiftlyCore _core;
     private readonly HZPServices _services;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
-    private readonly IOptionsMonitor<HZPDebugCFG> _debugCFG;
     private readonly HZPGlobals _globals;
     private readonly HZPZombieClassMenu _hZPZombieClassMenu;
     private readonly HZPAdminItemMenu _hZPAdminItemMenu;
@@ -30,7 +29,6 @@ public class HZPCommands
 
     public HZPCommands(ISwiftlyCore core, ILogger<HZPCommands> logger,
         HZPServices services, IOptionsMonitor<HZPMainCFG> mainCFG,
-        IOptionsMonitor<HZPDebugCFG> debugCFG,
         HZPGlobals globals, HZPAdminItemMenu hZPAdminItemMenu,
         HZPZombieClassMenu hZPZombieClassMenu, HZPHelpers helpers,
         HZPWeaponsMenu weaponsMenu, HZPGameMenu gameMenu,
@@ -40,7 +38,6 @@ public class HZPCommands
         _logger = logger;
         _services = services;
         _mainCFG = mainCFG;
-        _debugCFG = debugCFG;
         _globals = globals;
         _hZPAdminItemMenu = hZPAdminItemMenu;
         _hZPZombieClassMenu = hZPZombieClassMenu;
@@ -216,7 +213,7 @@ public class HZPCommands
     }
 
     private string ChatMsg(string message) =>
-        $"{_debugCFG.CurrentValue.ChatPrefix} {message}";
+        _helpers.ChatMsg(message);
 
     private bool HasAdminMenuPermission(IPlayer player)
     {
