@@ -85,6 +85,10 @@ public class HZPGlobals
     /// <summary>True while a zombie has an active Madness (invulnerability) buff.</summary>
     public Dictionary<int, bool> ZombieMadnessActive = new Dictionary<int, bool>();
 
+    // ── Multijump input tracking ──────────────────────────────────────────────
+    /// <summary>True if the player had the jump (Space) button pressed in the previous tick.</summary>
+    public Dictionary<int, bool> PrevJumpPressed = new Dictionary<int, bool>();
+
 }
 public class ZombieRegenState
 {
