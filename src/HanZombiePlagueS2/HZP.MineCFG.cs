@@ -1,9 +1,8 @@
 namespace HanZombiePlagueS2;
 
 /// <summary>
-/// Trip mine configuration for HanZombiePlagueS2, using field naming compatible with
-/// HanLaserTripmineS2's HanMineS2.jsonc format where possible.
-/// Loaded from configs/plugins/HanZombiePlagueS2/HanMineS2.jsonc.
+/// Visual and physics settings for the laser trip mine, embedded in HZPMainCFG.jsonc under the "Mine" key.
+/// Combat settings (damage, radius, beam length, etc.) live in HZPExtraItemsCFG.jsonc.
 /// </summary>
 public class HanMineS2CFG
 {
