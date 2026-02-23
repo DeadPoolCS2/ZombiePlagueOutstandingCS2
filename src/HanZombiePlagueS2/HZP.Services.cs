@@ -547,12 +547,6 @@ public partial class HZPServices
             SwitchMode();
             _helpers.SetAmbSounds(CFG, _globals);
 
-            _core.Scheduler.DelayBySeconds(0.5f, () =>
-            {
-                if (_globals.GameStart)
-                    _weaponsMenu.ShowPrimaryMenuToAllEligible();
-            });
-
             var modeVox = _gameMode.SelectModeVox();
             if (_globals.RoundVoxGroup != null && !string.IsNullOrEmpty(modeVox))
             {

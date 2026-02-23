@@ -89,6 +89,7 @@
     "WeaponsMenuNotEligible": "You are not eligible to use the weapon menu.",
     "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!",
     "WeaponsMenuDisabledInMode": "The buy weapons menu is not available in this game mode.",
+    "WeaponsMenuInfectionStarted": "The weapon selection menu is only available before infection begins.",
 
     // ── Main Game Menu ─────────────────────────────────────────────────────
     "GameMenuTitle": "ZP Game Menu",
@@ -189,6 +190,7 @@
     "AdminMenuStartGameMode": "Start Game Mode (use at roundstart)",
     "AdminMenuNoTargets": "No valid targets available.",
     "AdminMenuModeActivated": "Game mode {0} activated!",
+    "AdminMenuModeInfectionStarted": "Custom game mode can only be started before infection begins!",
     "AdminMenuToggledZombieToAll": "Admin infected player {0}!",
     "AdminMenuToggledHumanToAll": "Admin made player {0} human!",
     "AdminMenuMadeNemesisToAll": "Admin made player {0} a Nemesis!",

@@ -180,6 +180,13 @@ public class HZPAdminItemMenu
     {
         if (admin == null || !admin.IsValid) return;
 
+        // Block mode selection after infection has already started this round.
+        if (_globals.InfectionStartedThisRound)
+        {
+            _helpers.SendChatT(admin, "AdminMenuModeInfectionStarted");
+            return;
+        }
+
         IMenuAPI menu = _menuhelper.CreateMenu(_helpers.T(admin, "AdminMenuStartGameMode"));
 
         var modes = new (GameModeType type, string labelKey)[]
@@ -212,6 +219,7 @@ public class HZPAdminItemMenu
                 _core.Scheduler.NextTick(() =>
                 {
                     if (!clicker.IsValid) return;
+                    _globals.AdminForcedModeThisRound = true;
                     _gameMode.SetMode(capturedType);
                     _globals.GameStart = true;
                     _services.SwitchMode();

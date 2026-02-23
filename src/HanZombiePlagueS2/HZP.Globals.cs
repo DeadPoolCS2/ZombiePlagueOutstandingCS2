@@ -30,6 +30,13 @@ public class HZPGlobals
 
     public CancellationTokenSource? g_hRoundEndTimer { get; set; } = null;
     public CancellationTokenSource? g_hCountdown { get; set; } = null;
+    public CancellationTokenSource? g_hAutoSaveTimer { get; set; } = null;
+
+    // ── Round-state flags ─────────────────────────────────────────────────────
+    /// <summary>True once SwitchMode() has been called this round (infection started).</summary>
+    public bool InfectionStartedThisRound { get; set; } = false;
+    /// <summary>True when an admin forced a custom mode this round.</summary>
+    public bool AdminForcedModeThisRound { get; set; } = false;
 
     public Dictionary<int, ZombieIdleState> g_ZombieIdleStates = new();
     public CancellationTokenSource? g_IdleTimer { get; set; } = null;

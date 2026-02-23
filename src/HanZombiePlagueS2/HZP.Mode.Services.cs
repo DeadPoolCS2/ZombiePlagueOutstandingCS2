@@ -52,6 +52,7 @@ public partial class HZPServices
     }
     public void SwitchMode()
     {
+        _globals.InfectionStartedThisRound = true;
         var mode = _gameMode.CurrentMode;
         switch (mode)
         {

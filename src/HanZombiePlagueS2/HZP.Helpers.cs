@@ -53,6 +53,14 @@ public partial class HZPHelpers
         return $"{prefix} {message}";
     }
 
+    /// <summary>Sends a localised center message to a single player.</summary>
+    public void SendCenterT(IPlayer player, string key, params object[] args)
+    {
+        if (player == null || !player.IsValid || player.IsFakeClient)
+            return;
+        player.SendMessage(MessageType.Center, T(player, key, args));
+    }
+
     /// <summary>Sends a prefixed localised chat message to a single player.</summary>
     public void SendChatT(IPlayer player, string key, params object[] args)
     {
