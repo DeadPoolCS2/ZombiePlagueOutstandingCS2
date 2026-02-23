@@ -165,7 +165,7 @@ public class HZPExtraItemsMenu
 
         menu.AddOption(new TextMenuOption(
             HtmlGradient.GenerateGradientText(
-                string.Format(_helpers.T(player, "ExtraItemsMenuAP"), ap),
+                _helpers.T(player, "ExtraItemsMenuAP", ap),
                 DrawingColor.Gold, DrawingColor.LightGoldenrodYellow, DrawingColor.Gold),
             updateIntervalMs: 800, pauseIntervalMs: 100)
         {
