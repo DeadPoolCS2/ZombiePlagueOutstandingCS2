@@ -18,6 +18,7 @@ public class HZPWeaponsMenu
     private readonly HZPHelpers _helpers;
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPWeaponsCFG> _weaponsCFG;
+    private readonly HZPGameMode _gameMode;
 
     public HZPWeaponsMenu(
         ISwiftlyCore core,
@@ -25,7 +26,8 @@ public class HZPWeaponsMenu
         HZPGlobals globals,
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
-        IOptionsMonitor<HZPWeaponsCFG> weaponsCFG)
+        IOptionsMonitor<HZPWeaponsCFG> weaponsCFG,
+        HZPGameMode gameMode)
     {
         _core = core;
         _logger = logger;
@@ -33,6 +35,18 @@ public class HZPWeaponsMenu
         _helpers = helpers;
         _menuHelper = menuHelper;
         _weaponsCFG = weaponsCFG;
+        _gameMode = gameMode;
+    }
+
+    /// <summary>Returns true only in Normal/NormalInfection/MultiInfection modes where a
+    /// free weapon selection makes sense. Special modes (Survivor, Sniper, etc.) give
+    /// weapons automatically, so the buy-weapons menu is suppressed.</summary>
+    private bool IsWeaponMenuAllowedForCurrentMode()
+    {
+        var mode = _gameMode.CurrentMode;
+        return mode == GameModeType.Normal
+            || mode == GameModeType.NormalInfection
+            || mode == GameModeType.MultiInfection;
     }
 
     public bool IsEligibleHuman(IPlayer player)
@@ -44,25 +58,9 @@ public class HZPWeaponsMenu
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
             return false;
 
-        var id = player.PlayerID;
-
-        _globals.IsZombie.TryGetValue(id, out bool isZombie);
-        if (isZombie) return false;
-
-        _globals.IsSurvivor.TryGetValue(id, out bool isSurvivor);
-        if (isSurvivor) return false;
-
-        _globals.IsSniper.TryGetValue(id, out bool isSniper);
-        if (isSniper) return false;
-
-        _globals.IsNemesis.TryGetValue(id, out bool isNemesis);
-        if (isNemesis) return false;
-
-        _globals.IsAssassin.TryGetValue(id, out bool isAssassin);
-        if (isAssassin) return false;
-
-        _globals.IsHero.TryGetValue(id, out bool isHero);
-        if (isHero) return false;
+        // Only CT team players are eligible
+        if (controller.Team != Team.CT)
+            return false;
 
         return true;
     }
@@ -73,17 +71,16 @@ public class HZPWeaponsMenu
         if (!CFG.EnableWeaponsMenu || !CFG.AllowOpenFromGameMenu)
             return;
 
-        if (!IsEligibleHuman(player))
+        // Disable buy-weapons in special game modes
+        if (!IsWeaponMenuAllowedForCurrentMode())
         {
-            _helpers.SendChatT(player, "WeaponsMenuNotEligible");
+            _helpers.SendChatT(player, "WeaponsMenuDisabledInMode");
             return;
         }
 
-        var id = player.PlayerID;
-        _globals.CanBuyWeaponsThisRound.TryGetValue(id, out bool canBuy);
-        if (!canBuy)
+        if (!IsEligibleHuman(player))
         {
-            _helpers.SendChatT(player, "WeaponsMenuAlreadyUsed");
+            _helpers.SendChatT(player, "WeaponsMenuNotEligible");
             return;
         }
 
@@ -94,6 +91,9 @@ public class HZPWeaponsMenu
     {
         var CFG = _weaponsCFG.CurrentValue;
         if (!CFG.EnableWeaponsMenu || !CFG.GiveMenuOnRoundStart)
+            return;
+
+        if (!IsWeaponMenuAllowedForCurrentMode())
             return;
 
         var allPlayers = _core.PlayerManager.GetAllPlayers();

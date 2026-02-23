@@ -1,8 +1,8 @@
 {
 	"ServerInfoHotReload": "配置文件 HZPMainCFG 已经热重载更新 !",
     "ServerGameBegin": "游戏将在 1 秒后重新开始",
-    "ServerGameHumanWin": "人类胜利",
-    "ServerGameZombieWin": "僵尸胜利",
+    "ServerGameHumanWin": "人类胜利 !!!",
+    "ServerGameZombieWin": "僵尸胜利 !!!",
     "GameInfoBecomeHero": "玩家 {0} 成为了英雄!!",
     "GameInfoBecomeSurvivor": "玩家 {0} 成为了幸存者!!",
     "GameInfoBecomeSniper": "玩家 {0} 成为了狙击手!!",
@@ -88,6 +88,7 @@
     "WeaponMenuSecondarySelect": "选择本轮使用的副武器",
     "WeaponsMenuNotEligible": "你当前无法使用武器选择菜单。",
     "WeaponsMenuAlreadyUsed": "你本轮已经使用过武器选择菜单了！",
+    "WeaponsMenuDisabledInMode": "当前游戏模式中无法使用购买武器菜单。",
 
     // ── 主游戏菜单 ─────────────────────────────────────────────────────────
     "GameMenuTitle": "ZP 游戏菜单",
@@ -97,6 +98,7 @@
     "GameMenuZombieClass": "选择僵尸职业",
     "GameMenuUnstuck": "解除卡位",
     "GameMenuJoinSpectator": "加入观察者",
+    "GameMenuAdminMenu": "管理员菜单",
 
     // ── 解除卡位 ───────────────────────────────────────────────────────────
     "UnstuckMustBeAlive": "必须存活才能使用解除卡位功能。",
@@ -168,5 +170,26 @@
     // ── 复活令牌 ───────────────────────────────────────────────────────────
     "ExtraItemsReviveTokenSuccess": "复活令牌已购买！本轮死亡时将自动复活一次。剩余弹药包：{0}。",
     "ExtraItemsReviveTokenAlready": "你已拥有激活的复活令牌！",
-    "ReviveTokenUsed": "复活令牌已激活！你已被复活。"
+    "ReviveTokenUsed": "复活令牌已激活！你已被复活。",
+
+    // ── 新回合开始公告 ─────────────────────────────────────────────────────
+    "RoundStartAnnounce": "新回合开始。| 你的积分：{0} | 在线玩家：{1}",
+
+    // ── 管理员菜单 ─────────────────────────────────────────────────────────
+    "AdminMenuMakeZombieHuman": "变为僵尸/人类",
+    "AdminMenuMakeNemesis": "变为复仇之神",
+    "AdminMenuMakeAssassin": "变为暗杀者",
+    "AdminMenuMakeSurvivor": "变为幸存者",
+    "AdminMenuMakeSniper": "变为狙击手",
+    "AdminMenuRespawnSomeone": "复活玩家",
+    "AdminMenuStartGameMode": "启动游戏模式（在回合开始时使用）",
+    "AdminMenuNoTargets": "没有可选目标。",
+    "AdminMenuModeActivated": "游戏模式 {0} 已激活！",
+    "AdminMenuToggledZombieToAll": "管理员将玩家 {0} 感染了！",
+    "AdminMenuToggledHumanToAll": "管理员将玩家 {0} 变为人类！",
+    "AdminMenuMadeNemesisToAll": "管理员将玩家 {0} 变为复仇之神！",
+    "AdminMenuMadeAssassinToAll": "管理员将玩家 {0} 变为暗杀者！",
+    "AdminMenuMadeSurvivorToAll": "管理员将玩家 {0} 变为幸存者！",
+    "AdminMenuMadeSniperToAll": "管理员将玩家 {0} 变为狙击手！",
+    "AdminMenuRespawnedToAll": "管理员复活了玩家 {0}！"
 }

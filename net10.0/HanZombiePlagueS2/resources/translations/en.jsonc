@@ -1,8 +1,8 @@
 {
     "ServerInfoHotReload": "Configuration file HZPMainCFG has been hot reloaded!",
     "ServerGameBegin": "The game will restart in 1 second",
-    "ServerGameHumanWin": "Humans Win",
-    "ServerGameZombieWin": "Zombies Win",
+    "ServerGameHumanWin": "Humans WIN !!!",
+    "ServerGameZombieWin": "Zombies WIN !!!",
     "GameInfoBecomeHero": "Player {0} has become a Hero!!",
     "GameInfoBecomeSurvivor": "Player {0} has become a Survivor!!",
     "GameInfoBecomeSniper": "Player {0} has become a Sniper!!",
@@ -88,6 +88,7 @@
     "WeaponMenuSecondarySelect": "Choose your secondary weapon for this round",
     "WeaponsMenuNotEligible": "You are not eligible to use the weapon menu.",
     "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!",
+    "WeaponsMenuDisabledInMode": "The buy weapons menu is not available in this game mode.",
 
     // ── Main Game Menu ─────────────────────────────────────────────────────
     "GameMenuTitle": "ZP Game Menu",
@@ -97,6 +98,7 @@
     "GameMenuZombieClass": "Choose Zombie Class",
     "GameMenuUnstuck": "Unstuck",
     "GameMenuJoinSpectator": "Join Spectator",
+    "GameMenuAdminMenu": "Admin Menu",
 
     // ── Unstuck ────────────────────────────────────────────────────────────
     "UnstuckMustBeAlive": "You must be alive to use Unstuck.",
@@ -168,6 +170,27 @@
     // ── Revive Token ──────────────────────────────────────────────────────
     "ExtraItemsReviveTokenSuccess": "Revive Token purchased! You will automatically respawn once if you die this round. Ammo Packs remaining: {0}.",
     "ExtraItemsReviveTokenAlready": "You already have a Revive Token active!",
-    "ReviveTokenUsed": "Your Revive Token activated! You have been revived."
+    "ReviveTokenUsed": "Your Revive Token activated! You have been revived.",
+
+    // ── Round start announcement ───────────────────────────────────────────
+    "RoundStartAnnounce": "New round begins. | Your credits: {0} | Players connected: {1}",
+
+    // ── Admin Menu ────────────────────────────────────────────────────────
+    "AdminMenuMakeZombieHuman": "Make Zombie/Human",
+    "AdminMenuMakeNemesis": "Make Nemesis",
+    "AdminMenuMakeAssassin": "Make Assassin",
+    "AdminMenuMakeSurvivor": "Make Survivor",
+    "AdminMenuMakeSniper": "Make Sniper",
+    "AdminMenuRespawnSomeone": "Respawn Someone",
+    "AdminMenuStartGameMode": "Start Game Mode (use at roundstart)",
+    "AdminMenuNoTargets": "No valid targets available.",
+    "AdminMenuModeActivated": "Game mode {0} activated!",
+    "AdminMenuToggledZombieToAll": "Admin infected player {0}!",
+    "AdminMenuToggledHumanToAll": "Admin made player {0} human!",
+    "AdminMenuMadeNemesisToAll": "Admin made player {0} a Nemesis!",
+    "AdminMenuMadeAssassinToAll": "Admin made player {0} an Assassin!",
+    "AdminMenuMadeSurvivorToAll": "Admin made player {0} a Survivor!",
+    "AdminMenuMadeSniperToAll": "Admin made player {0} a Sniper!",
+    "AdminMenuRespawnedToAll": "Admin respawned player {0}!"
 
 }

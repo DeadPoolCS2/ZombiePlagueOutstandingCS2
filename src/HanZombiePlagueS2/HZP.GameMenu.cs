@@ -30,6 +30,7 @@ public class HZPGameMenu
     private readonly HZPZombieClassMenu _zombieClassMenu;
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly HZPWeaponsMenu _weaponsMenu;
+    private readonly HZPAdminItemMenu _adminMenu;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
 
     public HZPGameMenu(
@@ -41,6 +42,7 @@ public class HZPGameMenu
         HZPZombieClassMenu zombieClassMenu,
         HZPExtraItemsMenu extraItemsMenu,
         HZPWeaponsMenu weaponsMenu,
+        HZPAdminItemMenu adminMenu,
         IOptionsMonitor<HZPMainCFG> mainCFG)
     {
         _core = core;
@@ -51,6 +53,7 @@ public class HZPGameMenu
         _zombieClassMenu = zombieClassMenu;
         _extraItemsMenu = extraItemsMenu;
         _weaponsMenu = weaponsMenu;
+        _adminMenu = adminMenu;
         _mainCFG = mainCFG;
     }
 
@@ -157,7 +160,43 @@ public class HZPGameMenu
         };
         menu.AddOption(specBtn);
 
+        // 6 – Admin Menu (only shown to admins)
+        if (HasAdminPermission(player))
+        {
+            var adminBtn = new ButtonMenuOption(_helpers.T(player, "GameMenuAdminMenu"))
+            {
+                TextStyle = MenuOptionTextStyle.ScrollLeftLoop,
+                CloseAfterClick = true
+            };
+            adminBtn.Click += async (_, args) =>
+            {
+                var clicker = args.Player;
+                _core.Scheduler.NextTick(() =>
+                {
+                    if (!clicker.IsValid) return;
+                    _adminMenu.OpenAdminItemMenu(clicker);
+                });
+            };
+            menu.AddOption(adminBtn);
+        }
+
         _core.MenusAPI.OpenMenuForPlayer(player, menu);
+    }
+
+    private bool HasAdminPermission(IPlayer player)
+    {
+        if (player == null || !player.IsValid) return false;
+        ulong steamId = player.SteamID;
+        if (steamId == 0) return false;
+        var permString = _mainCFG.CurrentValue.AdminMenuPermission;
+        if (string.IsNullOrWhiteSpace(permString)) return true;
+        foreach (var perm in permString.Split(','))
+        {
+            var p = perm.Trim();
+            if (p.Length == 0) continue;
+            if (_core.Permission.PlayerHasPermission(steamId, p)) return true;
+        }
+        return false;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

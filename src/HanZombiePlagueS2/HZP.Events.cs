@@ -249,11 +249,27 @@ public partial class HZPEvents
             _service.ZombieRegenTimer();
             _service.StartAssassinInvisibilityTimer(configDist);
         });
+
+        // Round start chat announcement
+        int playerCount = _helpers.ServerPlayerCount() ?? 0;
+        foreach (var player in _core.PlayerManager.GetAllPlayers())
+        {
+            if (player == null || !player.IsValid || player.IsFakeClient) continue;
+            int ap = _extraItemsMenu.GetAmmoPacks(player.PlayerID);
+            _helpers.SendChatT(player, "RoundStartAnnounce", ap, playerCount);
+        }
+
         return HookResult.Continue;
     }
 
     private HookResult OnRoundEnd(EventRoundEnd @event)
     {
+        // Show winner center message based on event winner team
+        int winner = @event.Winner;
+        if (winner == (int)Team.CT)
+            _helpers.SendCenterToAllT("ServerGameHumanWin");
+        else if (winner == (int)Team.T)
+            _helpers.SendCenterToAllT("ServerGameZombieWin");
         
         _helpers.ClearAllBurns();
         _helpers.ClearAllLights();
