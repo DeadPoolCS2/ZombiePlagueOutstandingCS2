@@ -5,8 +5,6 @@
     A full-featured Zombie Plague plugin for CS2, built on the <strong>SwiftlyS2</strong> framework.
   </p>
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z31PY52N)
-
 **[▶ Video Preview](https://www.youtube.com/watch?v=DVeR5u28M_s)**
 
 </div>
