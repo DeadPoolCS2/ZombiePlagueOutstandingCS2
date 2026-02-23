@@ -409,3 +409,9 @@ Full docs: [`API/net10.0/HanZombiePlagueAPI.xml`](API/net10.0/HanZombiePlagueAPI
 - **Events:** `HZP_OnPlayerInfect`, `HZP_OnNemesisSelected`, `HZP_OnGameStart`, `HZP_OnHumanWin`, `HZP_OnZombieWin`, and more.
 - **Player queries:** `IsZombie`, `IsNemesis`, `IsAssassin`, `IsSurvivor`, `CurrentMode`, etc.
 - **Actions:** Force-set roles and classes, give/take Ammo Packs, set glow / FOV / god mode.
+
+---
+
+<div align="center">
+  Remade with ❤️ — from original plugin <em>[Zombie Plague made by H-AN](https://github.com/H-AN/HanZombiePlagueS2)</em>
+</div>
