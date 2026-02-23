@@ -183,7 +183,7 @@
 	// Send a chat reply to the invoking player on each command invocation.
 	"EnableCommandDebugChatReply": false,
 
-	// ── Ammo Packs database (replaces HZPDatabaseCFG.jsonc) ─────────────────
+	// ── Ammo Packs database ──────────────────────────────────────────────────
 	// Set to true to enable MySQL persistence for Ammo Packs.
 	"AmmoPacksEnabled": false,
 	// Connection name from configs/database.jsonc (leave empty = use default_connection).
@@ -191,7 +191,7 @@
 	// Table name for per-player ammo pack balances.
 	"AmmoPacksTableName": "hzp_ammo_packs",
 
-	// ── Laser trip-mine settings (replaces HanMineS2.jsonc) ─────────────────
+	// ── Laser trip-mine visual/model settings ────────────────────────────────
 	"Mine": {
 		// Workshop model for the mine body.
 		"Model": "models/stk_sentry_guns/lasermine/stk_lasermines_one.vmdl",

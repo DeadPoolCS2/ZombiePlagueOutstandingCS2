@@ -169,7 +169,7 @@ public class HZPMainCFG
     public float AmbSoundVolume { get; set; } = 0.6f;
     public string PrecacheAmbSound { get; set; } = string.Empty;
 
-    // ── Debug / chat settings (replaces HZPDebugCFG.jsonc) ──────────────────
+    // ── Debug / chat settings ────────────────────────────────────────────────
     /// <summary>Prefix prepended to chat messages sent by the plugin.</summary>
     public string ChatPrefix { get; set; } = "[HZP]";
     /// <summary>When true, command invocations are logged to the server console.</summary>
@@ -177,7 +177,7 @@ public class HZPMainCFG
     /// <summary>When true, command invocations produce a chat reply visible to the invoking player.</summary>
     public bool EnableCommandDebugChatReply { get; set; } = false;
 
-    // ── Ammo Packs database settings (replaces HZPDatabaseCFG.jsonc) ────────
+    // ── Ammo Packs database settings ─────────────────────────────────────────
     /// <summary>Set to true to enable MySQL persistence for Ammo Packs.</summary>
     public bool AmmoPacksEnabled { get; set; } = false;
     /// <summary>
@@ -188,6 +188,6 @@ public class HZPMainCFG
     /// <summary>Table name for per-player ammo pack balances (alphanumeric/underscore only).</summary>
     public string AmmoPacksTableName { get; set; } = "hzp_ammo_packs";
 
-    // ── Laser trip-mine settings (replaces HanMineS2.jsonc) ─────────────────
+    // ── Laser trip-mine visual/model settings ────────────────────────────────
     public HanMineS2CFG Mine { get; set; } = new();
 }

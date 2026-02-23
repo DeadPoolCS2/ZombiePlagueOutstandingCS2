@@ -1,523 +1,409 @@
-<div align="center"><h1><img width="600" height="131" alt="68747470733a2f2f70616e2e73616d7979632e6465762f732f56596d4d5845" src="https://github.com/user-attachments/assets/d0316faa-c2d0-478f-a642-1e3c3651f1d4" /></h1></div>
+<div align="center"><h1><img width="600" height="131" alt="Han Zombie Plague S2" src="https://github.com/user-attachments/assets/d0316faa-c2d0-478f-a642-1e3c3651f1d4" /></h1></div>
 
-<div class="section">
-<div align="center"><h1>Zombie Plague for Swiftly2</h1></div>
+<div align="center"><h1>Zombie Plague for Swiftly2 (CS2)</h1></div>
 
-
-<div align="center"><strong>基于 Swiftly2 框架开发的 CS2 僵尸瘟疫插件。</p></div>
-
-<div align="center"><strong>支持多种自定义配置/Supports multiple custom configurations。</p></div>
-<div align="center"><strong>支持自定义丧尸种类,多重游戏模式,僵尸瘟疫道具,支持API拓展,音效系统等。</p></div>
-  <div align="center"><strong>supports customizable zombie types, multiple game modes, zombie plague items, sound effects system</p></div>
-     <div align="center"><strong>supports API expansion.</p></div>
+<div align="center">
+A feature-rich Zombie Plague mode plugin for Counter-Strike 2, built on the <strong>SwiftlyS2</strong> framework.  
+Supports 10 game modes, custom zombie classes, ammo-pack Extra Items, laser trip-mines, API extensions, and more.
 </div>
 
 <div align="center">
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z31PY52N)
 
-## video
+### Video Preview
 https://www.youtube.com/watch?v=DVeR5u28M_s
+
 </div>
 
 ---
-
-Example Workshop files
-```
-sound : 3644652779
-zombie models : 3170427476
-```
-
----
-
-<div align="center">
-  <a href="./README.en.md"><img src="https://flagcdn.com/48x36/gb.png" alt="English" width="48" height="36" /> <strong>English</strong></a>  
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="./README.md"><img src="https://flagcdn.com/48x36/cn.png" alt="中文" width="48" height="36" /> <strong>中文版</strong></a>
-</div>
-
-<hr>
-
-# Han Zombie Plague S2
-
-**Zombie Plague Plugin**  
-A Zombie Plague mode plugin for Counter-Strike 2. Featuring rich game modes, special zombie/human classes, prop systems, full API support — bring endless fun and challenge to your server!
 
 ## Feature Overview
 
-- **10 Diverse Game Modes**: From classic infection to special class confrontations, all fully configurable.
-- **Special Class System**: Mother Zombie, Nemesis, Assassin, Survivor, Sniper, Hero, etc. Each class has independent attributes (health, speed, gravity, damage, model, weapon).
-- **Props & Abilities**: T-Virus Grenade (infection area), Incendiary Grenade, Flashbang, Freeze Grenade, Teleport Grenade, SCBA Suit (infection immunity), God Mode, Infinite Ammo, Infinite Clip, No Recoil.
-- **Custom Configuration**: Per-mode toggle for infinite ammo & zombie respawn; global settings for knockback force, spawn points, sound effects, ambient music, etc.
-- **Player Interaction**: Menu-based zombie class preference selection (saved to database), admin menu, kill damage HUD display.
-- **API Support**: Complete event system (infection, class selection, victory, etc.) for other plugins to extend custom logic.
-- **Sound & Visuals**: Dedicated sound effects (infection, prop usage), player glow outline, FOV adjustment, looping ambient atmosphere sounds.
-- **Balance Optimization**: Knockback system with separate multipliers (head/body/ground/air), independent hero knockback config.
+| Feature | Description |
+|---------|-------------|
+| **10 Game Modes** | Classic infection, multi-infection, boss modes, and more — all configurable |
+| **Special Class System** | Mother Zombie, Nemesis, Assassin, Survivor, Sniper, Hero — each with independent stats |
+| **Extra Items Shop** | Ammo-pack currency; buy Armor, Grenades, Jetpack, Trip Mines, SCBA Suit, and more |
+| **Laser Trip Mines** | Laser beam mines planted via `sw_plant`; auto-detonate when a zombie crosses the beam |
+| **Grenades** | Incendiary, Flashbang/Light, Freeze, Teleport, Incendiary Bomb — each with toggles & spawn auto-give |
+| **SCBA Suit** | Absorbs one zombie infection; purchasable in Extra Items (toggle: `CanUseScbaSuit`) |
+| **Revive Token** | One-time auto-respawn on death |
+| **Jetpack** | CTRL+SPACE to fly; right-click to fire rockets at zombies |
+| **Multi-Jump & Knife Blink** | Extra jump charges; teleport blink on knife swing |
+| **Round Announcements** | Chat summary (credits, player count) at round start; center-screen winner message at round end |
+| **Knockback System** | Per-hit-location, per-hero multipliers for fine-grained balance |
+| **API Support** | Full `IHanZombiePlagueAPI` for external plugin integration |
+| **Sound & Visuals** | Vox broadcast system, ambient music, player glow, FOV adjustment |
+| **Database** | Optional MySQL persistence for Ammo Pack balances |
 
-## Game Modes
+---
 
-The plugin provides **10 classic and innovative modes**, each with independent configuration:
-- **Zombie Respawn Toggle** (`ZombieCanReborn`)
-- **Human Infinite Ammo** (`EnableInfiniteClipMode`)
-- **Mode Weight** (`Weight`, used for random mode selection)
+## Workshop Assets
 
-1. **Normal Infection Mode**  
-   Select 1 player (configurable count) as Mother Zombie to start infecting humans. Classic progressive spread gameplay.
+```
+Sound pack : [3644652779](https://steamcommunity.com/sharedfiles/filedetails/?id=3644652779)
+Zombie models: [3170427476](https://steamcommunity.com/sharedfiles/filedetails/?id=3170427476)
+Mine model   : https://steamcommunity.com/workshop/filedetails/?id=3618032051
+```
 
-2. **Multi Infection Mode**  
-   Select half the players as Mother Zombies to start infecting simultaneously. Fast entry into high-intensity chaos.
+---
 
-3. **Survivor Mode**  
-   Select 1 human as Survivor, equipped with M249 machine gun + special attributes (high health, speed, low gravity, high damage — all configurable). All others become zombies for a lone survival battle.
+## Setup / Installation
 
-4. **Sniper Mode**  
-   Select 1 human as Sniper, equipped with sniper rifle (AWP) + special attributes (high health, speed, low gravity, high damage — configurable). All others become zombies for precision shooting vs horde.
+1. Install [SwiftlyS2](https://github.com/swiftly-solution/swiftly) on your CS2 server.
+2. Drop the plugin folder into `addons/swiftlys2/plugins/`.
+3. Start (or `sw_reload`) the server.
+4. Edit the config files under `configs/plugins/HanZombiePlagueS2/` (see Configuration below).
+5. Check the server console for load errors.
 
-5. **Swarm Mode (Confrontation Mode)**  
-   Half the players instantly become zombies (no infection phase) for direct human vs zombie firepower battle.
-
-6. **Plague Mode**  
-   Half the players become zombies + 1 Survivor + 1 Nemesis for epic multi-faction chaos battle.
-
-7. **Assassin Mode**  
-   Select 1 zombie as Assassin (invisible at long range, visible when close or attacked — invisibility distance configurable). No infection — stealth assassination gameplay.
-
-8. **Nemesis Mode**  
-   Select 1 zombie as Nemesis (high-stat boss). No infection — ultimate single boss vs all humans.
-
-9. **Hero Mode**  
-   The last x surviving humans (count configurable) automatically become Heroes with ultra-strong attributes and continue the fight.
-
-10. **Sniper vs Assassin Mode**  
-    Half the players become zombies + 1 Sniper + 1 Assassin — intense three-way faction battle.
-
-## Configuration Guide
-
-Main configuration file: `HZPMainCFG.json`.
-
-## Global Configuration
-
-Main configuration file: `HZPMainCFG.json`.
-
-The following table lists the key global settings that apply to all modes (unless overridden by mode-specific options).
-
-| Parameter                  | Description                                      | Example Value                                      |
-|----------------------------|--------------------------------------------------|----------------------------------------------------|
-| `RoundReadyTime`           | Round preparation time (seconds)                 | 22.0                                               |
-| `RoundTime`                | Round duration (minutes)                         | 4.0                                                |
-| `HumandefaultModel`        | Default human model path                         | "characters/models/ctm_st6/ctm_st6_variante.vmdl" |
-| `HumanMaxHealth`           | Maximum health for humans                        | 225                                                |
-| `HumanInitialSpeed`        | Initial movement speed for humans (multiplier)   | 1.0                                                |
-| `HumanInitialGravity`      | Initial gravity scale for humans                 | 0.8                                                |
-| `EnableDamageHud`          | Show kill damage HUD                             | true                                               |
-| `EnableInfiniteReserveAmmo`| Infinite reserve ammo for humans                 | true                                               |
-| `EnableWeaponNoRecoil`     | Weapons have no recoil                           | true                                               |
-| `HumanSpawnPoints`         | Human spawn points (CT/T/DM)                     | "CT,T,DM"                                          |
-| `ZombieSpawnPoints`        | Zombie spawn points (CT/T/DM)                    | "CT,T,DM"                                          |
-| `KnockZombieForce`         | Knockback force applied to zombies               | 250.0                                              |
-| `StunZombieTime`           | Stun duration when knocking back zombies (seconds) | 0.1                                              |
-| `AmbSound`                 | List of ambient atmosphere sounds (comma-separated) | "han.zombie.amb.zriot,..."                       |
-| `AmbSoundLoopTime`         | Ambient sound loop interval (seconds)            | 60.0                                               |
-| `AmbSoundVolume`           | Ambient sound volume                             | 0.8                                                |
-
-### Knockback System
-
-The knockback system allows customizable force when humans shoot zombies, helping balance gameplay and prevent zombies from rushing too easily.
-
-- `HumanKnockBackHeadMultiply`: Headshot knockback multiplier (2.0)  
-- `HumanKnockBackBodyMultiply`: Body shot knockback multiplier (1.0)  
-- `HumanKnockBackGroundMultiply`: Ground knockback multiplier (1.0)  
-- `HumanKnockBackAirMultiply`: Airborne knockback multiplier (0.5)  
-- `HumanHeroKnockBackMultiply`: Knockback multiplier when the shooter is a Hero (1.0)
-
-### Props Configuration
-
-| Prop              | Toggle Parameter          | Auto-Give on Spawn Parameter | Range / Duration     | Damage / Effect                  | Sound Effect                          |
-|-------------------|---------------------------|------------------------------|----------------------|----------------------------------|---------------------------------------|
-| T-Virus Grenade   | -                         | -                            | 300.0               | Can infect Heroes                | "han.zombieplague.grenadedote"       |
-| Incendiary Grenade| `FireGrenade`             | `SpawnGiveFireGrenade`       | 300.0 / 5.0s        | 500 initial + 10/s burning       | "han.zombieplague.grenadedote"       |
-| Incendiary Bomb   | -                         | `SpawnGiveIncGrenade`        | -                   | Burning damage                   | -                                     |
-| Flashbang / Light Grenade | `LightGrenade`    | `SpawnGiveLightGrenade`      | 1000.0 / 30.0s      | Blinding / strong light effect   | "C4.ExplodeTriggerTrip"               |
-| Freeze Grenade    | `FreezeGrenade`           | `SpawnGiveFreezeGrenade`     | 300.0 / 10.0s       | Freezes target                   | "han.zombieplague.grenadedote"       |
-| Teleport Grenade  | `TelportGrenade`          | `SpawnGiveTelportGrenade`    | -                   | Teleports player                 | -                                     |
-| T-Virus Serum     | -                         | -                            | -                   | Turns zombie back to human (special zombies immune) | "HealthShot.Pickup"                   |
-| SCBA Suit (Chemical Suit) | `CanUseScbaSuit`  | -                            | -                   | Immune to infection              | Pickup: "Player.PickupPistol"<br>Broken: "Breakable.Flesh" |
-
-### Mode Configuration Examples
-
-Each mode has its own independent settings:
-- `Enable`: Toggle the mode on/off
-- `Name`: Display name in-game
-- `Weight`: Random selection weight (higher = more likely to be chosen)
-
-Specific per-mode parameters:
-- **Normal Infection**: `MotherZombieCount` (number of Mother Zombies, default 1)
-- **Survivor**: `SurvivorHealth` (1000), `SurvivorSpeed` (3.0), custom model/weapon paths
-- **Sniper**: `SniperHealth` (500), `SniperWeapon` ("weapon_awp")
-- **Assassin**: `InvisibilityDist` (invisibility distance, 200.0)
-- **Hero**: `HeroCount` (number of Heroes, e.g. 3)
-
-For the full JSON configuration, see the `configs/` folder in the repository.
-
-## Installation Guide
-
-1. Download the plugin package and extract it to `addons/swiftlys2/plugins/`.
-2. Start (or restart) the server.
-3. Edit and configure `HZPMainCFG.json` (and other config files as needed).
-4. Ensure dependencies: The plugin requires the SwiftlyS2 framework to be installed and running.
-
-After installation, load the map or use the command to reload the plugin if necessary. Check server console/logs for any loading errors.
+---
 
 ## Commands List
 
-- `!zclass` or `sw_zclass`: Opens the zombie class selection menu (player preference, command can be freely customized in config).
-- `!zmenu` or `sw_zmenu`: Opens the admin menu (requires permission `AdminMenuPermission`; if left empty, accessible to everyone).
+| Command / Alias | Description |
+|-----------------|-------------|
+| `sw_zp` / `!zp` / `!menu` | Open the main game menu |
+| `sw_buyweapons` / `!buyweapons` | Open the weapon selection menu (CT/alive only) |
+| `sw_extras` / `!extras` | Open the Extra Items shop |
+| `sw_zclass` / `!zclass` | Open the zombie class preference menu |
+| `sw_zmenu` / `!zmenu` | Open the admin item menu (requires `AdminMenuPermission`) |
+| `sw_blink` / `!blink` | Activate Knife Blink (consumes 1 charge) |
+| `sw_plant` / `!plant` | Plant a laser trip mine at your current position (CT/alive; requires a charge) |
+| `sw_take` / `!take` | Recover your nearest planted trip mine (returns 1 charge) |
+| `sw_give_ap <name\|#userid> <amount>` | Admin: give Ammo Packs to a player |
+
+> **Weapons Menu**: `sw_buyweapons` is always available to CT players who are alive — there is no per-round single-use lock.
+
+---
+
+## Game Modes
+
+All 10 modes are configured in `HZPMainCFG.jsonc`. Each mode supports:
+- `Enable` – toggle on/off
+- `Weight` – random-selection weight (higher = more likely)
+- `ZombieCanReborn` – whether zombies respawn after death
+- `EnableInfiniteClipMode` – infinite ammo for humans in this mode
+
+| # | Mode | Description |
+|---|------|-------------|
+| 1 | **Normal Infection** | 1 (configurable) Mother Zombie infects the rest |
+| 2 | **Multi Infection** | Multiple Mother Zombies start simultaneously |
+| 3 | **Survivor** | 1 human Survivor with M249 + special stats; rest are zombies |
+| 4 | **Sniper** | 1 human Sniper with AWP + special stats; rest are zombies |
+| 5 | **Swarm** | Half the players are instantly zombies (no infection) |
+| 6 | **Plague** | Half zombies + 1 Survivor + 1 Nemesis |
+| 7 | **Assassin** | 1 invisible Assassin zombie; no infection |
+| 8 | **Nemesis** | 1 ultra-powerful Nemesis zombie; no infection |
+| 9 | **Hero** | Last X humans become Heroes with extreme stats |
+| 10 | **Assassin vs Sniper** | Half zombies + 1 Assassin + 1 Sniper |
+
+---
+
+## Round Announcements
+
+### Round Start (Chat)
+At the start of each new round every non-bot player receives a chat message:
+
+```
+[HZP] New round begins. | Your credits: X | Players connected: Y
+```
+
+- `X` = the player's current Ammo Pack balance
+- `Y` = total connected player count
+
+### Round End (Center Screen)
+When the round ends a center-screen message is displayed to all players:
+- **Humans win**: `Humans WIN !!!`
+- **Zombies win**: `Zombies WIN !!!`
+
+Translation keys: `ServerGameHumanWin`, `ServerGameZombieWin`, `RoundStartAnnounce`.
+
+---
+
+## Extra Items Shop
+
+Open with `sw_extras` / `!extras` or via the main game menu.
+
+### Ammo Packs (Currency)
+
+| Source | Amount (configurable) |
+|--------|----------------------|
+| Connect | `StartingAmmoPacks` (default: 0) |
+| Survive a round as human | `RoundSurviveReward` (default: 3) |
+| Zombie kills a human | `ZombieKillReward` (default: 2) |
+| Admin grant | `sw_give_ap <player> <amount>` |
+
+### Item Catalogue
+
+Items are defined in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.jsonc`.
+Toggle `"Enable": false` on any entry to hide it without deleting it.
+Items whose corresponding **HZPMainCFG feature toggle** is disabled are automatically hidden from the menu.
+
+| Key | Display Name | Team | Default Price | Toggle / Notes |
+|-----|-------------|------|--------------|----------------|
+| `armor` | Armor (100 points) | Human | 3 AP | Always available |
+| `he_grenade` | Incendiary Grenade | Human | 2 AP | Requires `FireGrenade: true` |
+| `flash_grenade` | Flashbang / Light Grenade | Human | 2 AP | Requires `LightGrenade: true` |
+| `smoke_grenade` | Freeze Grenade | Human | 2 AP | Requires `FreezeGrenade: true` |
+| `inc_grenade` | Incendiary Bomb | Human | 4 AP | Requires `SpawnGiveIncGrenade: true` |
+| `teleport_grenade` | Teleport Grenade | Human | 3 AP | Requires `TelportGrenade: true` |
+| `scba_suit` | SCBA Suit (Hazmat) | Human | 5 AP | Requires `CanUseScbaSuit: true`; absorbs 1 zombie infection |
+| `multijump` | Multi-Jump (+1 jump) | Human | 4 AP | Stackable up to `MultijumpMax` |
+| `knife_blink` | Knife Blink (3 charges) | Human | 5 AP | Use `sw_blink` / `!blink` |
+| `jetpack` | Jetpack | Human | 10 AP | CTRL+SPACE fly; right-click rocket |
+| `trip_mine` | Laser Trip Mine | Human | 6 AP | `sw_plant` to plant; `sw_take` to recover |
+| `revive_token` | Revive Token | Human | 8 AP | Auto-respawns you once on death |
+| `antidote` | Antidote (T-Virus Serum) | Zombie | 8 AP | Turns zombie back to human (special zombies immune) |
+| `zombie_madness` | Zombie Madness | Zombie | 6 AP | Temporary invulnerability (configurable duration) |
+| `t_virus_grenade` | T-Virus Grenade | Zombie | 6 AP | Infects humans in radius; can infect Heroes if `TVirusCanInfectHero: true` |
+
+---
+
+### Laser Trip Mine Details
+
+| Setting | Value | Notes |
+|---------|-------|-------|
+| Purchase | 6 AP / charge | Charges model: 1 purchase = +1 charge |
+| Plant | `sw_plant` / `!plant` | Consumes 1 charge; places mine in front of the player |
+| Recover | `sw_take` / `!take` | Returns 1 charge; owner only (`OwnerOnlyPickup`) |
+| Max active per player | 2 (configurable) | |
+| Laser beam length | 300 units (configurable) | |
+| Explosion radius | 360 units (configurable) | |
+| Max damage | 2600 (linear falloff) | Zombies only, no friendly fire |
+| Mine HP | 1800; detonates at ≤ 1000 HP | |
+| Blocked for | Zombies, Survivor, Sniper, Nemesis, Assassin, Hero | |
+
+Mine visual settings (color, model, sounds, delays) are in the `Mine` section of `configs/plugins/HanZombiePlagueS2/HZPMainCFG.jsonc`.
+Combat settings (damage, radius, beam length, etc.) are in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.jsonc`.
+
+---
+
+### Jetpack Details
+
+- Hold **CTRL + SPACE** to fly upward (consumes fuel).
+- Press **right-click (Mouse2)** to fire an explosive rocket (cooldown: 2 s).
+- Fuel is reset at round start.
+- Configure fuel capacity, thrust force, rocket damage/radius in `HZPExtraItemsCFG.jsonc`.
+
+---
+
+### SCBA Suit Details
+
+- Absorbs **one** zombie infection (knife hit from zombie).
+- Purchased from the Extra Items menu (5 AP default) when `CanUseScbaSuit: true` in `HZPMainCFG.jsonc`.
+- Only one suit per player per round; re-purchasing while the suit is active is rejected with a refund.
+- The suit is destroyed on use and a chat/sound notification is broadcast.
+
+---
+
+## Grenades
+
+All grenades are configured in `HZPMainCFG.jsonc`.
+
+| Grenade | Key | Toggle | Spawn Auto-Give Toggle | Range | Duration | Damage / Effect |
+|---------|-----|--------|----------------------|-------|----------|----------------|
+| Incendiary Grenade | `he_grenade` | `FireGrenade` | `SpawnGiveFireGrenade` | 300 units | 5 s | 500 initial + 10/s burning |
+| Flashbang / Light Grenade | `flash_grenade` | `LightGrenade` | `SpawnGiveLightGrenade` | 1000 units | 30 s | Strong light / blind effect |
+| Freeze Grenade | `smoke_grenade` | `FreezeGrenade` | `SpawnGiveFreezeGrenade` | 300 units | 10 s | Freezes target |
+| Teleport Grenade | `teleport_grenade` | `TelportGrenade` | `SpawnGiveTelportGrenade` | — | — | Teleports player |
+| Incendiary Bomb | `inc_grenade` | — | `SpawnGiveIncGrenade` | — | — | Fire damage area |
+| T-Virus Grenade (Zombie) | `t_virus_grenade` | — | — | 300 units | — | Infects humans in radius |
+
+---
+
+## Configuration
+
+### HZPMainCFG.jsonc (Main Settings)
+
+```jsonc
+{
+  "HZPMainCFG": {
+    "RoundReadyTime": 25,          // Prep time before Mother Zombie appears (seconds)
+    "RoundTime": 4,                // Round duration (minutes)
+    "HumanMaxHealth": 225,
+    "HumanInitialSpeed": 1.0,
+    "HumanInitialGravity": 0.8,
+    "ChatPrefix": "[HZP]",         // Prefix prepended to all chat messages
+    "KnockZombieForce": 250.0,
+    "StunZombieTime": 0.1,
+
+    // ── Grenades ─────────────────────────────────────────────────────────
+    "FireGrenade": true,           // Enable Incendiary Grenade feature
+    "SpawnGiveFireGrenade": true,  // Auto-give Incendiary Grenade on spawn
+    "FireGrenadeRange": 300.0,
+    "FireGrenadeDmg": 500.0,       // Initial damage on detonation
+    "FireDmg": 10.0,               // Burn damage per second
+    "FireGrenadeDuration": 5.0,    // Burn duration (seconds)
+
+    "LightGrenade": true,          // Enable Flashbang/Light Grenade
+    "SpawnGiveLightGrenade": true,
+    "LightGrenadeRange": 1000.0,
+    "LightGrenadeDuration": 30.0,
+
+    "FreezeGrenade": true,         // Enable Freeze Grenade
+    "SpawnGiveFreezeGrenade": true,
+    "FreezeGrenadeRange": 300.0,
+    "FreezeGrenadeDuration": 10.0,
+
+    "TelportGrenade": true,        // Enable Teleport Grenade
+    "SpawnGiveTelportGrenade": true,
+
+    "SpawnGiveIncGrenade": true,   // Auto-give Incendiary Bomb on spawn (CT)
+
+    "CanUseScbaSuit": true,        // Enable SCBA Suit feature
+    "TVirusCanInfectHero": true,   // T-Virus Grenade can infect Heroes
+    "TVirusGrenadeRange": 300.0,
+
+    // ── Commands ─────────────────────────────────────────────────────────
+    "BuyWeaponsCommand": "sw_buyweapons",
+    "ExtraItemsCommand": "sw_extras",
+    "PlantMineCommand": "sw_plant",
+    "TakeMineCommand": "sw_take",
+    "KnifeBlinkCommand": "sw_blink",
+
+    // ── Database (optional MySQL for AP persistence) ───────────────────
+    "AmmoPacksEnabled": false,
+    "AmmoPacksConnectionName": "",
+    "AmmoPacksTableName": "hzp_ammo_packs"
+  }
+}
+```
+
+### HZPExtraItemsCFG.jsonc (Extra Items)
+
+```jsonc
+{
+  "HZPExtraItemsCFG": {
+    "StartingAmmoPacks": 0,
+    "RoundSurviveReward": 3,
+    "ZombieKillReward": 2,
+    "Items": [
+      { "Key": "armor",           "Name": "Armor (100 points)",              "Price": 3,  "Enable": true, "Team": "Human"  },
+      { "Key": "he_grenade",      "Name": "Incendiary Grenade",              "Price": 2,  "Enable": true, "Team": "Human"  },
+      { "Key": "flash_grenade",   "Name": "Flashbang / Light Grenade",       "Price": 2,  "Enable": true, "Team": "Human"  },
+      { "Key": "smoke_grenade",   "Name": "Freeze Grenade",                  "Price": 2,  "Enable": true, "Team": "Human"  },
+      { "Key": "inc_grenade",     "Name": "Incendiary Bomb",                 "Price": 4,  "Enable": true, "Team": "Human"  },
+      { "Key": "teleport_grenade","Name": "Teleport Grenade",                "Price": 3,  "Enable": true, "Team": "Human"  },
+      { "Key": "scba_suit",       "Name": "SCBA Suit (resist 1 zombie hit)", "Price": 5,  "Enable": true, "Team": "Human"  },
+      { "Key": "multijump",       "Name": "Multi-Jump (+1 jump)",            "Price": 4,  "Enable": true, "Team": "Human"  },
+      { "Key": "knife_blink",     "Name": "Knife Blink (3 charges)",         "Price": 5,  "Enable": true, "Team": "Human"  },
+      { "Key": "jetpack",         "Name": "Jetpack",                         "Price": 10, "Enable": true, "Team": "Human"  },
+      { "Key": "trip_mine",       "Name": "Laser Trip Mine",                 "Price": 6,  "Enable": true, "Team": "Human"  },
+      { "Key": "revive_token",    "Name": "Revive Token",                    "Price": 8,  "Enable": true, "Team": "Human"  },
+      { "Key": "antidote",        "Name": "Antidote (T-Virus Serum)",        "Price": 8,  "Enable": true, "Team": "Zombie" },
+      { "Key": "zombie_madness",  "Name": "Zombie Madness (invulnerability)","Price": 6,  "Enable": true, "Team": "Zombie" },
+      { "Key": "t_virus_grenade", "Name": "T-Virus Grenade",                 "Price": 6,  "Enable": true, "Team": "Zombie" }
+    ]
+  }
+}
+```
+
+> **Toggle Behaviour**: Items whose corresponding `HZPMainCFG` toggle is disabled (`false`) are automatically hidden from the shop menu and cannot be purchased.
 
 ---
 
 ## Zombie Class Configuration
 
-The plugin supports a rich zombie class system, divided into two separate configuration files:
+- **`HZPZombieClassCFG.jsonc`** – Normal zombie class list (`ZombieClassList`).
+- **`HZPSpecialClassCFG.jsonc`** – Special class list (`SpecialClassList`) used by game modes.
 
-- **HZPZombieClassCFG.json**: List of normal zombie classes (`ZombieClassList`).  
-  These are the standard zombie types players may become after normal infection (e.g., Red Skull, White Skull, Xenomorph Queen, etc.).
+Each class entry:
 
-- **HZPSpecialClassCFG.json**: List of special zombie classes (`SpecialClassList`).  
-  These are the special roles used in specific modes (e.g., Mother Zombie, Nemesis, Assassin, etc.).
-
-**Both files use exactly the same format** — they are separated only to distinguish between normal zombies and special (mode-specific) zombies.
-
-Each zombie class follows this structure:
-
-```json
+```jsonc
 {
-  "Name": "Class Name",          // Must be unique, used for matching in main config
-  "Enable": true,                // Whether this class is enabled
-  "PrecacheSoundEvent": "...",   // Path to pre-cache sound event file
-  "Stats": { ... },              // Numerical stats / attributes
-  "Models": { ... },             // Model paths
-  "Sounds": { ... }              // Various sound effects
-}
-```
----
-
-Main Config Matching Mechanism for Zombie Classes
-In the main configuration file HZPMainCFG.json, special modes match zombie classes by name fields. Example:
-```
-"Nemesis": {
+  "Name": "Red Skull",           // Must match the name referenced in HZPMainCFG
   "Enable": true,
-  "Name": "Nemesis Mode",
-  "NemesisNames": "Nemesis",   // Must exactly match the "Name" in HZPSpecialClassCFG.json
-  "Weight": 50,
-  ...
-}
-```
-Fields like NemesisNames, AssassinNames, SurvivorNames, etc., must exactly match the "Name" value in the corresponding config file (HZPSpecialClassCFG.json or HZPZombieClassCFG.json).
-If the name does not match, the class is disabled (Enable: false), or the class does not exist, the plugin will fail to load that role, which may cause mode errors or fallback to default behavior.
-
----
-
-### Stats (Attributes) Parameters
-
-| Parameter           | Description                                      | Example Value | Notes                                      |
-|---------------------|--------------------------------------------------|---------------|--------------------------------------------|
-| Health              | Maximum health in normal state                   | 8000         | -                                          |
-| MotherZombieHealth  | Maximum health when acting as Mother Zombie      | 18000        | Only applies in Mother Zombie modes        |
-| Speed               | Movement speed multiplier (1.0 = default human speed) | 1.0 ~ 2.5 | Higher value = faster movement             |
-| Damage              | Base melee attack damage                         | 50.0         | Claw/knife damage                          |
-| Gravity             | Gravity scale (lower value = higher jumps, slower fall) | 0.7    | Typically 0.2 ~ 1.0                        |
-| Fov                 | Field of View (FOV)                              | 110          | Wider view for zombies                     |
-| EnableRegen         | Enable automatic health regeneration             | true         | -                                          |
-| HpRegenSec          | Health regeneration interval (seconds)           | 5.0          | -                                          |
-| HpRegenHp           | Health restored per regeneration tick            | 30           | -                                          |
-| ZombieSoundVolume   | Volume of zombie-related sounds                  | 1.0          | Range: 0.0 ~ 1.0                           |
-| IdleInterval        | Interval between idle sounds (seconds)           | 70.0         | -                                          |
-
-### Models Parameters
-
-| Parameter             | Description                              | Example Path                                                          |
-|-----------------------|------------------------------------------|-----------------------------------------------------------------------|
-| ModelPath             | Main zombie model path                   | characters/models/voikanaa/feral_ghoul_fonv/feral_ghoul_fonv.vmdl   |
-| CustomKinfeModelPath  | Custom claw/knife model path (optional)  | "" (uses default)                                                     |
-
-### Sounds Parameters
-
-| Parameter     | Description                          | Example Sound Key(s)                          |
-|---------------|--------------------------------------|-----------------------------------------------|
-| SoundInfect   | Sound played when infected           | han.human.mandeath                            |
-| SoundPain     | Pain/injury sound                    | han.hl.zombie.pain                            |
-| SoundHurt     | Hurt sound                           | han.zombie.manclassic_hurt                    |
-| SoundDeath    | Death sound                          | han.zombie.manclassic_death                   |
-| IdleSound     | Idle/breathing sound (multiple allowed, comma-separated) | han.hl.nihilanth.idle,han.hl.nihilanth.idleb |
-| RegenSound    | Health regeneration sound            | han.zombie.state.manheal                      |
-| BurnSound     | Sound when burning                   | han.zombieplague.zburn                        |
-| ExplodeSound  | Explosion/special death sound        | han.hl.zombie.idle                            |
-| HitSound      | Sound when hitting an enemy          | han.zombie.classic_hit                        |
-| HitWallSound  | Sound when hitting a wall            | han.zombie.classic_hitwall                    |
-| SwingSound    | Sound when swinging claw/missing attack | han.zombie.classic_swing                   |
-
-### Normal Zombie Classes
-
-| Class Name          | Normal Health | Mother Health | Speed | Gravity | FOV | Regen Interval / Amount | Special Notes                          |
-|---------------------|---------------|---------------|-------|---------|-----|-------------------------|----------------------------------------|
-| Red Skull           | 8000         | 18000        | 1.0  | 0.7    | 110 | 5.0s / 30              | High durability, auto-regen            |
-| White Skull         | 3000         | 13000        | 1.1  | 0.8    | 110 | 5.0s / 30              | Medium health, slightly faster speed   |
-| frozen              | 5000         | 15000        | 1.7  | 0.7    | 110 | 1.0s / 150             | High regen rate (disabled)             |
-| Fat Guy             | 5000         | 15000        | 1.7  | 0.8    | 110 | 1.0s / 150             | High regen rate (disabled)             |
-| Xenomorph Queen     | 2500         | 12500        | 2.0  | 0.2    | 110 | 10.0s / 5              | Extremely low gravity, high speed, female sounds |
-| Female Scientist Zombie | 1800     | 12000        | 1.8  | 0.5    | 110 | 10.0s / 5              | High speed, female sounds              |
-
-### Special Zombie Classes
-
-| Class Name     | Normal Health | Mother Health | Speed | Gravity | FOV | Regen Interval / Amount | Special Notes                              |
-|----------------|---------------|---------------|-------|---------|-----|-------------------------|--------------------------------------------|
-| Mother Zombie  | 15000        | 20000        | 1.5  | 0.5    | 110 | 1.0s / 50              | Initial infection source, high damage (150) |
-| Nemesis        | 30000        | 50000        | 2.0  | 0.3    | 120 | 1.0s / 50              | Ultimate boss, ultra-high health, low gravity |
-| Assassin       | 15000        | 35000        | 2.5  | 0.4    | 120 | 2.0s / 60              | Ultra-high speed, pairs with invisibility mechanic |
----
-
-## Sound Broadcast System (Vox System)
-
-The plugin includes a powerful sound broadcast system (Vox) that automatically plays voice announcements at key game moments (such as round start, countdown, mode announcement, victory declaration, etc.), greatly enhancing immersion and atmosphere.
-
-Configuration file: **HZPVoxCFG.json**
-
-### Vox System Structure
-
-`VoxList` is an array, where each element represents a complete voice broadcast package (e.g., CSOL Male, CSOL Female, HL1 Male, etc.).
-
-Each voice package follows this structure:
-
-```json
-{
-  "Name": "Voice Package Name",          // Only for display and identification
-  "Enable": true,                        // Whether this voice package is enabled
-  "PrecacheSoundEvent": "...",           // Path to pre-cache sound event file (required)
-  "RoundMusicVox": "...",                // Round start music/voice (multiple allowed, comma-separated)
-  "SecRemainVox": "...",                 // 20 seconds remaining reminder voice
-  "CoundDownVox": "...",                 // Countdown voice (10~1 seconds, multiple allowed)
-  "ZombieSpawnVox": "...",               // Zombie spawn/appearance voice
-  "NormalInfectionVox": "...",           // Normal Infection mode announcement voice
-  "MultiInfectionVox": "...",            // Multi Infection mode announcement voice
-  "NemesisVox": "...",                   // Nemesis mode announcement voice
-  "SurvivorVox": "...",                  // Survivor mode announcement voice
-  "SwarmVox": "...",                     // Swarm mode announcement voice
-  "PlagueVox": "...",                    // Plague mode announcement voice
-  "AssassinVox": "...",                  // Assassin mode announcement voice
-  "SniperVox": "...",                    // Sniper mode announcement voice
-  "AVSVox": "...",                       // Sniper vs Assassin mode announcement voice
-  "HeroVox": "...",                      // Hero mode announcement voice
-  "HumanWinVox": "...",                  // Human victory voice (multiple allowed)
-  "ZombieWinVox": "..."                  // Zombie victory voice (multiple allowed)
+  "PrecacheSoundEvent": "soundevents/...",
+  "Stats": {
+    "Health": 8000,
+    "MotherZombieHealth": 18000,
+    "Speed": 1.0,
+    "Damage": 50.0,
+    "Gravity": 0.7,
+    "Fov": 110,
+    "EnableRegen": true,
+    "HpRegenSec": 5.0,
+    "HpRegenHp": 30,
+    "IdleInterval": 70.0
+  },
+  "Models": {
+    "ModelPath": "characters/models/...",
+    "CustomKinfeModelPath": ""
+  },
+  "Sounds": {
+    "SoundInfect": "han.human.mandeath",
+    "SoundDeath":  "han.zombie.manclassic_death"
+    // ... SoundPain, SoundHurt, IdleSound, RegenSound, BurnSound, HitSound, etc.
+  }
 }
 ```
 
-### Vox Parameters / Voice Trigger Events
+---
 
-| Parameter          | Trigger Timing                          | Example Sound Key(s) (multiple allowed, comma-separated) | Notes                                      |
-|--------------------|-----------------------------------------|-----------------------------------------------------------|--------------------------------------------|
-| RoundMusicVox      | Round officially starts (prep time ends) | han.zombie.round.class_start                             | Often used for background music or opening voice |
-| SecRemainVox       | 20 seconds remaining in round           | han.zombie.round.20secremain                             | Reminds players time is running out        |
-| CoundDownVox       | Countdown 10~1 seconds (one per second) | han.zombie.round.mancdone,...                            | Supports 10 separate voices, played in sequence |
-| ZombieSpawnVox     | Zombie spawn or Mother Zombie appears   | han.zombie.round.manzbcome                               | Builds tension                             |
-| NormalInfectionVox | Normal Infection mode announcement      | han.zombieplague.end.horror                              | Mode-specific voice                        |
-| MultiInfectionVox  | Multi Infection mode announcement       | han.zombieplague.end.horror                              | -                                          |
-| NemesisVox         | Nemesis mode announcement               | han.zombieplague.type.nemesis                            | -                                          |
-| SurvivorVox        | Survivor mode announcement              | han.zombieplague.type.survivor                           | -                                          |
-| SwarmVox           | Swarm / Legion mode announcement        | han.zombieplague.end.horror                              | -                                          |
-| PlagueVox          | Plague mode announcement                | han.zombieplague.end.plague                              | -                                          |
-| AssassinVox        | Assassin mode announcement              | han.zombieplague.type.nemesis                            | -                                          |
-| SniperVox          | Sniper mode announcement                | han.zombieplague.type.survivor                           | -                                          |
-| AVSVox             | Sniper vs Assassin mode announcement    | han.zombieplague.type.nemesis                            | -                                          |
-| HeroVox            | Hero mode announcement                  | han.zombieplague.type.survivor                           | -                                          |
-| HumanWinVox        | Humans win                              | han.zombie.round.manhmwin                                | Multiple allowed — random playback         |
-| ZombieWinVox       | Zombies win                             | han.zombie.round.manzbwin                                | Multiple allowed — random playback         |
-### Voice Package Examples (HZPVoxCFG.json)
+## Sound Broadcast System (Vox)
 
-| Voice Package Name   | Style Source          | Enabled | Special Features                                                                 |
-|----------------------|-----------------------|---------|----------------------------------------------------------------------------------|
-| CSOL Male Broadcast  | CSOL Male Style       | true   | Classic male announcer, clear and powerful countdown, exciting victory voice   |
-| CSOL Female Broadcast| CSOL Female Style     | true   | Female voice, gentle yet tense countdown, suitable for varied atmospheres       |
-| HL1 Male Broadcast   | Half-Life 1 Male      | true   | Retro HL1 style, classic infection sounds and victory announcements             |
-| HL1 Female Broadcast | Half-Life 1 Female    | true   | HL1 female voice, unique retro atmosphere, special remaining time reminders     |
-| Zombie Plague Broadcast | Zombie Plague Classic | true   | Mix of various classic voices, rich victory announcements, strong random playback effect |
+Configuration: `HZPVoxCFG.jsonc` → `VoxList` array.
 
-**Customization Tips**:
-- Each voice package can be independently enabled or disabled (`"Enable": true/false`).
-- For the same event, you can list multiple sound keys (comma-separated) — the system will **randomly play** one of them for variety.
-- All voices must be pre-cached in the specified `PrecacheSoundEvent` file.
-- You can add your own custom voice packages (e.g., Japanese, Korean, or localized voices) as long as the sound file paths are correct.
+Each voice package supports:
 
-**Recommended Usage**:
-- Servers can switch voice packages based on event themes (e.g., horror style for Halloween, cheerful for holidays).
-- Combining different voice packages with modes creates stronger thematic immersion (e.g., HL1 package with retro maps, CSOL package with high-intensity matches).
+| Field | Trigger |
+|-------|---------|
+| `RoundMusicVox` | Round officially starts |
+| `CoundDownVox` | Countdown (10 → 1) |
+| `ZombieSpawnVox` | Mother Zombie appears |
+| `HumanWinVox` | Humans win |
+| `ZombieWinVox` | Zombies win |
+| `NormalInfectionVox`, `NemesisVox`, etc. | Mode-specific announcements |
+
+Multiple sound keys can be comma-separated — the system picks one at random.
 
 ---
 
+## Chat Prefix
+
+All plugin-generated chat messages are routed through the centralized `ChatMsg` helper, which prepends `ChatPrefix` (default: `[HZP]`) exactly once. To change the prefix, set `ChatPrefix` in `HZPMainCFG.jsonc`.
+
+---
+
+## Translations
+
+Translation files are located at:
+```
+net10.0/HanZombiePlagueS2/resources/translations/en.jsonc
+net10.0/HanZombiePlagueS2/resources/translations/zh-CN.jsonc
+```
+
+Key translation strings:
+
+| Key | Default (EN) |
+|-----|-------------|
+| `RoundStartAnnounce` | `New round begins. \| Your credits: {0} \| Players connected: {1}` |
+| `ServerGameHumanWin` | `Humans WIN !!!` |
+| `ServerGameZombieWin` | `Zombies WIN !!!` |
+| `ExtraItemsScbaSuitSuccess` | `You put on a Hazmat Suit and can resist one zombie attack! Ammo Packs remaining: {0}.` |
+| `ExtraItemsTripMineSuccess` | `Trip mine charge added (you now have {0} charge(s)). Ammo Packs remaining: {1}.` |
+| `TripMinePlanted` | `Mine planted ({0}/{1} active). Zombies crossing the laser beam will trigger the explosion!` |
+
+---
 
 ## API Support
 
-Full API interface (`IHanZombiePlagueAPI`) is provided, supporting event listening (e.g., infection, victory), player status queries, forced class setting, and more.  
-See details in [HanZombiePlagueAPI.xml](API/net10.0/HanZombiePlagueAPI.xml)
+Full `IHanZombiePlagueAPI` interface is provided for external plugin integration.  
+See [`API/net10.0/HanZombiePlagueAPI.xml`](API/net10.0/HanZombiePlagueAPI.xml) for full documentation.
 
-This API allows other plugins to:
-- Listen to key events (e.g., `HZP_OnPlayerInfect`, `HZP_OnNemesisSelected`, `HZP_OnGameStart`, `HZP_OnHumanWin`, etc.)
-- Query player states (is zombie? is Nemesis? current mode? etc.)
-- Forcefully set player roles/classes (e.g., make someone a Survivor, Nemesis, or Hero)
-- Interact with game flow (check win conditions, give props, set glow/FOV/god mode, etc.)
-
-For full documentation, including all methods, events, and parameters, refer to the API header file in the repository.
+Key capabilities:
+- Listen to events: `HZP_OnPlayerInfect`, `HZP_OnNemesisSelected`, `HZP_OnGameStart`, `HZP_OnHumanWin`, etc.
+- Query player state: `IsZombie`, `IsNemesis`, `CurrentMode`, etc.
+- Force-set player roles and classes.
+- Check win conditions, give props, set glow/FOV/god mode.
 
 ---
 
-## Main Game Menu & Extra Items System
+## Security & Notes
 
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `!menu` / `!zp` | Open the main game menu (chat) |
-| `hzp_menu` | Open the main game menu (console) |
-| `!extras` | Open the extra items menu directly |
-| `!blink` | Activate Knife Blink (if purchased) |
-| `sw_plant` / `!plant` | Plant a trip mine at your current position (human only; requires a mine charge) |
-| `sw_take` / `!take` | Recover your nearest planted trip mine (owner only) |
-| `hzp_give_ap <name\|#userid> <amount>` | Admin: give ammo packs to a player |
-
-### Main Menu Options
-
-1. **Buy Weapons** – Opens the round-start weapons menu (human only, once per round).
-2. **Buy Extra Items** – Opens the extra items shop.
-3. **Choose Zombie Class** – Opens the zombie class preference menu.
-4. **Unstuck** – Teleports you to a nearby free position if you are stuck.
-5. **Join Spectator** – Moves you to the spectator team.
-
-### Ammo Packs (AP)
-
-Ammo Packs are the currency for the Extra Items shop.
-
-| Source | Amount (configurable) |
-|--------|----------------------|
-| Connect | `StartingAmmoPacks` (default 0) |
-| Surviving a round as human | `RoundSurviveReward` (default 3) |
-| Zombie kills a human | `ZombieKillReward` (default 2) |
-
-Admins can grant AP with: `hzp_give_ap <player> <amount>`
-
-### Extra Items
-
-All items are configured in `configs/plugins/HanZombiePlagueS2/HZPExtraItemsCFG.jsonc`.
-
-| Item | Team | Default Price |
-|------|------|--------------|
-| Armor | Human | 3 AP |
-| HE Grenade | Human | 2 AP |
-| Flash Grenade | Human | 2 AP |
-| Smoke Grenade | Human | 2 AP |
-| Antidote (cure to human) | Zombie | 8 AP |
-| Zombie Madness (temporary invulnerability) | Zombie | 6 AP |
-| Multi-Jump (+1 extra jump, stackable) | Human | 4 AP |
-| Knife Blink (3 teleport charges, use `!blink`) | Human | 5 AP |
-
-### Configuration – HZPExtraItemsCFG.jsonc
-
-```jsonc
-{
-  "HZPExtraItemsCFG": {
-    "ArmorAmount": 100,           // Armor points given by Armor item
-    "MultijumpIncrement": 1,      // Extra jumps per purchase
-    "MultijumpMax": 3,            // Maximum extra jumps allowed
-    "MadnessDuration": 10.0,      // Zombie Madness duration (seconds)
-    "KnifeBlinkCharges": 3,       // Blink charges per purchase
-    "KnifeBlinkDistance": 300.0,  // Blink distance (engine units)
-    "KnifeBlinkCooldown": 2.0,    // Cooldown between blinks (seconds)
-    "StartingAmmoPacks": 0,       // AP given on connect
-    "RoundSurviveReward": 3,      // AP for surviving as human
-    "ZombieKillReward": 2,        // AP for zombie killing a human
-    "Items": [
-      { "Key": "armor",         "Name": "Armor (100 AP)",                       "Price": 3, "Enable": true, "Team": "Human"  },
-      { "Key": "he_grenade",    "Name": "HE Grenade",                           "Price": 2, "Enable": true, "Team": "Human"  },
-      { "Key": "flash_grenade", "Name": "Flash Grenade",                        "Price": 2, "Enable": true, "Team": "Human"  },
-      { "Key": "smoke_grenade", "Name": "Smoke Grenade",                        "Price": 2, "Enable": true, "Team": "Human"  },
-      { "Key": "antidote",      "Name": "Antidote (cure to human)",             "Price": 8, "Enable": true, "Team": "Zombie" },
-      { "Key": "zombie_madness","Name": "Zombie Madness (10s invulnerability)", "Price": 6, "Enable": true, "Team": "Zombie" },
-      { "Key": "multijump",     "Name": "Multi-Jump (+1 jump)",                 "Price": 4, "Enable": true, "Team": "Human"  },
-      { "Key": "knife_blink",   "Name": "Knife Blink (3 charges)",              "Price": 5, "Enable": true, "Team": "Human"  }
-    ]
-  }
-}
-```
-
-Items can be disabled by setting `"Enable": false`. Custom items can be added by extending the source code.
+- The weapons menu (`sw_buyweapons`) is available to any alive CT player at any time — there is no per-round single-use restriction.
+- Extra items respect their corresponding `HZPMainCFG` toggles: if a toggle is `false`, the item is hidden from the menu and purchase is rejected with a refund.
+- All chat messages are prefixed exactly once via the centralized `ChatMsg` helper.
 
 ---
-
-## Round-Start Weapons Menu
-
-Shown automatically at round start to eligible humans (when `GiveMenuOnRoundStart: true`).  
-Can also be opened via **Buy Weapons** in the main menu or `sw_buyweapons` command (once per round).
-
-### Configuration – HZPWeaponsCFG.jsonc
-
-```jsonc
-{
-  "HZPWeaponsCFG": {
-    // Enable the weapon selection menu system
-    "EnableWeaponsMenu": true,
-    // Show weapon menus to eligible humans at round start
-    "GiveMenuOnRoundStart": true,
-    // Allow players to re-open weapon menu via main menu / sw_buyweapons (once per round)
-    "AllowOpenFromGameMenu": true,
-    // Reserve ammo given to each weapon chosen from the menu
-    "ReserveAmmoAmount": 9999,
-    "PrimaryWeapons": [
-      { "Name": "AK-47",    "Classname": "weapon_ak47" },
-      { "Name": "M4A4",     "Classname": "weapon_m4a1" },
-      { "Name": "M4A1-S",   "Classname": "weapon_m4a1_silencer" },
-      { "Name": "AWP",      "Classname": "weapon_awp" },
-      { "Name": "FAMAS",    "Classname": "weapon_famas" },
-      { "Name": "Galil AR", "Classname": "weapon_galilar" },
-      { "Name": "SG 553",   "Classname": "weapon_sg556" },
-      { "Name": "AUG",      "Classname": "weapon_aug" }
-    ],
-    "SecondaryWeapons": [
-      { "Name": "Desert Eagle",  "Classname": "weapon_deagle" },
-      { "Name": "P250",          "Classname": "weapon_p250" },
-      { "Name": "USP-S",         "Classname": "weapon_usp_silencer" },
-      { "Name": "Glock-18",      "Classname": "weapon_glock" },
-      { "Name": "Dual Berettas", "Classname": "weapon_elite" }
-    ],
-    // Supported classnames: weapon_hegrenade, weapon_flashbang, weapon_smokegrenade, weapon_incgrenade, weapon_decoy
-    "DefaultGrenades": [
-      "weapon_hegrenade",
-      "weapon_flashbang",
-      "weapon_smokegrenade"
-    ]
-  }
-}
-```
-
----
-
-## Manual Test Steps
-
-1. **Install** the plugin and start a CS2 server.
-2. **Main Menu**: Type `!menu` or `!zp` in chat, or run `hzp_menu` in console. Verify all 5 options appear.
-3. **Weapons Menu**: At round start (as a human) the weapons menu should auto-open. Also test via **Buy Weapons** in the main menu.
-4. **Extra Items Menu**: Type `!extras` or select **Buy Extra Items** from the main menu. Verify AP balance is shown and items match your team.
-5. **Give Ammo Packs**: Use `hzp_give_ap <yourname> 20` to grant 20 AP. Verify the target receives a chat notification.
-6. **Armor**: Buy Armor from the extra items menu. Verify armor increases in the HUD.
-7. **Grenades**: Buy HE/Flash/Smoke Grenade and verify the corresponding grenade is added to inventory.
-8. **Antidote**: As a zombie, buy Antidote. Verify you switch to CT team and become human.
-9. **Zombie Madness**: As a zombie, buy Zombie Madness. Have a human shoot you during the active window and verify you take no damage.
-10. **Multi-Jump**: Buy Multi-Jump as a human. Jump and press Space again in the air — verify you get an extra jump.
-11. **Knife Blink**: Buy Knife Blink. Type `!blink` to teleport forward. Verify charges decrease and cooldown is respected.
-12. **Trip Mine – plant**: Buy a Trip Mine as a human. Type `sw_plant` or `/plant`. Verify a green laser beam appears (max 2 at once).
-13. **Trip Mine – take**: With a planted mine, type `sw_take` or `/take`. Verify the mine is removed and your charge count increases by 1.
-14. **Trip Mine – trip explosion**: Buy and plant a mine. Have a zombie walk through the beam. Verify explosion triggers, only zombies are damaged (no human friendly fire), and the mine is removed.
-15. **Trip Mine – special role blocking**: As a Survivor, Sniper, Hero, Nemesis, or Assassin, attempt to use `sw_plant`. Verify the action is denied.
-16. **Unstuck**: Use the Unstuck option from the main menu while alive — verify you are teleported to a free position.
-17. **Join Spectator**: Use Join Spectator from the main menu — verify you move to the spectator team.
-18. **Zombie Class**: Use Choose Zombie Class from the main menu and select a class. Verify it takes effect after next respawn.
-
-

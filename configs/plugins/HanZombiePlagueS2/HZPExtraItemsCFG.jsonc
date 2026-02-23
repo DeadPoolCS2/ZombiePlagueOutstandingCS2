@@ -43,7 +43,7 @@
     // ── Trip Mine ─────────────────────────────────────────────────────────
     // Maximum simultaneously planted mines per player
     "TripMineMaxPerPlayer": 2,
-    // Mine HP; explodes when damaged to ExplodeThreshold (see HanMineS2.jsonc)
+    // Mine HP; explodes when damaged to ExplodeThreshold (see HZPMainCFG.jsonc › Mine)
     "TripMineHealth": 1800,
     // Total damage at the mine's centre (falls off with distance)
     "TripMineDamage": 2600.0,
