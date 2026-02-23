@@ -7,15 +7,15 @@
 			"PrecacheSoundEvent": "soundevents/hanzbplayers.vsndevts",
 			"Stats": 
 			{
-			  "Health": 15000,
-			  "MotherZombieHealth": 20000,
-			  "Speed": 1.5,
+			  "Health": 20000,
+			  "MotherZombieHealth": 30000,
+			  "Speed": 0.75,
 			  "Damage": 150.0,
-			  "Gravity": 0.5,
+			  "Gravity": 1.0,
 			  "Fov": 110,
 			  "EnableRegen": true,
 			  "HpRegenSec": 1.0,
-			  "HpRegenHp": 50,
+			  "HpRegenHp": 100,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -45,15 +45,15 @@
 			"PrecacheSoundEvent": "soundevents/hanzombieplagueplayers.vsndevts",
 			"Stats": 
 			{
-			  "Health": 30000,
+			  "Health": 25000,
 			  "MotherZombieHealth": 50000,
-			  "Speed": 2.0,
+			  "Speed": 1.05,
 			  "Damage": 150.0,
-			  "Gravity": 0.3,
+			  "Gravity": 0.5,
 			  "Fov": 120,
 			  "EnableRegen": true,
 			  "HpRegenSec": 1.0,
-			  "HpRegenHp": 50,
+			  "HpRegenHp": 100,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
