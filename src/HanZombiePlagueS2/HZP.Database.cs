@@ -24,17 +24,26 @@ public class HZPDatabase
     }
 
     /// <summary>
-    /// Resolves the MySQL connection string via the SwiftlyS2 database service.
-    /// SwiftlyS2 reads <c>configs/database.jsonc</c> and supports both object-style
-    /// entries and DSN strings (e.g. <c>mysql://user:pass@host/db</c>).
+    /// Resolves a valid MySQL connection string via the SwiftlyS2 database service.
+    /// Uses <c>GetConnection()</c> (the same approach as VIPCore) so the framework
+    /// handles DSN / object-style entries in <c>configs/database.jsonc</c> internally,
+    /// returning a standard key=value connection string that MySqlConnector accepts.
     /// When <paramref name="connectionName"/> is empty it falls back to the
-    /// <c>default_connection</c> defined in that file — no manual parsing required.
+    /// <c>default_connection</c> defined in that file.
     /// </summary>
     private string? ResolveConnectionString(string connectionName)
     {
         try
         {
-            var connStr = _core.Database.GetConnectionString(connectionName);
+            // GetConnection() lets SwiftlyS2 normalise DSN / object-style entries in
+            // database.jsonc into a standard key=value string that MySqlConnector can
+            // parse. We only need the ConnectionString property, so we dispose
+            // the connection object immediately after reading it.
+            string? connStr;
+            using (var conn = _core.Database.GetConnection(connectionName))
+            {
+                connStr = conn?.ConnectionString;
+            }
             return string.IsNullOrWhiteSpace(connStr) ? null : connStr;
         }
         catch (Exception ex)
