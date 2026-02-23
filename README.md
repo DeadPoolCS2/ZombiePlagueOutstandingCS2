@@ -400,6 +400,69 @@ Key capabilities:
 
 ---
 
+## Database / Ammo Packs Persistence
+
+### Enabling persistence
+
+Set the following three keys in `configs/plugins/HanZombiePlagueS2/HZPMainCFG.jsonc`:
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `AmmoPacksEnabled` | bool | `false` | Set to `true` to enable MySQL persistence for Ammo Pack balances. When `false` no database connection is opened and no warnings are emitted. |
+| `AmmoPacksConnectionName` | string | `""` | Name of the connection entry to look up in `configs/database.jsonc`. Leave empty to use the value of `default_connection` from that file. |
+| `AmmoPacksTableName` | string | `"hzp_ammo_packs"` | MySQL table name for per-player balances (alphanumeric and underscores only). The table is created automatically on first load. |
+
+```jsonc
+// HZPMainCFG.jsonc — database section
+"AmmoPacksEnabled": true,
+"AmmoPacksConnectionName": "",        // empty → uses default_connection from database.jsonc
+"AmmoPacksTableName": "hzp_ammo_packs"
+```
+
+> **Note**: The startup warning `[HZP-DB] configs/database.jsonc not found or connection '…' missing` only appears when `AmmoPacksEnabled` is `true` **and** the specified connection cannot be resolved. If persistence is disabled, no warning is shown.
+
+### configs/database.jsonc — connection formats
+
+`HanZombiePlagueS2` reads the shared `configs/database.jsonc` file. Each entry in `"connections"` may use either format:
+
+**Option A – object style** (host/port/database/user/password fields):
+
+```jsonc
+{
+  "default_connection": "main",
+  "connections": {
+    "main": {
+      "host": "127.0.0.1",
+      "port": 3306,
+      "database": "zombieplague",
+      "user": "root",
+      "password": ""
+    }
+  }
+}
+```
+
+**Option B – DSN string** (`mysql://user:password@host:port/database`):
+
+```jsonc
+{
+  "default_connection": "host",
+  "connections": {
+    "host": "mysql://root:secretpassword@127.0.0.1:3306/zombieplague"
+  }
+}
+```
+
+Both formats are fully supported. The plugin does **not** require any changes to the Swiftly core `configs/database.jsonc`.
+
+### Connection resolution order
+
+1. If `AmmoPacksConnectionName` is non-empty → look up that key in `connections`.
+2. If `AmmoPacksConnectionName` is empty → look up the key named by `default_connection`.
+3. If neither resolves → log a warning and skip all DB operations (no crash).
+
+---
+
 ## Security & Notes
 
 - The weapons menu (`sw_buyweapons`) is available to any alive CT player at any time — there is no per-round single-use restriction.

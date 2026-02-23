@@ -36,17 +36,52 @@ public class HZPDatabase
     private sealed class DbRegistry
     {
         [JsonPropertyName("default_connection")] public string DefaultConnection { get; set; } = "";
-        [JsonPropertyName("connections")] public Dictionary<string, DbConnectionEntry> Connections { get; set; } = new();
+        // Values may be either an object (host/port/database/user/password) or a string DSN
+        // (e.g. "mysql://user:password@host:3306/database") – both formats are supported.
+        [JsonPropertyName("connections")] public Dictionary<string, JsonElement> Connections { get; set; } = new();
+    }
+
+    /// <summary>
+    /// Parses a MySQL DSN string of the form <c>mysql://user:password@host:port/database</c>
+    /// into a <see cref="DbConnectionEntry"/>. Returns <c>null</c> on parse failure.
+    /// </summary>
+    private static DbConnectionEntry? ParseDsn(string? dsn)
+    {
+        if (string.IsNullOrWhiteSpace(dsn)) return null;
+        try
+        {
+            var uri = new Uri(dsn);
+            if (!uri.Scheme.Equals("mysql", StringComparison.OrdinalIgnoreCase)) return null;
+
+            var userInfo = uri.UserInfo.Split(':', 2);
+            // Empty user/password is intentionally allowed – some MySQL setups
+            // accept connections without credentials (e.g. unix socket auth).
+            var user = Uri.UnescapeDataString(userInfo[0]);
+            var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+
+            return new DbConnectionEntry
+            {
+                Host = uri.Host,
+                Port = uri.Port > 0 ? uri.Port : 3306,
+                Database = uri.AbsolutePath.TrimStart('/'),
+                User = user,
+                Password = password
+            };
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     /// <summary>
     /// Attempts to load a named connection from configs/database.jsonc (Swiftly shared registry).
-    /// Returns null if the file or connection cannot be found.
+    /// Supports both object-style entries and string DSN values (e.g. <c>mysql://…</c>).
+    /// When <paramref name="connectionName"/> is empty, falls back to <c>default_connection</c>.
+    /// Returns <c>null</c> if the file or connection cannot be found.
     /// </summary>
     private DbConnectionEntry? TryLoadFromRegistry(string connectionName)
     {
-        // Probe a few candidate paths relative to the current working directory,
-        // matching the directory layout expected on a Swiftly-based CS2 server.
         // Walk up the directory tree from the current working directory looking for
         // a configs/database.jsonc file. This is more robust than hard-coded relative paths.
         string? dir = Directory.GetCurrentDirectory();
@@ -67,15 +102,24 @@ public class HZPDatabase
                     new JsonSerializerOptions { AllowTrailingCommas = true });
                 if (registry is null) continue;
 
+                // Use the explicit connection name, or fall back to default_connection.
                 var key = string.IsNullOrWhiteSpace(connectionName)
                     ? registry.DefaultConnection
                     : connectionName;
 
                 if (!string.IsNullOrWhiteSpace(key) &&
-                    registry.Connections.TryGetValue(key, out var entry))
+                    registry.Connections.TryGetValue(key, out var element))
                 {
-                    _logger.LogInformation("[HZP-DB] Using connection '{Key}' from {File}.", key, candidate);
-                    return entry;
+                    // Support both string DSN ("mysql://…") and object-style connection entries.
+                    DbConnectionEntry? entry = element.ValueKind == JsonValueKind.String
+                        ? ParseDsn(element.GetString())
+                        : element.Deserialize<DbConnectionEntry>();
+
+                    if (entry is not null)
+                    {
+                        _logger.LogInformation("[HZP-DB] Using connection '{Key}' from {File}.", key, candidate);
+                        return entry;
+                    }
                 }
             }
             catch (Exception ex)
