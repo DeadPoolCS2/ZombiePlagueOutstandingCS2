@@ -65,8 +65,15 @@
     "StartingAmmoPacks": 0,
     // Ammo packs rewarded to a human that survives to round end
     "RoundSurviveReward": 3,
-    // Ammo packs rewarded to a zombie per human kill
+    // Ammo packs rewarded to a zombie per human kill/infection
+    // Source: zp_zombie_infect_reward "2"
     "ZombieKillReward": 2,
+    // Cumulative damage a human must deal to zombies to earn one Ammo Pack.
+    // Resets to 0 after each award (can award multiple packs in one hit if
+    // multiple thresholds are crossed). Source: zp_human_damage_reward "600"
+    "HumanDamageRewardThreshold": 600,
+    // Ammo packs awarded each time the damage threshold is crossed.
+    "HumanDamageReward": 1,
 
     // ── Item Definitions ─────────────────────────────────────────────────
     // Key      – internal identifier used in code (do not translate)
