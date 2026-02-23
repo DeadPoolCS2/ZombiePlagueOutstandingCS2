@@ -379,12 +379,16 @@ The table is created automatically on first load.
 
 ## Translations
 
-Translation files:
+The English translation file lives in the repository under:
 
 ```
-net10.0/HanZombiePlagueS2/resources/translations/en.jsonc
-net10.0/HanZombiePlagueS2/resources/translations/zh-CN.jsonc
+translations/en.jsonc
 ```
+
+At build/release time it is automatically copied to
+`resources/translations/en.jsonc` inside the plugin output, where SwiftlyS2
+expects to find it.  The `net10.0/` output directory is **not** committed to
+the repository; it is generated during the release build.
 
 Key strings:
 
@@ -402,7 +406,7 @@ Key strings:
 ## API
 
 `IHanZombiePlagueAPI` is exposed for external plugin integration.  
-Full docs: [`API/net10.0/HanZombiePlagueAPI.xml`](API/net10.0/HanZombiePlagueAPI.xml)
+The XML documentation is generated alongside the DLL during the release build.
 
 **Capabilities:**
 

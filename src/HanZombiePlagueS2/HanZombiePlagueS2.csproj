@@ -17,4 +17,10 @@
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
 		<ProjectReference Include="../IHanZombiePlagueAPI/IHanZombiePlagueAPI.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+		<None Include="../../translations/en.jsonc">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>resources/translations/en.jsonc</Link>
+		</None>
+	</ItemGroup>
 </Project>
