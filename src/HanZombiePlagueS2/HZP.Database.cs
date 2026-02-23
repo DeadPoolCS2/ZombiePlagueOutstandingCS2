@@ -1,6 +1,6 @@
+using System.Data.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MySqlConnector;
 using SwiftlyS2.Shared;
 
 namespace HanZombiePlagueS2;
@@ -24,34 +24,21 @@ public class HZPDatabase
     }
 
     /// <summary>
-    /// Resolves a valid MySQL connection string via the SwiftlyS2 database service.
-    /// Uses <c>GetConnection()</c> (the same approach as VIPCore) so the framework
-    /// handles DSN / object-style entries in <c>configs/database.jsonc</c> internally,
-    /// returning a standard key=value connection string that MySqlConnector accepts.
-    /// When <paramref name="connectionName"/> is empty it falls back to the
-    /// <c>default_connection</c> defined in that file.
+    /// Returns a <see cref="DbConnection"/> obtained directly from the SwiftlyS2 database
+    /// service — the same pattern as VIPCore's <c>DatabaseConnectionFactory.CreateConnection()</c>.
+    /// SwiftlyS2 handles DSN / object-style entries in <c>configs/database.jsonc</c>
+    /// internally, so no manual connection-string parsing is needed here.
+    /// The caller is responsible for disposing the returned connection.
     /// </summary>
-    private string? ResolveConnectionString(string connectionName)
+    private DbConnection CreateConnection(string connectionName)
     {
-        try
-        {
-            // GetConnection() lets SwiftlyS2 normalise DSN / object-style entries in
-            // database.jsonc into a standard key=value string that MySqlConnector can
-            // parse. We only need the ConnectionString property, so we dispose
-            // the connection object immediately after reading it.
-            string? connStr;
-            using (var conn = _core.Database.GetConnection(connectionName))
-            {
-                connStr = conn?.ConnectionString;
-            }
-            return string.IsNullOrWhiteSpace(connStr) ? null : connStr;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("[HZP-DB] Could not resolve connection '{Name}' from configs/database.jsonc: {Ex}",
-                string.IsNullOrWhiteSpace(connectionName) ? "(default)" : connectionName, ex.Message);
-            return null;
-        }
+        var conn = _core.Database.GetConnection(connectionName);
+        if (conn is not DbConnection dbConn)
+            throw new InvalidOperationException(
+                $"[HZP-DB] Connection '{(string.IsNullOrWhiteSpace(connectionName) ? "(default)" : connectionName)}' " +
+                $"is not a DbConnection (actual type: {conn?.GetType().FullName ?? "null"}). " +
+                "Only MySQL/MariaDB providers are supported.");
+        return dbConn;
     }
 
     private bool TryGetSafeTableName(out string tableName)
@@ -72,23 +59,13 @@ public class HZPDatabase
         if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
 
-        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
-        if (connStr is null)
-        {
-            _logger.LogWarning("[HZP-DB] Connection '{Name}' could not be resolved. " +
-                "Set AmmoPacksConnectionName in HZPMainCFG.jsonc to a key in configs/database.jsonc, " +
-                "or leave empty to use default_connection.",
-                string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName);
-            return;
-        }
-
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         if (cfg.EnableCommandDebugLogs)
             _logger.LogInformation("[HZP-DB] EnsureTable: connection='{Conn}' table='{Table}'", connName, table);
 
         try
         {
-            await using var conn = new MySqlConnection(connStr);
+            await using var conn = CreateConnection(cfg.AmmoPacksConnectionName);
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = $"""
@@ -114,20 +91,20 @@ public class HZPDatabase
         if (!cfg.AmmoPacksEnabled) return null;
         if (!TryGetSafeTableName(out var table)) return null;
 
-        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
-        if (connStr is null) return null;
-
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         if (cfg.EnableCommandDebugLogs)
             _logger.LogInformation("[HZP-DB] LoadAmmoPacks: connection='{Conn}' table='{Table}' steamid={SteamId}", connName, table, steamId);
 
         try
         {
-            await using var conn = new MySqlConnection(connStr);
+            await using var conn = CreateConnection(cfg.AmmoPacksConnectionName);
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = $"SELECT `ammopacks` FROM `{table}` WHERE `steamid`=@sid LIMIT 1;";
-            cmd.Parameters.AddWithValue("@sid", steamId);
+            var p = cmd.CreateParameter();
+            p.ParameterName = "@sid";
+            p.Value = steamId;
+            cmd.Parameters.Add(p);
             var result = await cmd.ExecuteScalarAsync();
             if (result is null || result is DBNull)
             {
@@ -154,16 +131,13 @@ public class HZPDatabase
         if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
 
-        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
-        if (connStr is null) return;
-
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         if (cfg.EnableCommandDebugLogs)
             _logger.LogInformation("[HZP-DB] SaveAmmoPacks: connection='{Conn}' table='{Table}' steamid={SteamId} ap={AP}", connName, table, steamId, ammoPacks);
 
         try
         {
-            await using var conn = new MySqlConnection(connStr);
+            await using var conn = CreateConnection(cfg.AmmoPacksConnectionName);
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = $"""
@@ -171,8 +145,14 @@ public class HZPDatabase
                 VALUES (@sid, @ap)
                 ON DUPLICATE KEY UPDATE `ammopacks` = @ap;
                 """;
-            cmd.Parameters.AddWithValue("@sid", steamId);
-            cmd.Parameters.AddWithValue("@ap", ammoPacks);
+            var pSid = cmd.CreateParameter();
+            pSid.ParameterName = "@sid";
+            pSid.Value = steamId;
+            cmd.Parameters.Add(pSid);
+            var pAp = cmd.CreateParameter();
+            pAp.ParameterName = "@ap";
+            pAp.Value = ammoPacks;
+            cmd.Parameters.Add(pAp);
             await cmd.ExecuteNonQueryAsync();
             if (cfg.EnableCommandDebugLogs)
                 _logger.LogInformation("[HZP-DB] SaveAmmoPacks: steamid={SteamId} ap={AP} SUCCESS.", steamId, ammoPacks);
@@ -193,16 +173,13 @@ public class HZPDatabase
         if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
 
-        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
-        if (connStr is null) return;
-
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         var playerList = players.ToList();
         if (playerList.Count == 0) return;
 
         try
         {
-            await using var conn = new MySqlConnection(connStr);
+            await using var conn = CreateConnection(cfg.AmmoPacksConnectionName);
             await conn.OpenAsync();
 
             foreach (var (steamId, ammoPacks) in playerList)
@@ -217,8 +194,14 @@ public class HZPDatabase
                         VALUES (@sid, @ap)
                         ON DUPLICATE KEY UPDATE `ammopacks` = @ap;
                         """;
-                    cmd.Parameters.AddWithValue("@sid", steamId);
-                    cmd.Parameters.AddWithValue("@ap", ammoPacks);
+                    var pSid = cmd.CreateParameter();
+                    pSid.ParameterName = "@sid";
+                    pSid.Value = steamId;
+                    cmd.Parameters.Add(pSid);
+                    var pAp = cmd.CreateParameter();
+                    pAp.ParameterName = "@ap";
+                    pAp.Value = ammoPacks;
+                    cmd.Parameters.Add(pAp);
                     await cmd.ExecuteNonQueryAsync();
                     if (cfg.EnableCommandDebugLogs)
                         _logger.LogInformation("[HZP-DB] SaveAllPlayers: steamid={SteamId} ap={AP} SUCCESS.", steamId, ammoPacks);
