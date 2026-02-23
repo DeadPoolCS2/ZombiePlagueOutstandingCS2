@@ -152,6 +152,7 @@
     // ── AP reward notifications ────────────────────────────────────────────
     "APRoundSurviveReward": "You survived the round! +{0} Ammo Packs (total: {1}).",
     "APZombieKillReward": "You infected a human! +{0} Ammo Packs (total: {1}).",
+    "APHumanDamageReward": "Damage bonus! +{0} Ammo Packs (total: {1}).",
 
     // ── Jetpack ───────────────────────────────────────────────────────────
     "ExtraItemsJetpackSuccess": "Jetpack equipped! Fuel: {0}. Hold CTRL+SPACE to fly, right-click to fire rockets. Ammo Packs remaining: {1}.",

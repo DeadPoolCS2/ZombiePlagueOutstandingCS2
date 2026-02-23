@@ -68,6 +68,11 @@ public class HZPGlobals
     // ── Extra Items / Ammo Packs ──────────────────────────────────────────────
     /// <summary>Per-player ammo-pack balance (keyed by PlayerID).</summary>
     public Dictionary<int, int> AmmoPacks = new Dictionary<int, int>();
+    /// <summary>
+    /// Accumulated damage dealt by each human to zombies this round (keyed by PlayerID).
+    /// Reset at round end and on disconnect. Used for damage-based AP reward.
+    /// </summary>
+    public Dictionary<int, int> DamageAccumulator = new Dictionary<int, int>();
 
     // ── Multijump ─────────────────────────────────────────────────────────────
     /// <summary>Number of extra jumps currently available to the player this round.</summary>

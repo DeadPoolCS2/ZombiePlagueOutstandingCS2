@@ -99,6 +99,13 @@ public class HZPExtraItemsCFG
     public int RoundSurviveReward { get; set; } = 3;
     /// <summary>Ammo packs awarded to a zombie that kills a human.</summary>
     public int ZombieKillReward { get; set; } = 2;
+    /// <summary>
+    /// Total damage a human must deal to zombies to earn one Ammo Pack reward.
+    /// Set to 0 to disable the damage-based reward. (CS 1.6 reference: 500)
+    /// </summary>
+    public int HumanDamageRewardThreshold { get; set; } = 500;
+    /// <summary>Ammo packs awarded each time a human crosses the damage threshold.</summary>
+    public int HumanDamageReward { get; set; } = 1;
 
     // ── Item list ─────────────────────────────────────────────────────────────
     /// <summary>List of extra items shown in the menu.</summary>

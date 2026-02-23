@@ -211,7 +211,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
             _zombieState.ExternalPreferences[steamId] = newClassName!;
         }
 
-        OnPreferenceChanged?.Invoke(steamId, newClassName);
+        OnPreferenceChanged?.Invoke(steamId, newClassName ?? string.Empty);
     }
 
 }

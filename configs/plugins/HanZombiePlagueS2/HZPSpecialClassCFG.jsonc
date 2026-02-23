@@ -2,20 +2,20 @@
   "HZPSpecialClassCFG": {
     "SpecialClassList": [
 		{
-			"Name": "母体僵尸",
+			"Name": "Mother Zombie",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanzbplayers.vsndevts",
 			"Stats": 
 			{
 			  "Health": 15000,
 			  "MotherZombieHealth": 20000,
-			  "Speed": 1.5,
+			  "Speed": 1.16,
 			  "Damage": 150.0,
-			  "Gravity": 0.5,
+			  "Gravity": 0.6,
 			  "Fov": 110,
 			  "EnableRegen": true,
 			  "HpRegenSec": 1.0,
-			  "HpRegenHp": 50,
+			  "HpRegenHp": 100,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -40,20 +40,20 @@
 			}
 		},
 		{
-			"Name": "复仇之神",
+			"Name": "Nemesis",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanzombieplagueplayers.vsndevts",
 			"Stats": 
 			{
-			  "Health": 30000,
-			  "MotherZombieHealth": 50000,
-			  "Speed": 2.0,
-			  "Damage": 150.0,
-			  "Gravity": 0.3,
+			  "Health": 120000,
+			  "MotherZombieHealth": 240000,
+			  "Speed": 1.0,
+			  "Damage": 250.0,
+			  "Gravity": 0.5,
 			  "Fov": 120,
 			  "EnableRegen": true,
 			  "HpRegenSec": 1.0,
-			  "HpRegenHp": 50,
+			  "HpRegenHp": 100,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -78,16 +78,16 @@
 			}
 		},
 		{
-			"Name": "暗杀者",
+			"Name": "Assassin",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanzbplayerstate.vsndevts",
 			"Stats": 
 			{
-			  "Health": 15000,
-			  "MotherZombieHealth": 35000,
-			  "Speed": 2.5,
-			  "Damage": 50.0,
-			  "Gravity": 0.4,
+			  "Health": 24000,
+			  "MotherZombieHealth": 48000,
+			  "Speed": 3.5,
+			  "Damage": 357.0,
+			  "Gravity": 0.5,
 			  "Fov": 120,
 			  "EnableRegen": true,
 			  "HpRegenSec": 2.0,

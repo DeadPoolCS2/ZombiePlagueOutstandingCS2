@@ -3,20 +3,20 @@
     "ZombieClassList": 
 	[
 		{
-			"Name": "红骷髅",
+			"Name": "Classic Zombie",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanhl1zombies.vsndevts",
 			"Stats": 
 			{
-			  "Health": 8000,
-			  "MotherZombieHealth": 18000,
-			  "Speed": 1.0,
-			  "Damage": 50.0,
-			  "Gravity": 0.7,
+			  "Health": 6000,
+			  "MotherZombieHealth": 15000,
+			  "Speed": 1.16,
+			  "Damage": 60.0,
+			  "Gravity": 0.6,
 			  "Fov": 110,
 			  "EnableRegen": true,
 			  "HpRegenSec": 5.0,
-			  "HpRegenHp": 30,
+			  "HpRegenHp": 100,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -41,20 +41,20 @@
 			}
 		},
 		{
-			"Name": "白骷髅",
+			"Name": "Raptor",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanhl1zombies.vsndevts",
 			"Stats": 
 			{
-			  "Health": 3000,
-			  "MotherZombieHealth": 13000,
-			  "Speed": 1.1,
-			  "Damage": 50.0,
-			  "Gravity": 0.8,
+			  "Health": 4800,
+			  "MotherZombieHealth": 12000,
+			  "Speed": 1.22,
+			  "Damage": 55.0,
+			  "Gravity": 1.0,
 			  "Fov": 110,
 			  "EnableRegen": true,
 			  "HpRegenSec": 5.0,
-			  "HpRegenHp": 30,
+			  "HpRegenHp": 60,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -79,20 +79,20 @@
 			}
 		},
 		{
-			"Name": "frozen",
-			"Enable": false,
+			"Name": "Tight Zombie",
+			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanhl1zombies.vsndevts",
 			"Stats": 
 			{
-			  "Health": 5000,
-			  "MotherZombieHealth": 15000,
-			  "Speed": 1.7,
-			  "Damage": 50.0,
-			  "Gravity": 0.7,
+			  "Health": 7500,
+			  "MotherZombieHealth": 18750,
+			  "Speed": 0.88,
+			  "Damage": 70.0,
+			  "Gravity": 0.8,
 			  "Fov": 110,
 			  "EnableRegen": true,
-			  "HpRegenSec": 1.0,
-			  "HpRegenHp": 150,
+			  "HpRegenSec": 3.0,
+			  "HpRegenHp": 100,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -117,19 +117,19 @@
 			}
 		},
 		{
-			"Name": "胖子",
-			"Enable": false,
+			"Name": "Mutant",
+			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanhl1zombies.vsndevts",
 			"Stats": 
 			{
-			  "Health": 5000,
-			  "MotherZombieHealth": 15000,
-			  "Speed": 1.7,
-			  "Damage": 50.0,
-			  "Gravity": 0.8,
+			  "Health": 6250,
+			  "MotherZombieHealth": 15625,
+			  "Speed": 0.98,
+			  "Damage": 80.0,
+			  "Gravity": 1.0,
 			  "Fov": 110,
 			  "EnableRegen": true,
-			  "HpRegenSec": 1.0,
+			  "HpRegenSec": 2.0,
 			  "HpRegenHp": 150,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
@@ -155,20 +155,20 @@
 			}
 		},
 		{
-			"Name": "异形女王",
+			"Name": "Predator Blue",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanzbplayerstate.vsndevts",
 			"Stats": 
 			{
-			  "Health": 2500,
-			  "MotherZombieHealth": 12500,
-			  "Speed": 2.0,
-			  "Damage": 50.0,
-			  "Gravity": 0.2,
+			  "Health": 5600,
+			  "MotherZombieHealth": 14000,
+			  "Speed": 1.12,
+			  "Damage": 70.0,
+			  "Gravity": 0.8,
 			  "Fov": 110,
 			  "EnableRegen": true,
-			  "HpRegenSec": 10.0,
-			  "HpRegenHp": 5,
+			  "HpRegenSec": 5.0,
+			  "HpRegenHp": 80,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
@@ -193,20 +193,20 @@
 			}
 		},
 		{
-			"Name": "女科学家丧尸",
+			"Name": "Regenerator",
 			"Enable": true,
 			"PrecacheSoundEvent": "soundevents/hanzbplayerstate.vsndevts",
 			"Stats": 
 			{
-			  "Health": 1800,
-			  "MotherZombieHealth": 12000,
-			  "Speed": 1.8,
+			  "Health": 4750,
+			  "MotherZombieHealth": 11875,
+			  "Speed": 1.0,
 			  "Damage": 50.0,
-			  "Gravity": 0.5,
+			  "Gravity": 1.0,
 			  "Fov": 110,
 			  "EnableRegen": true,
-			  "HpRegenSec": 10.0,
-			  "HpRegenHp": 5,
+			  "HpRegenSec": 5.0,
+			  "HpRegenHp": 350,
 			  "ZombieSoundVolume": 1.0,
 			  "IdleInterval": 70.0
 			},
