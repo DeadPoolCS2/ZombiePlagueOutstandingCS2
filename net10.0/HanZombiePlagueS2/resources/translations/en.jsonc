@@ -172,6 +172,9 @@
     "ExtraItemsReviveTokenAlready": "You already have a Revive Token active!",
     "ReviveTokenUsed": "Your Revive Token activated! You have been revived.",
 
+    // ── SCBA Suit (Extra Items) ────────────────────────────────────────────
+    "ExtraItemsScbaSuitSuccess": "You put on a Hazmat Suit and can resist one zombie attack! Ammo Packs remaining: {0}.",
+
     // ── Round start announcement ───────────────────────────────────────────
     "RoundStartAnnounce": "New round begins. | Your credits: {0} | Players connected: {1}",
 

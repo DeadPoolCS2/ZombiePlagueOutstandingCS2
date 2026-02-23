@@ -120,6 +120,22 @@ public class HZPExtraItemsMenu
         };
     }
 
+    /// <summary>Returns false when the HZPMainCFG feature toggle for this item is disabled.</summary>
+    private bool IsToggleEnabled(ExtraItemEntry item)
+    {
+        var cfg = _mainCFG.CurrentValue;
+        return item.Key switch
+        {
+            "he_grenade"       => cfg.FireGrenade,
+            "flash_grenade"    => cfg.LightGrenade,
+            "smoke_grenade"    => cfg.FreezeGrenade,
+            "inc_grenade"      => cfg.SpawnGiveIncGrenade,
+            "teleport_grenade" => cfg.TelportGrenade,
+            "scba_suit"        => cfg.CanUseScbaSuit,
+            _                  => true
+        };
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     //  Menu
     // ─────────────────────────────────────────────────────────────────────────
@@ -160,6 +176,7 @@ public class HZPExtraItemsMenu
         foreach (var item in cfg.Items)
         {
             if (!item.Enable) continue;
+            if (!IsToggleEnabled(item)) continue;
             if (!ItemAllowedForPlayer(item, playerId)) continue;
 
             anyVisible = true;
@@ -234,6 +251,13 @@ public class HZPExtraItemsMenu
             return;
         }
 
+        // Safety check: if the feature toggle was disabled after the menu was opened, refund silently.
+        if (!IsToggleEnabled(item))
+        {
+            AddAmmoPacks(playerId, item.Price);
+            return;
+        }
+
         int newAp = GetAmmoPacks(playerId);
 
         switch (item.Key)
@@ -270,6 +294,18 @@ public class HZPExtraItemsMenu
                 break;
             case "revive_token":
                 ApplyReviveToken(player, newAp);
+                break;
+            case "t_virus_grenade":
+                ApplyTVirusGrenade(player, newAp);
+                break;
+            case "inc_grenade":
+                ApplyIncGrenadeItem(player, newAp);
+                break;
+            case "teleport_grenade":
+                ApplyTeleportGrenadeItem(player, newAp);
+                break;
+            case "scba_suit":
+                ApplyScbaSuit(player, newAp);
                 break;
             default:
                 // Unknown item – refund
@@ -460,6 +496,54 @@ public class HZPExtraItemsMenu
         _globals.HasReviveToken[playerId] = true;
 
         _helpers.SendChatT(player, "ExtraItemsReviveTokenSuccess", remainingAP);
+    }
+
+    private void ApplyTVirusGrenade(IPlayer player, int remainingAP)
+    {
+        int playerId = player.PlayerID;
+        if (!IsZombie(playerId))
+        {
+            AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
+                .FirstOrDefault(i => i.Key == "t_virus_grenade")?.Price ?? 0);
+            _helpers.SendChatT(player, "ItemHumanCantUse");
+            return;
+        }
+
+        _helpers.TVirusGrenade(player);
+        _helpers.SendChatT(player, "ExtraItemsGrenadeSuccess",
+            _helpers.T(player, "ItemTVirusGrenade"), remainingAP);
+    }
+
+    private void ApplyIncGrenadeItem(IPlayer player, int remainingAP)
+    {
+        _helpers.GiveIncGrenade(player);
+        _helpers.SendChatT(player, "ExtraItemsGrenadeSuccess",
+            _helpers.T(player, "ItemIncGrenade"), remainingAP);
+    }
+
+    private void ApplyTeleportGrenadeItem(IPlayer player, int remainingAP)
+    {
+        _helpers.GiveTeleprotGrenade(player);
+        _helpers.SendChatT(player, "ExtraItemsGrenadeSuccess",
+            _helpers.T(player, "ItemTeleportGrenade"), remainingAP);
+    }
+
+    private void ApplyScbaSuit(IPlayer player, int remainingAP)
+    {
+        int playerId = player.PlayerID;
+        if (_globals.ScbaSuit.GetValueOrDefault(playerId))
+        {
+            AddAmmoPacks(playerId, _extraItemsCFG.CurrentValue.Items
+                .FirstOrDefault(i => i.Key == "scba_suit")?.Price ?? 0);
+            _helpers.SendChatT(player, "ItemSCBASuitAlready");
+            return;
+        }
+
+        var mainCFG = _mainCFG.CurrentValue;
+        _globals.ScbaSuit[playerId] = true;
+        _helpers.EmitSoundFormPlayer(player, mainCFG.ScbaSuitGetSound, 1.0f);
+        _helpers.SendChatT(player, "ExtraItemsScbaSuitSuccess", remainingAP);
+        _helpers.SendChatToAllT("ItemSCBASuitSuccessToAll", player.Name);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
