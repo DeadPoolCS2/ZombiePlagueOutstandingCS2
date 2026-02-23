@@ -151,6 +151,34 @@
         "Price": 8,
         "Enable": true,
         "Team": "Human"
+      },
+      {
+        "Key": "t_virus_grenade",
+        "Name": "T-Virus Grenade (infects humans in range)",
+        "Price": 6,
+        "Enable": true,
+        "Team": "Zombie"
+      },
+      {
+        "Key": "inc_grenade",
+        "Name": "Incendiary Bomb (CT-only fire grenade)",
+        "Price": 4,
+        "Enable": true,
+        "Team": "Human"
+      },
+      {
+        "Key": "teleport_grenade",
+        "Name": "Teleport Grenade (decoy teleporter)",
+        "Price": 3,
+        "Enable": true,
+        "Team": "Human"
+      },
+      {
+        "Key": "scba_suit",
+        "Name": "SCBA Suit (resist one zombie attack)",
+        "Price": 5,
+        "Enable": true,
+        "Team": "Human"
       }
     ]
   }
