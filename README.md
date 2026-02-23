@@ -1,9 +1,8 @@
 <div align="center">
   <h1><img width="600" height="131" alt="Han Zombie Plague S2" src="https://github.com/user-attachments/assets/d0316faa-c2d0-478f-a642-1e3c3651f1d4" /></h1>
-  <h2>Zombie Plague Outstanding — Counter-Strike 2</h2>
+  <h2>Zombie Outstanding — Counter-Strike 2</h2>
   <p>
-    A full-featured Zombie Plague plugin for CS2, built on the <strong>SwiftlyS2</strong> framework.<br>
-    Inspired by the legendary <em>Zombie Outstanding by LondoN eXtream</em> (CS 1.6).
+    A full-featured Zombie Plague plugin for CS2, built on the <strong>SwiftlyS2</strong> framework.
   </p>
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z31PY52N)
@@ -412,9 +411,3 @@ Full docs: [`API/net10.0/HanZombiePlagueAPI.xml`](API/net10.0/HanZombiePlagueAPI
 - **Events:** `HZP_OnPlayerInfect`, `HZP_OnNemesisSelected`, `HZP_OnGameStart`, `HZP_OnHumanWin`, `HZP_OnZombieWin`, and more.
 - **Player queries:** `IsZombie`, `IsNemesis`, `IsAssassin`, `IsSurvivor`, `CurrentMode`, etc.
 - **Actions:** Force-set roles and classes, give/take Ammo Packs, set glow / FOV / god mode.
-
----
-
-<div align="center">
-  Made with ❤️ — inspired by <em>Zombie Outstanding by LondoN eXtream</em> (CS 1.6 v7.1)
-</div>
