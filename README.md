@@ -379,12 +379,15 @@ The table is created automatically on first load.
 
 ## Translations
 
-Translation files:
+Translation files are kept under `translations/` in the repository root:
 
 ```
-net10.0/HanZombiePlagueS2/resources/translations/en.jsonc
-net10.0/HanZombiePlagueS2/resources/translations/zh-CN.jsonc
+translations/en.jsonc
 ```
+
+> **Note:** Only English (`en.jsonc`) is bundled. The build copies translations into
+> `resources/translations/` inside the published plugin folder. The `net10.0/` directory
+> is **not** committed — it is generated during the release build.
 
 Key strings:
 
@@ -402,7 +405,7 @@ Key strings:
 ## API
 
 `IHanZombiePlagueAPI` is exposed for external plugin integration.  
-Full docs: [`API/net10.0/HanZombiePlagueAPI.xml`](API/net10.0/HanZombiePlagueAPI.xml)
+Full docs: [`API/net10.0/HanZombiePlagueAPI.xml`](API/net10.0/HanZombiePlagueAPI.xml) (generated on release)
 
 **Capabilities:**
 
