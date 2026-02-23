@@ -41,6 +41,7 @@ public partial class HZPEvents
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly HZPDatabase _database;
+    private readonly HZPWeaponsMenu _weaponsMenu;
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -52,7 +53,8 @@ public partial class HZPEvents
         HanZombiePlagueAPI api,
         HZPExtraItemsMenu extraItemsMenu,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        HZPDatabase database)
+        HZPDatabase database,
+        HZPWeaponsMenu weaponsMenu)
     {
         _core = core;
         _logger = logger;
@@ -70,6 +72,7 @@ public partial class HZPEvents
         _extraItemsMenu = extraItemsMenu;
         _extraItemsCFG = extraItemsCFG;
         _database = database;
+        _weaponsMenu = weaponsMenu;
     }
 
     public void HookEvents()
@@ -189,6 +192,9 @@ public partial class HZPEvents
                 if (_globals.GameStart)
                     return HookResult.Continue;
 
+                // Auto-open weapons menu pre-infection (buy phase)
+                _weaponsMenu.ShowPrimaryMenuToAllEligible();
+
                 if (_globals.RoundVoxGroup != null)
                 {
                     //_logger.LogInformation($"播放背景音乐: {_globals.RoundVoxGroup.RoundMusicVox}");
@@ -207,6 +213,9 @@ public partial class HZPEvents
 
                 if (_globals.GameStart)
                     return HookResult.Continue;
+
+                // Auto-open weapons menu pre-infection (buy phase)
+                _weaponsMenu.ShowPrimaryMenuToAllEligible();
 
                 if (_globals.RoundVoxGroup != null)
                 {
@@ -241,6 +250,8 @@ public partial class HZPEvents
     {
         _service.SetRoundEndTime();
         _globals.SafeRoundStart = true;
+        _globals.InfectionStartedThisRound = false;
+        _globals.AdminForcedModeThisRound = false;
         var CFG = _mainCFG.CurrentValue;
         float configDist = CFG.Assassin.InvisibilityDist;
         _core.Scheduler.DelayBySeconds(1.0f, () =>
@@ -321,7 +332,7 @@ public partial class HZPEvents
                     if (reward > 0)
                     {
                         _extraItemsMenu.AddAmmoPacks(id, reward);
-                        _helpers.SendChatT(player, "APRoundSurviveReward", reward,
+                        _helpers.SendCenterT(player, "APRoundSurviveReward", reward,
                             _extraItemsMenu.GetAmmoPacks(id));
                     }
                 }
@@ -640,7 +651,7 @@ public partial class HZPEvents
                     if (reward > 0)
                     {
                         _extraItemsMenu.AddAmmoPacks(aId, reward);
-                        _helpers.SendChatT(attacker, "APZombieKillReward", reward,
+                        _helpers.SendCenterT(attacker, "APZombieKillReward", reward,
                             _extraItemsMenu.GetAmmoPacks(aId));
                     }
                 }
@@ -836,7 +847,7 @@ public partial class HZPEvents
                     accumulated -= packs * threshold;
                     int totalReward = packs * rewardPerThreshold;
                     _extraItemsMenu.AddAmmoPacks(aId, totalReward);
-                    _helpers.SendChatT(attacker, "APHumanDamageReward", totalReward,
+                    _helpers.SendCenterT(attacker, "APHumanDamageReward", totalReward,
                         _extraItemsMenu.GetAmmoPacks(aId));
                 }
                 _globals.DamageAccumulator[aId] = accumulated;
@@ -945,6 +956,16 @@ public partial class HZPEvents
 
         // Failsafe: persist every connected player's AP on map change.
         _ = SaveAllConnectedPlayersAsync();
+
+        // Start periodic autosave (every 60 s). Cancel any existing timer first.
+        _globals.g_hAutoSaveTimer?.Cancel();
+        _globals.g_hAutoSaveTimer = _core.Scheduler.RepeatBySeconds(60.0f, () =>
+        {
+            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
+                _logger.LogInformation("[HZP-DB] Autosave: saving all connected players.");
+            _ = SaveAllConnectedPlayersAsync();
+        });
+        _core.Scheduler.StopOnMapChange(_globals.g_hAutoSaveTimer);
     }
 
     /// <summary>

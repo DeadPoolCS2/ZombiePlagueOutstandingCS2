@@ -89,6 +89,7 @@
     "WeaponsMenuNotEligible": "你当前无法使用武器选择菜单。",
     "WeaponsMenuAlreadyUsed": "你本轮已经使用过武器选择菜单了！",
     "WeaponsMenuDisabledInMode": "当前游戏模式中无法使用购买武器菜单。",
+    "WeaponsMenuInfectionStarted": "武器选择菜单仅在感染开始前可用。",
 
     // ── 主游戏菜单 ─────────────────────────────────────────────────────────
     "GameMenuTitle": "ZP 游戏菜单",
@@ -189,6 +190,7 @@
     "AdminMenuStartGameMode": "启动游戏模式（在回合开始时使用）",
     "AdminMenuNoTargets": "没有可选目标。",
     "AdminMenuModeActivated": "游戏模式 {0} 已激活！",
+    "AdminMenuModeInfectionStarted": "自定义游戏模式只能在感染开始前启动！",
     "AdminMenuToggledZombieToAll": "管理员将玩家 {0} 感染了！",
     "AdminMenuToggledHumanToAll": "管理员将玩家 {0} 变为人类！",
     "AdminMenuMadeNemesisToAll": "管理员将玩家 {0} 变为复仇之神！",

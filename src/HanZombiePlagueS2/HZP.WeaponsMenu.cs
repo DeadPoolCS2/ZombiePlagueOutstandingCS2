@@ -78,9 +78,23 @@ public class HZPWeaponsMenu
             return;
         }
 
+        // Disable after infection has started or when admin forced a custom mode
+        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
+        {
+            _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
+            return;
+        }
+
         if (!IsEligibleHuman(player))
         {
             _helpers.SendChatT(player, "WeaponsMenuNotEligible");
+            return;
+        }
+
+        var id = player.PlayerID;
+        if (!_globals.CanBuyWeaponsThisRound.TryGetValue(id, out bool canBuy) || !canBuy)
+        {
+            _helpers.SendChatT(player, "WeaponsMenuAlreadyUsed");
             return;
         }
 
