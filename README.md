@@ -132,6 +132,7 @@ Open with `sw_extras` / `!extras` or via the main game menu.
 | Connect | `StartingAmmoPacks` (default: 0) |
 | Survive a round as human | `RoundSurviveReward` (default: 3) |
 | Zombie kills a human | `ZombieKillReward` (default: 2) |
+| Human deals 500 damage to zombies | `HumanDamageReward` per `HumanDamageRewardThreshold` damage (default: +1 per 500) |
 | Admin grant | `sw_give_ap <player> <amount>` |
 
 ### Item Catalogue
@@ -278,6 +279,8 @@ All grenades are configured in `HZPMainCFG.jsonc`.
     "StartingAmmoPacks": 0,
     "RoundSurviveReward": 3,
     "ZombieKillReward": 2,
+    "HumanDamageRewardThreshold": 500,
+    "HumanDamageReward": 1,
     "Items": [
       { "Key": "armor",           "Name": "Armor (100 points)",              "Price": 3,  "Enable": true, "Team": "Human"  },
       { "Key": "he_grenade",      "Name": "Incendiary Grenade",              "Price": 2,  "Enable": true, "Team": "Human"  },

@@ -308,6 +308,7 @@ public partial class HZPEvents
                 _globals.KnifeBlinkCooldownEnd.Remove(id);
                 _globals.ZombieMadnessActive.Remove(id);
                 _globals.PrevJumpPressed.Remove(id);
+                _globals.DamageAccumulator.Remove(id);
                 // Jetpack / Trip Mine / Revive Token
                 _extraItemsMenu.CleanupJetpack(id);
                 _globals.TripMineCharges.Remove(id);
@@ -816,6 +817,32 @@ public partial class HZPEvents
             _globals.g_IsInvisible[vId] = false;
         }
 
+        // Damage-based ammo pack reward (CS 1.6-style: 500 dmg dealt = +1 AP)
+        if (!attackerIsZombie && victimIsZombie && _globals.GameStart)
+        {
+            var cfg = _extraItemsCFG.CurrentValue;
+            int threshold = cfg.HumanDamageRewardThreshold;
+            int rewardPerThreshold = cfg.HumanDamageReward;
+
+            if (threshold > 0 && rewardPerThreshold > 0)
+            {
+                int dmg = @event.DmgHealth;
+                _globals.DamageAccumulator.TryGetValue(aId, out int accumulated);
+                accumulated += dmg;
+
+                int packs = accumulated / threshold;
+                if (packs > 0)
+                {
+                    accumulated -= packs * threshold;
+                    int totalReward = packs * rewardPerThreshold;
+                    _extraItemsMenu.AddAmmoPacks(aId, totalReward);
+                    _helpers.SendChatT(attacker, "APHumanDamageReward", totalReward,
+                        _extraItemsMenu.GetAmmoPacks(aId));
+                }
+                _globals.DamageAccumulator[aId] = accumulated;
+            }
+        }
+
         return HookResult.Continue;
     }
 
@@ -1114,6 +1141,7 @@ public partial class HZPEvents
 
         // Extra items cleanup
         _globals.AmmoPacks.Remove(id);
+        _globals.DamageAccumulator.Remove(id);
         _globals.ExtraJumps.Remove(id);
         _globals.JumpsUsed.Remove(id);
         _globals.KnifeBlinkCharges.Remove(id);
