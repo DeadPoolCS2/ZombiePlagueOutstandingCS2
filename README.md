@@ -419,11 +419,11 @@ Set the following three keys in `configs/plugins/HanZombiePlagueS2/HZPMainCFG.js
 "AmmoPacksTableName": "hzp_ammo_packs"
 ```
 
-> **Note**: The startup warning `[HZP-DB] configs/database.jsonc not found or connection '…' missing` only appears when `AmmoPacksEnabled` is `true` **and** the specified connection cannot be resolved. If persistence is disabled, no warning is shown.
+> **Note**: The startup warning `[HZP-DB] Connection '…' could not be resolved` only appears when `AmmoPacksEnabled` is `true` **and** the specified connection cannot be resolved. If persistence is disabled, no warning is shown.
 
 ### configs/database.jsonc — connection formats
 
-`HanZombiePlagueS2` reads the shared `configs/database.jsonc` file. Each entry in `"connections"` may use either format:
+`HanZombiePlagueS2` delegates all `configs/database.jsonc` reading to the **SwiftlyS2 database service** (the same API used by K4-Seasons and other SwiftlyS2 plugins), so every format the framework supports is automatically supported:
 
 **Option A – object style** (host/port/database/user/password fields):
 
@@ -453,13 +453,13 @@ Set the following three keys in `configs/plugins/HanZombiePlagueS2/HZPMainCFG.js
 }
 ```
 
-Both formats are fully supported. The plugin does **not** require any changes to the Swiftly core `configs/database.jsonc`.
+Both formats are handled natively by SwiftlyS2. The plugin does **not** require any changes to the Swiftly core `configs/database.jsonc`.
 
 ### Connection resolution order
 
-1. If `AmmoPacksConnectionName` is non-empty → look up that key in `connections`.
-2. If `AmmoPacksConnectionName` is empty → look up the key named by `default_connection`.
-3. If neither resolves → log a warning and skip all DB operations (no crash).
+1. If `AmmoPacksConnectionName` is non-empty → SwiftlyS2 looks up that key in `connections`.
+2. If `AmmoPacksConnectionName` is empty → SwiftlyS2 falls back to `default_connection`.
+3. If neither resolves → the plugin logs a warning and skips all DB operations (no crash).
 
 ---
 

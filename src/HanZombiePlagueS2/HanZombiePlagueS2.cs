@@ -61,6 +61,7 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         
         var collection = new ServiceCollection();
         collection.AddSwiftly(Core);
+        collection.AddSingleton<ISwiftlyCore>(Core);
         collection.AddSingleton<IHanZombiePlagueAPI>(_apiInstance);
         collection.AddSingleton(_apiInstance);
 

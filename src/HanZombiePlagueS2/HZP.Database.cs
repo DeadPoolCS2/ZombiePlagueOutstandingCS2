@@ -1,9 +1,7 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using SwiftlyS2.Shared;
 
 namespace HanZombiePlagueS2;
 
@@ -12,149 +10,39 @@ public class HZPDatabase
 {
     private readonly ILogger<HZPDatabase> _logger;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
+    private readonly ISwiftlyCore _core;
 
     // Only alphanumeric and underscores are allowed in the table name to prevent SQL injection.
-    private static readonly Regex _safeTableName = new(@"^[A-Za-z0-9_]+$", RegexOptions.Compiled);
+    private static readonly System.Text.RegularExpressions.Regex _safeTableName =
+        new(@"^[A-Za-z0-9_]+$", System.Text.RegularExpressions.RegexOptions.Compiled);
 
-    public HZPDatabase(ILogger<HZPDatabase> logger, IOptionsMonitor<HZPMainCFG> mainCFG)
+    public HZPDatabase(ILogger<HZPDatabase> logger, IOptionsMonitor<HZPMainCFG> mainCFG, ISwiftlyCore core)
     {
         _logger = logger;
         _mainCFG = mainCFG;
-    }
-
-    // ── database.jsonc support ────────────────────────────────────────────────
-
-    private sealed class DbConnectionEntry
-    {
-        [JsonPropertyName("host")] public string Host { get; set; } = "127.0.0.1";
-        [JsonPropertyName("port")] public int Port { get; set; } = 3306;
-        [JsonPropertyName("database")] public string Database { get; set; } = "";
-        [JsonPropertyName("user")] public string User { get; set; } = "root";
-        [JsonPropertyName("password")] public string Password { get; set; } = "";
-    }
-
-    private sealed class DbRegistry
-    {
-        [JsonPropertyName("default_connection")] public string DefaultConnection { get; set; } = "";
-        // Values may be either an object (host/port/database/user/password) or a string DSN
-        // (e.g. "mysql://user:password@host:3306/database") – both formats are supported.
-        [JsonPropertyName("connections")] public Dictionary<string, JsonElement> Connections { get; set; } = new();
+        _core = core;
     }
 
     /// <summary>
-    /// Parses a MySQL DSN string of the form <c>mysql://user:password@host:port/database</c>
-    /// into a <see cref="DbConnectionEntry"/>. Returns <c>null</c> on parse failure.
+    /// Resolves the MySQL connection string via the SwiftlyS2 database service.
+    /// SwiftlyS2 reads <c>configs/database.jsonc</c> and supports both object-style
+    /// entries and DSN strings (e.g. <c>mysql://user:pass@host/db</c>).
+    /// When <paramref name="connectionName"/> is empty it falls back to the
+    /// <c>default_connection</c> defined in that file — no manual parsing required.
     /// </summary>
-    private static DbConnectionEntry? ParseDsn(string? dsn)
+    private string? ResolveConnectionString(string connectionName)
     {
-        if (string.IsNullOrWhiteSpace(dsn)) return null;
         try
         {
-            var uri = new Uri(dsn);
-            if (!uri.Scheme.Equals("mysql", StringComparison.OrdinalIgnoreCase)) return null;
-
-            var userInfo = uri.UserInfo.Split(':', 2);
-            // Empty user/password is intentionally allowed – some MySQL setups
-            // accept connections without credentials (e.g. unix socket auth).
-            var user = Uri.UnescapeDataString(userInfo[0]);
-            var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
-
-            return new DbConnectionEntry
-            {
-                Host = uri.Host,
-                Port = uri.Port > 0 ? uri.Port : 3306,
-                Database = uri.AbsolutePath.TrimStart('/'),
-                User = user,
-                Password = password
-            };
+            var connStr = _core.Database.GetConnectionString(connectionName);
+            return string.IsNullOrWhiteSpace(connStr) ? null : connStr;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning("[HZP-DB] Could not resolve connection '{Name}' from configs/database.jsonc: {Ex}",
+                string.IsNullOrWhiteSpace(connectionName) ? "(default)" : connectionName, ex.Message);
             return null;
         }
-    }
-
-    /// <summary>
-    /// Attempts to load a named connection from configs/database.jsonc (Swiftly shared registry).
-    /// Supports both object-style entries and string DSN values (e.g. <c>mysql://…</c>).
-    /// When <paramref name="connectionName"/> is empty, falls back to <c>default_connection</c>.
-    /// Returns <c>null</c> if the file or connection cannot be found.
-    /// </summary>
-    private DbConnectionEntry? TryLoadFromRegistry(string connectionName)
-    {
-        // Walk up the directory tree from the current working directory looking for
-        // a configs/database.jsonc file. This is more robust than hard-coded relative paths.
-        string? dir = Directory.GetCurrentDirectory();
-        const int maxLevels = 6;
-        for (int i = 0; i < maxLevels && dir is not null; i++, dir = Directory.GetParent(dir)?.FullName)
-        {
-            string candidate = Path.Combine(dir, "configs", "database.jsonc");
-            if (!File.Exists(candidate))
-                continue;
-
-            try
-            {
-                var json = File.ReadAllText(candidate);
-                // Strip JSONC comments: both single-line // ... and block /* ... */ comments.
-                var stripped = Regex.Replace(json, @"/\*.*?\*/|//[^\r\n]*", "",
-                    RegexOptions.Singleline);
-                var registry = JsonSerializer.Deserialize<DbRegistry>(stripped,
-                    new JsonSerializerOptions { AllowTrailingCommas = true });
-                if (registry is null) continue;
-
-                // Use the explicit connection name, or fall back to default_connection.
-                var key = string.IsNullOrWhiteSpace(connectionName)
-                    ? registry.DefaultConnection
-                    : connectionName;
-
-                if (!string.IsNullOrWhiteSpace(key) &&
-                    registry.Connections.TryGetValue(key, out var element))
-                {
-                    // Support both string DSN ("mysql://…") and object-style connection entries.
-                    DbConnectionEntry? entry = element.ValueKind == JsonValueKind.String
-                        ? ParseDsn(element.GetString())
-                        : element.Deserialize<DbConnectionEntry>();
-
-                    if (entry is not null)
-                    {
-                        _logger.LogInformation("[HZP-DB] Using connection '{Key}' from {File}.", key, candidate);
-                        return entry;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("[HZP-DB] Could not parse {File}: {Ex}", candidate, ex.Message);
-            }
-        }
-
-        return null;
-    }
-
-    private string BuildConnectionString()
-    {
-        var cfg = _mainCFG.CurrentValue;
-        var entry = TryLoadFromRegistry(cfg.AmmoPacksConnectionName);
-
-        if (entry is not null)
-        {
-            return new MySqlConnectionStringBuilder
-            {
-                Server = entry.Host,
-                Port = (uint)entry.Port,
-                Database = entry.Database,
-                UserID = entry.User,
-                Password = entry.Password,
-                ConnectionTimeout = 5,
-                AllowPublicKeyRetrieval = false
-            }.ConnectionString;
-        }
-
-        // Fall back: no database.jsonc found – DB operations will fail gracefully.
-        _logger.LogWarning("[HZP-DB] configs/database.jsonc not found or connection '{Name}' missing. " +
-            "Set AmmoPacksConnectionName in HZPMainCFG.jsonc and ensure configs/database.jsonc exists.",
-            cfg.AmmoPacksConnectionName);
-        return string.Empty;
     }
 
     private bool TryGetSafeTableName(out string tableName)
@@ -174,8 +62,16 @@ public class HZPDatabase
         var cfg = _mainCFG.CurrentValue;
         if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
-        var connStr = BuildConnectionString();
-        if (string.IsNullOrEmpty(connStr)) return;
+
+        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
+        if (connStr is null)
+        {
+            _logger.LogWarning("[HZP-DB] Connection '{Name}' could not be resolved. " +
+                "Set AmmoPacksConnectionName in HZPMainCFG.jsonc to a key in configs/database.jsonc, " +
+                "or leave empty to use default_connection.",
+                string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName);
+            return;
+        }
 
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         if (cfg.EnableCommandDebugLogs)
@@ -208,8 +104,9 @@ public class HZPDatabase
         var cfg = _mainCFG.CurrentValue;
         if (!cfg.AmmoPacksEnabled) return null;
         if (!TryGetSafeTableName(out var table)) return null;
-        var connStr = BuildConnectionString();
-        if (string.IsNullOrEmpty(connStr)) return null;
+
+        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
+        if (connStr is null) return null;
 
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         if (cfg.EnableCommandDebugLogs)
@@ -247,8 +144,9 @@ public class HZPDatabase
         var cfg = _mainCFG.CurrentValue;
         if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
-        var connStr = BuildConnectionString();
-        if (string.IsNullOrEmpty(connStr)) return;
+
+        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
+        if (connStr is null) return;
 
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         if (cfg.EnableCommandDebugLogs)
@@ -285,8 +183,9 @@ public class HZPDatabase
         var cfg = _mainCFG.CurrentValue;
         if (!cfg.AmmoPacksEnabled) return;
         if (!TryGetSafeTableName(out var table)) return;
-        var connStr = BuildConnectionString();
-        if (string.IsNullOrEmpty(connStr)) return;
+
+        var connStr = ResolveConnectionString(cfg.AmmoPacksConnectionName);
+        if (connStr is null) return;
 
         var connName = string.IsNullOrWhiteSpace(cfg.AmmoPacksConnectionName) ? "(default)" : cfg.AmmoPacksConnectionName;
         var playerList = players.ToList();
