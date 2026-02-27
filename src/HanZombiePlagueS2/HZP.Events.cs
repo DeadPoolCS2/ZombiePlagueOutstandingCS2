@@ -1131,9 +1131,6 @@ public partial class HZPEvents
             }
 
             ulong steamId = player.SteamID;
-            if (steamId != 0)
-                _globals.PlayerSteamIdCache[id] = steamId;
-
             if (steamId == 0)
             {
                 if (attemptsLeft > 0)
@@ -1154,18 +1151,7 @@ public partial class HZPEvents
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
                     var current = _core.PlayerManager.GetPlayer(id);
-                    if (current == null || !current.IsValid || current.IsFakeClient)
-                    {
-                        _ammoPacksLoadInProgress.Remove(id);
-                        return;
-                    }
-
-                    // Ignore stale async results if this slot was already reused.
-                    ulong currentSteamId = current.SteamID;
-                    if (currentSteamId == 0)
-                        _globals.PlayerSteamIdCache.TryGetValue(id, out currentSteamId);
-
-                    if (currentSteamId != steamId)
+                    if (current == null || !current.IsValid)
                     {
                         _ammoPacksLoadInProgress.Remove(id);
                         return;
@@ -1194,18 +1180,17 @@ public partial class HZPEvents
         }
 
         var id = @event.PlayerId;
+        _ammoPacksLoadInProgress.Remove(id);
 
         // Defensive guard: if the slot is already occupied again, this disconnect event
         // belongs to an older session and must not wipe the new player's AP/state.
         var player = _core.PlayerManager.GetPlayer(id);
-        if (player != null && player.IsValid && !player.IsFakeClient)
-            return;
-
-        _ammoPacksLoadInProgress.Remove(id);
-
-        // Persist AP to DB before clearing in-memory state
         ulong steamId = 0;
-        _globals.PlayerSteamIdCache.TryGetValue(id, out steamId);
+        if (player != null && player.IsValid && !player.IsFakeClient)
+            steamId = player.SteamID;
+
+        if (steamId == 0)
+            _globals.PlayerSteamIdCache.TryGetValue(id, out steamId);
 
         if (steamId != 0)
         {
