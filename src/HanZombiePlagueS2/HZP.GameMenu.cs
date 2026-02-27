@@ -8,6 +8,7 @@ using SwiftlyS2.Shared.Misc;
 using SwiftlyS2.Shared.Natives;
 using SwiftlyS2.Shared.Players;
 using DrawingColor = System.Drawing.Color;
+using Vector = SwiftlyS2.Shared.Natives.Vector;
 
 namespace HanZombiePlagueS2;
 
@@ -203,6 +204,52 @@ public class HZPGameMenu
     //  Unstuck logic
     // ─────────────────────────────────────────────────────────────────────────
 
+    private const float MinSafeWorldZ = -8192f;
+    private const float MaxSafeWorldZ = 16384f;
+    private const float MaxUnstuckStepDrop = 96f;
+
+    private bool IsSafeTeleportDestination(IPlayer player, Vector origin, Vector candidate)
+    {
+        if (candidate.Z < MinSafeWorldZ || candidate.Z > MaxSafeWorldZ)
+            return false;
+
+        float dx = candidate.X - origin.X;
+        float dy = candidate.Y - origin.Y;
+        float dz = candidate.Z - origin.Z;
+
+        // Avoid giant jumps; unstuck should only do local corrections.
+        float horizontalDist = MathF.Sqrt(dx * dx + dy * dy);
+        if (horizontalDist > 180f)
+            return false;
+
+        // Never push player too far below their current floor level.
+        if (dz < -MaxUnstuckStepDrop)
+            return false;
+
+        // Avoid teleporting inside another player, which often results in immediate re-stuck.
+        foreach (var other in _core.PlayerManager.GetAllPlayers())
+        {
+            if (other == null || !other.IsValid || other.PlayerID == player.PlayerID)
+                continue;
+
+            var otherPawn = other.PlayerPawn;
+            if (otherPawn == null || !otherPawn.IsValid)
+                continue;
+
+            var otherPos = otherPawn.AbsOrigin;
+            if (otherPos == null)
+                continue;
+
+            float ox = otherPos.Value.X - candidate.X;
+            float oy = otherPos.Value.Y - candidate.Y;
+            float oz = MathF.Abs(otherPos.Value.Z - candidate.Z);
+            if ((ox * ox + oy * oy) <= (24f * 24f) && oz <= 72f)
+                return false;
+        }
+
+        return true;
+    }
+
     private void TryUnstuck(IPlayer player)
     {
         if (player == null || !player.IsValid) return;
@@ -220,24 +267,41 @@ public class HZPGameMenu
         var origin = pawn.AbsOrigin;
         if (origin == null) return;
 
-        // Try a series of small random offsets until the player is no longer stuck.
-        // This is a best-effort implementation.
-        var offsets = new (float x, float y, float z)[]
+        var angles = pawn.EyeAngles;
+        angles.ToDirectionVectors(out Vector forward, out Vector right, out _);
+
+        // Prioritize small forward/side corrections before wider attempts.
+        var attempts = new (float fwd, float side, float up)[]
         {
-            (50, 0, 0), (-50, 0, 0), (0, 50, 0), (0, -50, 0),
-            (50, 50, 0), (-50, 50, 0), (50, -50, 0), (-50, -50, 0),
-            (0, 0, 50), (70, 0, 50), (-70, 0, 50)
+            (28f, 0f, 18f),
+            (20f, 22f, 18f),
+            (20f, -22f, 18f),
+            (-20f, 0f, 20f),
+            (36f, 0f, 28f),
+            (0f, 34f, 24f),
+            (0f, -34f, 24f),
+            (-32f, 28f, 24f),
+            (-32f, -28f, 24f),
+            (58f, 0f, 36f)
         };
 
-        var angles = pawn.EyeAngles;
-        foreach (var (dx, dy, dz) in offsets)
+        var current = origin.Value;
+        foreach (var (fwd, side, up) in attempts)
         {
-            var dest = new Vector(origin.Value.X + dx, origin.Value.Y + dy, origin.Value.Z + dz);
-            pawn.Teleport(dest, angles, Vector.Zero);
-            break; // simple first-offset strategy
+            var candidate = new Vector(
+                current.X + (forward.X * fwd) + (right.X * side),
+                current.Y + (forward.Y * fwd) + (right.Y * side),
+                current.Z + up);
+
+            if (!IsSafeTeleportDestination(player, current, candidate))
+                continue;
+
+            pawn.Teleport(candidate, angles, Vector.Zero);
+            _helpers.SendChatT(player, "UnstuckSuccess");
+            return;
         }
 
-        _helpers.SendChatT(player, "UnstuckSuccess");
+        _helpers.SendChatT(player, "UnstuckNoSafePosition");
     }
 
     // ─────────────────────────────────────────────────────────────────────────

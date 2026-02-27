@@ -23,6 +23,7 @@ public class HZPExtraItemsMenu
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
+    private readonly HZPGameMode _gameMode;
 
     public HZPExtraItemsMenu(
         ISwiftlyCore core,
@@ -31,7 +32,8 @@ public class HZPExtraItemsMenu
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        IOptionsMonitor<HZPMainCFG> mainCFG)
+        IOptionsMonitor<HZPMainCFG> mainCFG,
+        HZPGameMode gameMode)
     {
         _core = core;
         _logger = logger;
@@ -40,6 +42,7 @@ public class HZPExtraItemsMenu
         _menuHelper = menuHelper;
         _extraItemsCFG = extraItemsCFG;
         _mainCFG = mainCFG;
+        _gameMode = gameMode;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -121,6 +124,22 @@ public class HZPExtraItemsMenu
     }
 
     /// <summary>Returns false when the HZPMainCFG feature toggle for this item is disabled.</summary>
+
+    private bool IsSpecialOrCustomModeActive()
+    {
+        if (_globals.AdminForcedModeThisRound)
+            return true;
+
+        return _gameMode.CurrentMode is GameModeType.Nemesis
+            or GameModeType.Survivor
+            or GameModeType.Sniper
+            or GameModeType.Swarm
+            or GameModeType.Plague
+            or GameModeType.Assassin
+            or GameModeType.AVS
+            or GameModeType.Hero;
+    }
+
     private bool IsToggleEnabled(ExtraItemEntry item)
     {
         var cfg = _mainCFG.CurrentValue;
@@ -154,6 +173,12 @@ public class HZPExtraItemsMenu
         if (!_globals.GameStart)
         {
             _helpers.SendChatT(player, "ExtraItemsRoundNotActive");
+            return;
+        }
+
+        if (IsSpecialOrCustomModeActive())
+        {
+            _helpers.SendChatT(player, "ExtraItemsDisabledInMode");
             return;
         }
 
@@ -843,7 +868,35 @@ public class HZPExtraItemsMenu
                 mine.Beam = beamEnt;
             }
 
-            // Smoke-trail particle as mine visual
+            // Mine body model visual
+            var mineCfgLocal = _mainCFG.CurrentValue.Mine;
+            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic");
+            if (modelEnt != null && modelEnt.IsValid && modelEnt.IsValidEntity)
+            {
+                if (!float.TryParse(mineCfgLocal.ModelAngleFix, System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture, out float modelYawFix))
+                    modelYawFix = 90f;
+
+                var modelAngles = new QAngle(0f, angles.Y + modelYawFix, 0f);
+                if (!string.IsNullOrWhiteSpace(mineCfgLocal.Model))
+                    modelEnt.SetModel(mineCfgLocal.Model);
+
+                // Ensure model is transmitted/visible.
+                const uint EF_NODRAW = 32;
+                const uint EF_NODRAW_BUT_TRANSMIT = 1024;
+                modelEnt.Effects &= ~(EF_NODRAW | EF_NODRAW_BUT_TRANSMIT);
+                modelEnt.EffectsUpdated();
+
+                modelEnt.Teleport(minePos, modelAngles, Vector.Zero);
+                modelEnt.DispatchSpawn();
+                modelEnt.Render = ParseColor(mineCfgLocal.GlowColor, 0, 255, 0, 255);
+                modelEnt.RenderMode = RenderMode_t.kRenderNormal;
+                modelEnt.RenderModeUpdated();
+                modelEnt.RenderUpdated();
+                mine.ModelVisual = modelEnt;
+            }
+
+            // Lightweight particle marker at mine origin
             var particleEnt = _core.EntitySystem.CreateEntityByDesignerName<CParticleSystem>("info_particle_system");
             if (particleEnt != null && particleEnt.IsValid && particleEnt.IsValidEntity)
             {
@@ -851,7 +904,7 @@ public class HZPExtraItemsMenu
                 particleEnt.EffectName = "particles/survival_fx/danger_trail_spores_world.vpcf";
                 particleEnt.AcceptInput("Start", "");
                 particleEnt.DispatchSpawn();
-                particleEnt.Teleport(minePos, new QAngle(), new Vector(0, 0, 0));
+                particleEnt.Teleport(minePos, new QAngle(), Vector.Zero);
                 mine.Visual = particleEnt;
             }
         });
@@ -1034,8 +1087,11 @@ public class HZPExtraItemsMenu
             mine.Beam.AcceptInput("Kill", 0);
         if (mine.Visual != null && mine.Visual.IsValid && mine.Visual.IsValidEntity)
             mine.Visual.AcceptInput("Kill", 0);
-        mine.Beam   = null;
+        if (mine.ModelVisual != null && mine.ModelVisual.IsValid && mine.ModelVisual.IsValidEntity)
+            mine.ModelVisual.AcceptInput("Kill", 0);
+        mine.Beam = null;
         mine.Visual = null;
+        mine.ModelVisual = null;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -434,11 +434,11 @@ public partial class HZPHelpers
 
         });
 
-        _globals.GlowEntity.Add(controller, new GlowEntity()
+        _globals.GlowEntity[controller] = new GlowEntity()
         {
             Glow = modelGlow,
             Relay = modelRelay
-        });
+        };
     }
 
     public void RemoveGlow(IPlayer player)
