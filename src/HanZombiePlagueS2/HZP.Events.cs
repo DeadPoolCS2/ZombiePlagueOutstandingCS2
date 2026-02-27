@@ -310,6 +310,9 @@ public partial class HZPEvents
                 _helpers.RemoveGlow(player);
 
                 var id = player.PlayerID;
+                bool wasZombie = false;
+                _globals.IsZombie.TryGetValue(id, out wasZombie);
+
                 _globals.IsZombie[id] = false;
                 _globals.IsSurvivor[id] = false;
                 _globals.IsAssassin[id] = false;
@@ -333,8 +336,6 @@ public partial class HZPEvents
                 _extraItemsMenu.CleanupJetpack(id);
                 _globals.TripMineCharges.Remove(id);
                 _globals.HasReviveToken.Remove(id);
-                bool wasZombie = false;
-                _globals.IsZombie.TryGetValue(id, out wasZombie);
                 if (!wasZombie && player.Controller != null && player.Controller.IsValid && player.Controller.PawnIsAlive)
                 {
                     int reward = _extraItemsCFG.CurrentValue.RoundSurviveReward;
