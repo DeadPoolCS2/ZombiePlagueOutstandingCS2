@@ -42,6 +42,7 @@ public partial class HZPEvents
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly HZPDatabase _database;
     private readonly HZPWeaponsMenu _weaponsMenu;
+    private readonly HashSet<int> _ammoPacksLoadInProgress = new HashSet<int>();
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -1109,32 +1110,64 @@ public partial class HZPEvents
         }
 
         _globals.IsZombie[id] = _globals.GameStart;
+        _ammoPacksLoadInProgress.Remove(id);
 
-        // Load AP from DB (async) or fall back to starting packs
-        var player = _core.PlayerManager.GetPlayer(id);
+        // Load AP from DB once SteamID is available; avoid overwriting rewards gained while async load is running.
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
-        if (player != null && player.IsValid && !player.IsFakeClient)
+        const int maxAttempts = 20;
+        const float retryDelaySeconds = 0.5f;
+
+        void TryLoadAmmoPacks(int attemptsLeft)
         {
+            var player = _core.PlayerManager.GetPlayer(id);
+            if (player == null || !player.IsValid || player.IsFakeClient)
+            {
+                if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
+                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
             ulong steamId = player.SteamID;
+            if (steamId == 0)
+            {
+                if (attemptsLeft > 0)
+                {
+                    _core.Scheduler.DelayBySeconds(retryDelaySeconds, () => TryLoadAmmoPacks(attemptsLeft - 1));
+                    return;
+                }
+
+                if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
+                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
             _ = Task.Run(async () =>
             {
                 int? savedAP = await _database.LoadAmmoPacksAsync(steamId);
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
-                    // Guard: player may have disconnected before the DB responded
                     var current = _core.PlayerManager.GetPlayer(id);
-                    if (current == null || !current.IsValid) return;
+                    if (current == null || !current.IsValid)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    int currentAp = _extraItemsMenu.GetAmmoPacks(id);
                     if (savedAP.HasValue)
-                        _extraItemsMenu.SetAmmoPacks(id, savedAP.Value);
-                    else if (startingAP > 0)
-                        _extraItemsMenu.AddAmmoPacks(id, startingAP);
+                        _extraItemsMenu.SetAmmoPacks(id, Math.Max(currentAp, savedAP.Value));
+                    else if (startingAP > 0 && currentAp <= 0)
+                        _extraItemsMenu.SetAmmoPacks(id, startingAP);
+
+                    _ammoPacksLoadInProgress.Remove(id);
                 });
             });
         }
-        else if (startingAP > 0)
-        {
-            _extraItemsMenu.AddAmmoPacks(id, startingAP);
-        }
+
+        if (_ammoPacksLoadInProgress.Add(id))
+            TryLoadAmmoPacks(maxAttempts);
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)
@@ -1145,6 +1178,7 @@ public partial class HZPEvents
         }
 
         var id = @event.PlayerId;
+        _ammoPacksLoadInProgress.Remove(id);
 
         // Persist AP to DB before clearing in-memory state
         var player = _core.PlayerManager.GetPlayer(id);
