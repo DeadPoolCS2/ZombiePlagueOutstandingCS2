@@ -1182,7 +1182,8 @@ public partial class HZPEvents
         var id = @event.PlayerId;
         _ammoPacksLoadInProgress.Remove(id);
 
-        // Persist AP to DB before clearing in-memory state
+        // Defensive guard: if the slot is already occupied again, this disconnect event
+        // belongs to an older session and must not wipe the new player's AP/state.
         var player = _core.PlayerManager.GetPlayer(id);
         ulong steamId = 0;
         if (player != null && player.IsValid && !player.IsFakeClient)
