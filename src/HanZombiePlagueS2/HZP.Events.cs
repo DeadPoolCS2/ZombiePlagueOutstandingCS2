@@ -507,6 +507,8 @@ public partial class HZPEvents
 
             var Id = player.PlayerID;
             ulong steamId = player.SteamID;
+            if (steamId != 0)
+                _globals.PlayerSteamIdCache[Id] = steamId;
 
             _core.Scheduler.NextWorldUpdate(() =>
             {
@@ -1182,9 +1184,15 @@ public partial class HZPEvents
 
         // Persist AP to DB before clearing in-memory state
         var player = _core.PlayerManager.GetPlayer(id);
+        ulong steamId = 0;
         if (player != null && player.IsValid && !player.IsFakeClient)
+            steamId = player.SteamID;
+
+        if (steamId == 0)
+            _globals.PlayerSteamIdCache.TryGetValue(id, out steamId);
+
+        if (steamId != 0)
         {
-            ulong steamId = player.SteamID;
             int currentAP = _extraItemsMenu.GetAmmoPacks(id);
             _ = _database.SaveAmmoPacksAsync(steamId, currentAP);
         }
@@ -1211,6 +1219,7 @@ public partial class HZPEvents
 
         // Extra items cleanup
         _globals.AmmoPacks.Remove(id);
+        _globals.PlayerSteamIdCache.Remove(id);
         _globals.DamageAccumulator.Remove(id);
         _globals.ExtraJumps.Remove(id);
         _globals.JumpsUsed.Remove(id);

@@ -49,6 +49,28 @@ public class HZPWeaponsMenu
             || mode == GameModeType.MultiInfection;
     }
 
+    private bool IsWeaponSelectionWindowOpen(IPlayer player, bool sendReason = false)
+    {
+        // In special/custom modes players receive forced loadouts (sniper/assassin/etc.),
+        // so buy selection must remain locked.
+        if (!IsWeaponMenuAllowedForCurrentMode())
+        {
+            if (sendReason)
+                _helpers.SendChatT(player, "WeaponsMenuDisabledInMode");
+            return false;
+        }
+
+        // Once infection/custom start begins, late selections are no longer allowed.
+        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
+        {
+            if (sendReason)
+                _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
+            return false;
+        }
+
+        return true;
+    }
+
     public bool IsEligibleHuman(IPlayer player)
     {
         if (player == null || !player.IsValid)
@@ -71,19 +93,8 @@ public class HZPWeaponsMenu
         if (!CFG.EnableWeaponsMenu || !CFG.AllowOpenFromGameMenu)
             return;
 
-        // Disable buy-weapons in special game modes
-        if (!IsWeaponMenuAllowedForCurrentMode())
-        {
-            _helpers.SendChatT(player, "WeaponsMenuDisabledInMode");
+        if (!IsWeaponSelectionWindowOpen(player, sendReason: true))
             return;
-        }
-
-        // Disable after infection has started or when admin forced a custom mode
-        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
-        {
-            _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
-            return;
-        }
 
         if (!IsEligibleHuman(player))
         {
@@ -117,6 +128,12 @@ public class HZPWeaponsMenu
                 continue;
 
             var id = player.PlayerID;
+
+            // Avoid duplicate auto-open within the same round (e.g. reliability pass).
+            // Presence in this dictionary means this player has already been prompted.
+            if (_globals.CanBuyWeaponsThisRound.ContainsKey(id))
+                continue;
+
             _globals.CanBuyWeaponsThisRound[id] = true;
             ShowPrimaryMenu(player);
         }
@@ -129,6 +146,9 @@ public class HZPWeaponsMenu
             return;
 
         if (!IsEligibleHuman(player))
+            return;
+
+        if (!IsWeaponSelectionWindowOpen(player, sendReason: false))
             return;
 
         IMenuAPI menu = _menuHelper.CreateMenu(_helpers.T(player, "WeaponMenuPrimaryTitle"));
@@ -159,6 +179,9 @@ public class HZPWeaponsMenu
                 {
                     if (!clicker.IsValid) return;
 
+                    if (!IsWeaponSelectionWindowOpen(clicker, sendReason: true))
+                        return;
+
                     var id = clicker.PlayerID;
                     _globals.CanBuyWeaponsThisRound[id] = false;
                     GiveWeaponBySlot(clicker, classname, gear_slot_t.GEAR_SLOT_RIFLE);
@@ -179,6 +202,9 @@ public class HZPWeaponsMenu
             return;
 
         if (player == null || !player.IsValid)
+            return;
+
+        if (!IsWeaponSelectionWindowOpen(player, sendReason: false))
             return;
 
         IMenuAPI menu = _menuHelper.CreateMenu(_helpers.T(player, "WeaponMenuSecondaryTitle"));
@@ -208,6 +234,9 @@ public class HZPWeaponsMenu
                 _core.Scheduler.NextTick(() =>
                 {
                     if (!clicker.IsValid) return;
+
+                    if (!IsWeaponSelectionWindowOpen(clicker, sendReason: true))
+                        return;
 
                     GiveWeaponBySlot(clicker, classname, gear_slot_t.GEAR_SLOT_PISTOL);
                     GiveDefaultGrenades(clicker);

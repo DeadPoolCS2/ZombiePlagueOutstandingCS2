@@ -75,6 +75,8 @@ public class HZPGlobals
     // ── Extra Items / Ammo Packs ──────────────────────────────────────────────
     /// <summary>Per-player ammo-pack balance (keyed by PlayerID).</summary>
     public Dictionary<int, int> AmmoPacks = new Dictionary<int, int>();
+    /// <summary>Last known SteamID64 per player slot (for reliable AP save on disconnect).</summary>
+    public Dictionary<int, ulong> PlayerSteamIdCache = new Dictionary<int, ulong>();
     /// <summary>
     /// Accumulated damage dealt by each human to zombies this round (keyed by PlayerID).
     /// Reset at round end and on disconnect. Used for damage-based AP reward.
