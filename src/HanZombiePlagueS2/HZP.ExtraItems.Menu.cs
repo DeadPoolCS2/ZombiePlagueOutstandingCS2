@@ -170,7 +170,7 @@ public class HZPExtraItemsMenu
             return;
         }
 
-        if (!IsEligibleHuman(player))
+        if (!_globals.GameStart)
         {
             _helpers.SendChatT(player, "ExtraItemsRoundNotActive");
             return;
