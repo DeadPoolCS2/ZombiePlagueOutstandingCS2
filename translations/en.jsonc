@@ -1,8 +1,8 @@
 {
     "ServerInfoHotReload": "Configuration file HZPMainCFG has been hot reloaded!",
-    "ServerGameBegin": "The game will restart in 1 second",
-    "ServerGameHumanWin": "Humans WIN !!!",
-    "ServerGameZombieWin": "Zombies WIN !!!",
+    "ServerGameBegin": "<font color='#FFD700'>The game will restart in 1 second</font>",
+    "ServerGameHumanWin": "<font color='#66CCFF'>Humans WIN !!!</font>",
+    "ServerGameZombieWin": "<font color='#FF4D4D'>Zombies WIN !!!</font>",
     "GameInfoBecomeHero": "Player {0} has become a Hero!!",
     "GameInfoBecomeSurvivor": "Player {0} has become a Survivor!!",
     "GameInfoBecomeSniper": "Player {0} has become a Sniper!!",
@@ -58,6 +58,7 @@
     "ItemFreezeGrenadeSuccess": "You obtained a Freeze Grenade!!",
     "ItemTeleportGrenade": "Obtain Teleport Grenade",
     "ItemTeleportGrenadeSuccess": "You obtained a Teleport Grenade!!",
+    "TeleportGrenadeUnsafeDestination": "<font color='#FF6666'>Teleport canceled:</font> grenade destination is unsafe.",
     "ItemIncGrenade": "Obtain Fire Grenade",
     "ItemIncGrenadeSuccess": "You obtained a Fire Grenade!!",
     "HudZombieClass": "Zombie Class：",
@@ -88,8 +89,8 @@
     "WeaponMenuSecondarySelect": "Choose your secondary weapon for this round",
     "WeaponsMenuNotEligible": "You are not eligible to use the weapon menu.",
     "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!",
-    "WeaponsMenuDisabledInMode": "The buy weapons menu is not available in this game mode.",
-    "WeaponsMenuInfectionStarted": "The weapon selection menu is only available before infection begins.",
+    "WeaponsMenuDisabledInMode": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>The buy weapons menu is not available in this game mode.</font>",
+    "WeaponsMenuInfectionStarted": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Weapon selection is only available before infection begins.</font>",
 
     // ── Main Game Menu ─────────────────────────────────────────────────────
     "GameMenuTitle": "ZP Game Menu",
@@ -103,8 +104,9 @@
 
     // ── Unstuck ────────────────────────────────────────────────────────────
     "UnstuckMustBeAlive": "You must be alive to use Unstuck.",
-    "UnstuckSuccess": "Attempted to move you to a free position.",
-    "UnstuckFailed": "Could not find a free position nearby.",
+    "UnstuckSuccess": "<font color='#98FB98'>Unstuck success:</font> moved to a nearby safe spot.",
+    "UnstuckFailed": "<font color='#FF6666'>Unstuck failed:</font> could not find a free position nearby.",
+    "UnstuckNoSafePosition": "<font color='#FF6666'>Unstuck failed:</font> no safe position was found nearby.",
 
     // ── Join Spectator ─────────────────────────────────────────────────────
     "JoinSpectatorSuccess": "You have been moved to the spectator team.",
@@ -116,6 +118,7 @@
     "ExtraItemsNoneAvailable": "No items available for your team.",
     "ExtraItemsMustBeAlive": "You must be alive to buy items.",
     "ExtraItemsRoundNotActive": "Cannot purchase items right now.",
+    "ExtraItemsDisabledInMode": "<font color='#FF6666'>Extra Items are disabled in this special/custom mode.</font>",
     "ExtraItemsWrongTeam": "This item is not available for your team.",
     "ExtraItemsNotEnoughAP": "You need {0} Ammo Packs but only have {1}.",
 
@@ -178,7 +181,7 @@
     "ExtraItemsScbaSuitSuccess": "You put on a Hazmat Suit and can resist one zombie attack! Ammo Packs remaining: {0}.",
 
     // ── Round start announcement ───────────────────────────────────────────
-    "RoundStartAnnounce": "New round begins. | Your credits: {0} | Players connected: {1}",
+    "RoundStartAnnounce": "<font color='#FFD700'>New round begins!</font> <font color='#B0E0E6'>| Your credits: {0} | Players connected: {1}</font>",
 
     // ── Admin Menu ────────────────────────────────────────────────────────
     "AdminMenuMakeZombieHuman": "Make Zombie/Human",
@@ -189,7 +192,7 @@
     "AdminMenuRespawnSomeone": "Respawn Someone",
     "AdminMenuStartGameMode": "Start Game Mode (use at roundstart)",
     "AdminMenuNoTargets": "No valid targets available.",
-    "AdminMenuModeActivated": "Game mode {0} activated!",
+    "AdminMenuModeActivated": "<font color='#FFD700'>Game mode</font> <font color='#FF8C00'>{0}</font> <font color='#FFD700'>activated!</font>",
     "AdminMenuModeInfectionStarted": "Custom game mode can only be started before infection begins!",
     "AdminMenuToggledZombieToAll": "Admin infected player {0}!",
     "AdminMenuToggledHumanToAll": "Admin made player {0} human!",

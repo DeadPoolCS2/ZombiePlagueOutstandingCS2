@@ -169,10 +169,11 @@ public class TripMineData
     public CBeam? Beam;
     /// <summary>Particle visual attached at the mine position.</summary>
     public CParticleSystem? Visual;
+    /// <summary>Mine body model visual attached at the mine position.</summary>
+    public CBaseModelEntity? ModelVisual;
     /// <summary>Remaining health of the mine.</summary>
     public int Health;
     /// <summary>True once the mine has detonated (pending removal).</summary>
     public bool Exploded;
 }
-
 
