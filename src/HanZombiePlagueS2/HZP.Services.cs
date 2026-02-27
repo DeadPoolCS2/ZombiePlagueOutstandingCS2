@@ -381,6 +381,8 @@ public partial class HZPServices
                     mine.Beam.AcceptInput("Kill", 0);
                 if (mine.Visual != null && mine.Visual.IsValid && mine.Visual.IsValidEntity)
                     mine.Visual.AcceptInput("Kill", 0);
+                if (mine.ModelVisual != null && mine.ModelVisual.IsValid && mine.ModelVisual.IsValidEntity)
+                    mine.ModelVisual.AcceptInput("Kill", 0);
                 mine.Exploded = true;
             }
             _globals.AllMines.RemoveAll(m => m.OwnerId == Id);
