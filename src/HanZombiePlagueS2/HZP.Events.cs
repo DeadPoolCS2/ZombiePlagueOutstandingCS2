@@ -1131,9 +1131,6 @@ public partial class HZPEvents
             }
 
             ulong steamId = player.SteamID;
-            if (steamId != 0)
-                _globals.PlayerSteamIdCache[id] = steamId;
-
             if (steamId == 0)
             {
                 if (attemptsLeft > 0)
