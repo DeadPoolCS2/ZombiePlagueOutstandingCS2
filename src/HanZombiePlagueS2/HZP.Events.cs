@@ -42,6 +42,7 @@ public partial class HZPEvents
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly HZPDatabase _database;
     private readonly HZPWeaponsMenu _weaponsMenu;
+    private readonly HashSet<int> _ammoPacksLoadInProgress = new HashSet<int>();
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -252,6 +253,7 @@ public partial class HZPEvents
         _globals.SafeRoundStart = true;
         _globals.InfectionStartedThisRound = false;
         _globals.AdminForcedModeThisRound = false;
+        _gameMode.ResetMode();
         var CFG = _mainCFG.CurrentValue;
         float configDist = CFG.Assassin.InvisibilityDist;
         _core.Scheduler.DelayBySeconds(1.0f, () =>
@@ -269,6 +271,14 @@ public partial class HZPEvents
             int ap = _extraItemsMenu.GetAmmoPacks(player.PlayerID);
             _helpers.SendChatT(player, "RoundStartAnnounce", ap, playerCount);
         }
+
+        // Reliability pass: ensure round-start weapon menu opens during pre-infection phase.
+        _core.Scheduler.DelayBySeconds(0.3f, () =>
+        {
+            if (_globals.GameStart || _globals.InfectionStartedThisRound)
+                return;
+            _weaponsMenu.ShowPrimaryMenuToAllEligible();
+        });
 
         return HookResult.Continue;
     }
@@ -301,6 +311,9 @@ public partial class HZPEvents
                 _helpers.RemoveGlow(player);
 
                 var id = player.PlayerID;
+                bool wasZombie = false;
+                _globals.IsZombie.TryGetValue(id, out wasZombie);
+
                 _globals.IsZombie[id] = false;
                 _globals.IsSurvivor[id] = false;
                 _globals.IsAssassin[id] = false;
@@ -324,8 +337,6 @@ public partial class HZPEvents
                 _extraItemsMenu.CleanupJetpack(id);
                 _globals.TripMineCharges.Remove(id);
                 _globals.HasReviveToken.Remove(id);
-                bool wasZombie = false;
-                _globals.IsZombie.TryGetValue(id, out wasZombie);
                 if (!wasZombie && player.Controller != null && player.Controller.IsValid && player.Controller.PawnIsAlive)
                 {
                     int reward = _extraItemsCFG.CurrentValue.RoundSurviveReward;
@@ -367,6 +378,11 @@ public partial class HZPEvents
         @event.AddItem("particles/survival_fx/danger_trail_spores_world.vpcf");
 
         var CFG = _mainCFG.CurrentValue;
+        if (!string.IsNullOrWhiteSpace(CFG.Mine.Model))
+            @event.AddItem(CFG.Mine.Model);
+        if (!string.IsNullOrWhiteSpace(CFG.Mine.PrecacheSoundEvent))
+            @event.AddItem(CFG.Mine.PrecacheSoundEvent);
+
         var ambsound = CFG.PrecacheAmbSound;
         if (!string.IsNullOrEmpty(ambsound))
         {
@@ -491,6 +507,8 @@ public partial class HZPEvents
 
             var Id = player.PlayerID;
             ulong steamId = player.SteamID;
+            if (steamId != 0)
+                _globals.PlayerSteamIdCache[Id] = steamId;
 
             _core.Scheduler.NextWorldUpdate(() =>
             {
@@ -1094,32 +1112,78 @@ public partial class HZPEvents
         }
 
         _globals.IsZombie[id] = _globals.GameStart;
+        _ammoPacksLoadInProgress.Remove(id);
 
-        // Load AP from DB (async) or fall back to starting packs
-        var player = _core.PlayerManager.GetPlayer(id);
+        // Load AP from DB once SteamID is available; avoid overwriting rewards gained while async load is running.
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
-        if (player != null && player.IsValid && !player.IsFakeClient)
+        const int maxAttempts = 20;
+        const float retryDelaySeconds = 0.5f;
+
+        void TryLoadAmmoPacks(int attemptsLeft)
         {
+            var player = _core.PlayerManager.GetPlayer(id);
+            if (player == null || !player.IsValid || player.IsFakeClient)
+            {
+                if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
+                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
             ulong steamId = player.SteamID;
+            if (steamId != 0)
+                _globals.PlayerSteamIdCache[id] = steamId;
+
+            if (steamId == 0)
+            {
+                if (attemptsLeft > 0)
+                {
+                    _core.Scheduler.DelayBySeconds(retryDelaySeconds, () => TryLoadAmmoPacks(attemptsLeft - 1));
+                    return;
+                }
+
+                if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
+                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
             _ = Task.Run(async () =>
             {
                 int? savedAP = await _database.LoadAmmoPacksAsync(steamId);
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
-                    // Guard: player may have disconnected before the DB responded
                     var current = _core.PlayerManager.GetPlayer(id);
-                    if (current == null || !current.IsValid) return;
+                    if (current == null || !current.IsValid || current.IsFakeClient)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    // Ignore stale async results if this slot was already reused.
+                    ulong currentSteamId = current.SteamID;
+                    if (currentSteamId == 0)
+                        _globals.PlayerSteamIdCache.TryGetValue(id, out currentSteamId);
+
+                    if (currentSteamId != steamId)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    int currentAp = _extraItemsMenu.GetAmmoPacks(id);
                     if (savedAP.HasValue)
-                        _extraItemsMenu.SetAmmoPacks(id, savedAP.Value);
-                    else if (startingAP > 0)
-                        _extraItemsMenu.AddAmmoPacks(id, startingAP);
+                        _extraItemsMenu.SetAmmoPacks(id, Math.Max(currentAp, savedAP.Value));
+                    else if (startingAP > 0 && currentAp <= 0)
+                        _extraItemsMenu.SetAmmoPacks(id, startingAP);
+
+                    _ammoPacksLoadInProgress.Remove(id);
                 });
             });
         }
-        else if (startingAP > 0)
-        {
-            _extraItemsMenu.AddAmmoPacks(id, startingAP);
-        }
+
+        if (_ammoPacksLoadInProgress.Add(id))
+            TryLoadAmmoPacks(maxAttempts);
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)
@@ -1131,11 +1195,20 @@ public partial class HZPEvents
 
         var id = @event.PlayerId;
 
-        // Persist AP to DB before clearing in-memory state
+        // Defensive guard: if the slot is already occupied again, this disconnect event
+        // belongs to an older session and must not wipe the new player's AP/state.
         var player = _core.PlayerManager.GetPlayer(id);
         if (player != null && player.IsValid && !player.IsFakeClient)
+            return;
+
+        _ammoPacksLoadInProgress.Remove(id);
+
+        // Persist AP to DB before clearing in-memory state
+        ulong steamId = 0;
+        _globals.PlayerSteamIdCache.TryGetValue(id, out steamId);
+
+        if (steamId != 0)
         {
-            ulong steamId = player.SteamID;
             int currentAP = _extraItemsMenu.GetAmmoPacks(id);
             _ = _database.SaveAmmoPacksAsync(steamId, currentAP);
         }
@@ -1162,6 +1235,7 @@ public partial class HZPEvents
 
         // Extra items cleanup
         _globals.AmmoPacks.Remove(id);
+        _globals.PlayerSteamIdCache.Remove(id);
         _globals.DamageAccumulator.Remove(id);
         _globals.ExtraJumps.Remove(id);
         _globals.JumpsUsed.Remove(id);
@@ -1820,6 +1894,41 @@ public partial class HZPEvents
 
     }
 
+    private static bool IsTeleportDestinationWithinBounds(SwiftlyS2.Shared.Natives.Vector origin, SwiftlyS2.Shared.Natives.Vector destination)
+    {
+        float dx = destination.X - origin.X;
+        float dy = destination.Y - origin.Y;
+        float dz = destination.Z - origin.Z;
+        float dist2d = MathF.Sqrt(dx * dx + dy * dy);
+
+        return destination.Z > -8192f && destination.Z < 16384f && dist2d <= 2500f && dz >= -128f;
+    }
+
+    private bool IsTeleportDestinationClear(IPlayer player, SwiftlyS2.Shared.Natives.Vector destination)
+    {
+        foreach (var other in _core.PlayerManager.GetAllPlayers())
+        {
+            if (other == null || !other.IsValid || other.PlayerID == player.PlayerID)
+                continue;
+
+            var otherPawn = other.PlayerPawn;
+            if (otherPawn == null || !otherPawn.IsValid)
+                continue;
+
+            var otherPos = otherPawn.AbsOrigin;
+            if (otherPos == null)
+                continue;
+
+            float ox = otherPos.Value.X - destination.X;
+            float oy = otherPos.Value.Y - destination.Y;
+            float oz = MathF.Abs(otherPos.Value.Z - destination.Z);
+            if ((ox * ox + oy * oy) <= (26f * 26f) && oz <= 72f)
+                return false;
+        }
+
+        return true;
+    }
+
     private HookResult OnDecoyFiring(EventDecoyFiring @event)
     {
         var entityId = @event.EntityID;
@@ -1836,13 +1945,62 @@ public partial class HZPEvents
         if (!CFG.TelportGrenade)
             return HookResult.Continue;
 
-        SwiftlyS2.Shared.Natives.Vector position = new SwiftlyS2.Shared.Natives.Vector(@event.X, @event.Y, @event.Z);
+        SwiftlyS2.Shared.Natives.Vector position = new SwiftlyS2.Shared.Natives.Vector(@event.X, @event.Y, @event.Z + 18f);
 
         var id = player.PlayerID;
         _globals.IsZombie.TryGetValue(id, out bool isZombie);
         if (!isZombie)
         {
-            player.Teleport(position);
+            var pawn = player.PlayerPawn;
+            if (pawn != null && pawn.IsValid)
+            {
+                var current = pawn.AbsOrigin;
+                if (current != null)
+                {
+                    var candidates = new[]
+                    {
+                        new SwiftlyS2.Shared.Natives.Vector(position.X, position.Y, position.Z + 12f),
+                        new SwiftlyS2.Shared.Natives.Vector(position.X + 18f, position.Y, position.Z + 14f),
+                        new SwiftlyS2.Shared.Natives.Vector(position.X - 18f, position.Y, position.Z + 14f),
+                        new SwiftlyS2.Shared.Natives.Vector(position.X, position.Y + 18f, position.Z + 14f),
+                        new SwiftlyS2.Shared.Natives.Vector(position.X, position.Y - 18f, position.Z + 14f)
+                    };
+
+                    SwiftlyS2.Shared.Natives.Vector? selected = null;
+                    foreach (var candidate in candidates)
+                    {
+                        if (!IsTeleportDestinationWithinBounds(current.Value, candidate))
+                            continue;
+                        if (!IsTeleportDestinationClear(player, candidate))
+                            continue;
+                        selected = candidate;
+                        break;
+                    }
+
+                    if (selected != null)
+                    {
+                        var eyeAngles = pawn.EyeAngles;
+                        pawn.Teleport(selected.Value, eyeAngles, SwiftlyS2.Shared.Natives.Vector.Zero);
+                        _helpers.ClearFreezeStaten(player);
+
+                        // Post-teleport pass to reduce chances of collision lock.
+                        _core.Scheduler.NextTick(() =>
+                        {
+                            if (!player.IsValid) return;
+                            var p = player.PlayerPawn;
+                            if (p == null || !p.IsValid) return;
+                            var posNow = p.AbsOrigin;
+                            if (posNow == null) return;
+                            p.Teleport(new SwiftlyS2.Shared.Natives.Vector(posNow.Value.X, posNow.Value.Y, posNow.Value.Z + 6f), p.EyeAngles, SwiftlyS2.Shared.Natives.Vector.Zero);
+                            _helpers.ClearFreezeStaten(player);
+                        });
+                    }
+                    else
+                    {
+                        _helpers.SendChatT(player, "TeleportGrenadeUnsafeDestination");
+                    }
+                }
+            }
         }
         if (entity != null && entity.IsValid && entity.IsValidEntity)
         {

@@ -1,8 +1,8 @@
 {
     "ServerInfoHotReload": "Configuration file HZPMainCFG has been hot reloaded!",
-    "ServerGameBegin": "The game will restart in 1 second",
-    "ServerGameHumanWin": "Humans WIN !!!",
-    "ServerGameZombieWin": "Zombies WIN !!!",
+    "ServerGameBegin": "<font color='#FFD700'>The game will restart in 1 second</font>",
+    "ServerGameHumanWin": "<font color='#66CCFF'>Humans WIN !!!</font>",
+    "ServerGameZombieWin": "<font color='#FF4D4D'>Zombies WIN !!!</font>",
     "GameInfoBecomeHero": "Player {0} has become a Hero!!",
     "GameInfoBecomeSurvivor": "Player {0} has become a Survivor!!",
     "GameInfoBecomeSniper": "Player {0} has become a Sniper!!",
@@ -17,10 +17,10 @@
     "ZClassMenuRandomSelect": "Random Selection",
     "ZClassMenuRandomSelectInfo": "Set to random selection",
     "AdminItemMenu": "Admin Item Menu",
-    "NoPermission": "You have No Permission to use.",
+    "NoPermission": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>You do not have permission to use this.</font>",
     "AdminMenuSelect": "Select the item you want to use",
-    "ItemZombieCantUse": "Zombies cannot use this!!",
-    "ItemHumanCantUse": "You are not a zombie and cannot use this!!",
+    "ItemZombieCantUse": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Zombies cannot use this item.</font>",
+    "ItemHumanCantUse": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Only zombies can use this item.</font>",
     "ItemTVaccine": "T-Virus Vaccine",
     "ItemTVaccineError": "Assassin and Nemesis cannot use the T-Virus Vaccine!",
     "ItemTVaccineSuccess": "You used the T-Virus Vaccine and reverted back to a human!!",
@@ -58,6 +58,7 @@
     "ItemFreezeGrenadeSuccess": "You obtained a Freeze Grenade!!",
     "ItemTeleportGrenade": "Obtain Teleport Grenade",
     "ItemTeleportGrenadeSuccess": "You obtained a Teleport Grenade!!",
+    "TeleportGrenadeUnsafeDestination": "<font color='#FF6666'>Teleport canceled:</font> grenade destination is unsafe.",
     "ItemIncGrenade": "Obtain Fire Grenade",
     "ItemIncGrenadeSuccess": "You obtained a Fire Grenade!!",
     "HudZombieClass": "Zombie Class：",
@@ -88,8 +89,8 @@
     "WeaponMenuSecondarySelect": "Choose your secondary weapon for this round",
     "WeaponsMenuNotEligible": "You are not eligible to use the weapon menu.",
     "WeaponsMenuAlreadyUsed": "You have already used the weapon selection menu this round!",
-    "WeaponsMenuDisabledInMode": "The buy weapons menu is not available in this game mode.",
-    "WeaponsMenuInfectionStarted": "The weapon selection menu is only available before infection begins.",
+    "WeaponsMenuDisabledInMode": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>The buy weapons menu is not available in this game mode.</font>",
+    "WeaponsMenuInfectionStarted": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Weapon selection is only available before infection begins.</font>",
 
     // ── Main Game Menu ─────────────────────────────────────────────────────
     "GameMenuTitle": "ZP Game Menu",
@@ -103,8 +104,9 @@
 
     // ── Unstuck ────────────────────────────────────────────────────────────
     "UnstuckMustBeAlive": "You must be alive to use Unstuck.",
-    "UnstuckSuccess": "Attempted to move you to a free position.",
-    "UnstuckFailed": "Could not find a free position nearby.",
+    "UnstuckSuccess": "<font color='#98FB98'>Unstuck success:</font> moved to a nearby safe spot.",
+    "UnstuckFailed": "<font color='#FF6666'>Unstuck failed:</font> could not find a free position nearby.",
+    "UnstuckNoSafePosition": "<font color='#FF6666'>Unstuck failed:</font> no safe position was found nearby.",
 
     // ── Join Spectator ─────────────────────────────────────────────────────
     "JoinSpectatorSuccess": "You have been moved to the spectator team.",
@@ -116,6 +118,7 @@
     "ExtraItemsNoneAvailable": "No items available for your team.",
     "ExtraItemsMustBeAlive": "You must be alive to buy items.",
     "ExtraItemsRoundNotActive": "Cannot purchase items right now.",
+    "ExtraItemsDisabledInMode": "<font color='#FF6666'>Extra Items are disabled in this special/custom mode.</font>",
     "ExtraItemsWrongTeam": "This item is not available for your team.",
     "ExtraItemsNotEnoughAP": "You need {0} Ammo Packs but only have {1}.",
 
@@ -144,41 +147,41 @@
     "ExtraItemsKnifeBlinkUsed": "Blinked! Charges remaining: {0} (cooldown: {1}s).",
 
     // ── Admin give-AP command ──────────────────────────────────────────────
-    "GiveAPUsage": "Usage: hzp_give_ap <name|#userid> <amount>",
-    "GiveAPInvalidAmount": "Amount must be a positive integer.",
-    "GiveAPTargetNotFound": "Player not found.",
-    "GiveAPReceived": "You received {0} Ammo Packs. Total: {1}.",
-    "GiveAPSuccess": "Gave {0} {1} Ammo Pack(s). New total: {2}.",
+    "GiveAPUsage": "<font color='#FFB347'>[ZM]</font> <font color='#B0E0E6'>Usage:</font> <font color='#FFD700'>hzp_give_ap &lt;name|#userid&gt; &lt;amount&gt;</font>",
+    "GiveAPInvalidAmount": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Amount must be a positive integer.</font>",
+    "GiveAPTargetNotFound": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Player not found.</font>",
+    "GiveAPReceived": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>+{0} Ammo Packs</font> <font color='#B0E0E6'>(total: {1})</font>",
+    "GiveAPSuccess": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Granted {0} AP</font> <font color='#B0E0E6'>to {1} (new total: {2})</font>",
 
     // ── AP reward notifications ────────────────────────────────────────────
-    "APRoundSurviveReward": "You survived the round! +{0} Ammo Packs (total: {1}).",
-    "APZombieKillReward": "You infected a human! +{0} Ammo Packs (total: {1}).",
-    "APHumanDamageReward": "Damage bonus! +{0} Ammo Packs (total: {1}).",
+    "APRoundSurviveReward": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Survival reward: +{0} AP</font> <font color='#B0E0E6'>(total: {1})</font>",
+    "APZombieKillReward": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Infection reward: +{0} AP</font> <font color='#B0E0E6'>(total: {1})</font>",
+    "APHumanDamageReward": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Damage bonus: +{0} AP</font> <font color='#B0E0E6'>(total: {1})</font>",
 
     // ── Jetpack ───────────────────────────────────────────────────────────
     "ExtraItemsJetpackSuccess": "Jetpack equipped! Fuel: {0}. Hold CTRL+SPACE to fly, right-click to fire rockets. Ammo Packs remaining: {1}.",
     "ExtraItemsJetpackRefueled": "Jetpack refueled to {0} units. Ammo Packs remaining: {1}.",
-    "ExtraItemsJetpackRocketFired": "Rocket launched!",
+    "ExtraItemsJetpackRocketFired": "<font color='#FFB347'>[ZM]</font> <font color='#FFD700'>Rocket launched!</font>",
 
     // ── Trip Mine ─────────────────────────────────────────────────────────
     "ExtraItemsTripMineSuccess": "Trip mine charge added (you now have {0} charge(s)). Use sw_plant or /plant to plant. Ammo Packs remaining: {1}.",
-    "TripMinePlanted": "Mine planted ({0}/{1} active). Zombies crossing the laser beam will trigger the explosion!",
-    "TripMineNoCharges": "You have no trip mine charges. Buy one from the Extra Items menu.",
-    "TripMineMaxReached": "You already have the maximum of {0} active mines.",
-    "TripMineNoneToTake": "No mine found nearby to recover.",
-    "TripMineTaken": "Mine recovered! You now have {0} charge(s).",
-    "ItemSpecialRoleCantUse": "Special roles cannot use this item.",
+    "TripMinePlanted": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Mine planted ({0}/{1})</font> <font color='#B0E0E6'>- zombies crossing the laser will trigger it.</font>",
+    "TripMineNoCharges": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>You have no trip mine charges.</font> <font color='#B0E0E6'>Buy one from Extra Items.</font>",
+    "TripMineMaxReached": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Trip mine limit reached:</font> <font color='#B0E0E6'>{0} active mines.</font>",
+    "TripMineNoneToTake": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>No nearby mine to recover.</font>",
+    "TripMineTaken": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Mine recovered!</font> <font color='#B0E0E6'>Charges: {0}</font>",
+    "ItemSpecialRoleCantUse": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Special roles cannot use this item.</font>",
 
     // ── Revive Token ──────────────────────────────────────────────────────
     "ExtraItemsReviveTokenSuccess": "Revive Token purchased! You will automatically respawn once if you die this round. Ammo Packs remaining: {0}.",
     "ExtraItemsReviveTokenAlready": "You already have a Revive Token active!",
-    "ReviveTokenUsed": "Your Revive Token activated! You have been revived.",
+    "ReviveTokenUsed": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Revive Token activated!</font> <font color='#B0E0E6'>You were revived.</font>",
 
     // ── SCBA Suit (Extra Items) ────────────────────────────────────────────
     "ExtraItemsScbaSuitSuccess": "You put on a Hazmat Suit and can resist one zombie attack! Ammo Packs remaining: {0}.",
 
     // ── Round start announcement ───────────────────────────────────────────
-    "RoundStartAnnounce": "New round begins. | Your credits: {0} | Players connected: {1}",
+    "RoundStartAnnounce": "<font color='#FFD700'>New round begins!</font> <font color='#B0E0E6'>| Your credits: {0} | Players connected: {1}</font>",
 
     // ── Admin Menu ────────────────────────────────────────────────────────
     "AdminMenuMakeZombieHuman": "Make Zombie/Human",
@@ -189,14 +192,14 @@
     "AdminMenuRespawnSomeone": "Respawn Someone",
     "AdminMenuStartGameMode": "Start Game Mode (use at roundstart)",
     "AdminMenuNoTargets": "No valid targets available.",
-    "AdminMenuModeActivated": "Game mode {0} activated!",
-    "AdminMenuModeInfectionStarted": "Custom game mode can only be started before infection begins!",
-    "AdminMenuToggledZombieToAll": "Admin infected player {0}!",
-    "AdminMenuToggledHumanToAll": "Admin made player {0} human!",
-    "AdminMenuMadeNemesisToAll": "Admin made player {0} a Nemesis!",
-    "AdminMenuMadeAssassinToAll": "Admin made player {0} an Assassin!",
-    "AdminMenuMadeSurvivorToAll": "Admin made player {0} a Survivor!",
-    "AdminMenuMadeSniperToAll": "Admin made player {0} a Sniper!",
-    "AdminMenuRespawnedToAll": "Admin respawned player {0}!"
+    "AdminMenuModeActivated": "<font color='#FFD700'>Game mode</font> <font color='#FF8C00'>{0}</font> <font color='#FFD700'>activated!</font>",
+    "AdminMenuModeInfectionStarted": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Custom mode can only be started before infection.</font>",
+    "AdminMenuToggledZombieToAll": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Admin infected</font> <font color='#FFD700'>{0}</font><font color='#FF6666'>.</font>",
+    "AdminMenuToggledHumanToAll": "<font color='#FFB347'>[ZM]</font> <font color='#66CCFF'>Admin made</font> <font color='#FFD700'>{0}</font> <font color='#66CCFF'>human.</font>",
+    "AdminMenuMadeNemesisToAll": "<font color='#FFB347'>[ZM]</font> <font color='#FF6666'>Admin made</font> <font color='#FFD700'>{0}</font> <font color='#FF6666'>a Nemesis.</font>",
+    "AdminMenuMadeAssassinToAll": "<font color='#FFB347'>[ZM]</font> <font color='#C792EA'>Admin made</font> <font color='#FFD700'>{0}</font> <font color='#C792EA'>an Assassin.</font>",
+    "AdminMenuMadeSurvivorToAll": "<font color='#FFB347'>[ZM]</font> <font color='#66CCFF'>Admin made</font> <font color='#FFD700'>{0}</font> <font color='#66CCFF'>a Survivor.</font>",
+    "AdminMenuMadeSniperToAll": "<font color='#FFB347'>[ZM]</font> <font color='#66CCFF'>Admin made</font> <font color='#FFD700'>{0}</font> <font color='#66CCFF'>a Sniper.</font>",
+    "AdminMenuRespawnedToAll": "<font color='#FFB347'>[ZM]</font> <font color='#90EE90'>Admin respawned</font> <font color='#FFD700'>{0}</font><font color='#90EE90'>.</font>"
 
 }
