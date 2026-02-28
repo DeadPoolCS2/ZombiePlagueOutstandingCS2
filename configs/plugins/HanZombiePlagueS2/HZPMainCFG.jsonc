@@ -185,13 +185,28 @@
 	// Send a chat reply to the invoking player on each command invocation.
 	"EnableCommandDebugChatReply": false,
 
-	// ── Ammo Packs database ──────────────────────────────────────────────────
-	// Set to true to enable MySQL persistence for Ammo Packs.
+	// ── Ammo Packs persistence ───────────────────────────────────────────────
+	// Set to true to enable persistence for Ammo Packs.
 	"AmmoPacksEnabled": false,
+	// Backend to use for Ammo Packs persistence.
+	// "MySQL"    – built-in direct MySQL/MariaDB connection (requires AmmoPacksConnectionName).
+	// "Economy"  – delegates to the Economy plugin (https://github.com/DeadPoolCS2/Economy).
+	// "Cookies"  – delegates to the Cookies plugin (https://github.com/DeadPoolCS2/Cookies).
+	"AmmoPacksStorageBackend": "MySQL",
+
+	// ── MySQL backend settings (only used when AmmoPacksStorageBackend = "MySQL") ──
 	// Connection name from configs/database.jsonc (leave empty = use default_connection).
 	"AmmoPacksConnectionName": "",
 	// Table name for per-player ammo pack balances.
 	"AmmoPacksTableName": "hzp_ammo_packs",
+
+	// ── Economy backend settings (only used when AmmoPacksStorageBackend = "Economy") ──
+	// Wallet kind name registered in the Economy plugin. Must match a wallet kind in Economy's config.
+	"EconomyWalletKind": "ammopacks",
+
+	// ── Cookies backend settings (only used when AmmoPacksStorageBackend = "Cookies") ──
+	// Cookie key used to store the ammo pack balance in the Cookies plugin.
+	"CookiesAmmoPacksKey": "hzp_ammopacks",
 
 	// ── Laser trip-mine visual/model settings ────────────────────────────────
 	"Mine": {

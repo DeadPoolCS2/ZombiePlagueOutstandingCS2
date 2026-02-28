@@ -40,7 +40,7 @@ public partial class HZPEvents
     private readonly HanZombiePlagueAPI _api;
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
-    private readonly HZPDatabase _database;
+    private readonly AmmoPacksBackendResolver _backendResolver;
     private readonly HZPWeaponsMenu _weaponsMenu;
     private readonly HashSet<int> _ammoPacksLoadInProgress = new HashSet<int>();
     private readonly Dictionary<int, int> _ammoPacksLoadGeneration = new Dictionary<int, int>();
@@ -48,14 +48,14 @@ public partial class HZPEvents
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
         HZPCommands commands, IOptionsMonitor<HZPMainCFG> mainCFG,
-        IOptionsMonitor<HZPVoxCFG> voxCFG, HZPHelpers helpers, 
+        IOptionsMonitor<HZPVoxCFG> voxCFG, HZPHelpers helpers,
         IOptionsMonitor<HZPZombieClassCFG> zombieClassCFG,
         PlayerZombieState zombieState, HZPGameMode gameMode,
         IOptionsMonitor<HZPSpecialClassCFG> specialClassCFG,
         HanZombiePlagueAPI api,
         HZPExtraItemsMenu extraItemsMenu,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        HZPDatabase database,
+        AmmoPacksBackendResolver backendResolver,
         HZPWeaponsMenu weaponsMenu)
     {
         _core = core;
@@ -73,7 +73,7 @@ public partial class HZPEvents
         _api = api;
         _extraItemsMenu = extraItemsMenu;
         _extraItemsCFG = extraItemsCFG;
-        _database = database;
+        _backendResolver = backendResolver;
         _weaponsMenu = weaponsMenu;
     }
 
@@ -981,7 +981,7 @@ public partial class HZPEvents
         _globals.g_hAutoSaveTimer = _core.Scheduler.RepeatBySeconds(60.0f, () =>
         {
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogInformation("[HZP-DB] Autosave: saving all connected players.");
+                _logger.LogInformation("[HZP-AP] Autosave: saving all connected players.");
             _ = SaveAllConnectedPlayersAsync();
         });
         _core.Scheduler.StopOnMapChange(_globals.g_hAutoSaveTimer);
@@ -989,10 +989,13 @@ public partial class HZPEvents
 
     /// <summary>
     /// Collects current ammo pack balances for all connected human players and
-    /// persists them to the database. Used as a failsafe on map change and unload.
+    /// persists them via the active backend. Used as a failsafe on map change and unload.
     /// </summary>
     public async Task SaveAllConnectedPlayersAsync()
     {
+        var cfg = _mainCFG.CurrentValue;
+        if (!cfg.AmmoPacksEnabled) return;
+
         var snapshot = new List<(ulong steamId, int ap)>();
         foreach (var player in _core.PlayerManager.GetAllPlayers())
         {
@@ -1005,7 +1008,7 @@ public partial class HZPEvents
         }
 
         if (snapshot.Count > 0)
-            await _database.SaveAllPlayersAsync(snapshot);
+            await _backendResolver.Active.SaveAllAsync(snapshot);
     }
     private void Event_OnEntityTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)
     {
@@ -1123,7 +1126,7 @@ public partial class HZPEvents
         // Always reset slot AP at connect so stale values from a previous occupant cannot leak.
         _extraItemsMenu.SetAmmoPacks(id, 0);
 
-        // Load AP from DB once SteamID is available; avoid overwriting rewards gained while async load is running.
+        // Load AP from backend once SteamID is available; avoid overwriting rewards gained while async load is running.
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
         const int maxAttempts = 20;
         const float retryDelaySeconds = 0.5f;
@@ -1163,9 +1166,18 @@ public partial class HZPEvents
                 return;
             }
 
+            // If persistence is disabled, just apply the starting AP and bail.
+            if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
+            {
+                if (startingAP > 0 && _extraItemsMenu.GetAmmoPacks(id) <= 0)
+                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
             _ = Task.Run(async () =>
             {
-                int? savedAP = await _database.LoadAmmoPacksAsync(steamId);
+                int? savedAP = await _backendResolver.Active.LoadAsync(steamId);
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
                     if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
@@ -1238,8 +1250,12 @@ public partial class HZPEvents
 
         if (steamId != 0)
         {
-            int currentAP = _extraItemsMenu.GetAmmoPacks(id);
-            _ = _database.SaveAmmoPacksAsync(steamId, currentAP);
+            var cfg = _mainCFG.CurrentValue;
+            if (cfg.AmmoPacksEnabled)
+            {
+                int currentAP = _extraItemsMenu.GetAmmoPacks(id);
+                _ = _backendResolver.Active.SaveAsync(steamId, currentAP);
+            }
         }
 
         _helpers.ClearPlayerBurn(id);
