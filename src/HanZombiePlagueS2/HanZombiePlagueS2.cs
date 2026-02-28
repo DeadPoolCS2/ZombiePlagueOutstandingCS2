@@ -42,42 +42,46 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         var cfg = ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<HZPMainCFG>>().CurrentValue;
 
         // ── Economy plugin ────────────────────────────────────────────────────
+        bool economyResolved = false;
         try
         {
             var economyApi = interfaceManager.GetSharedInterface<IEconomyAPIv1>("Economy.API.v1");
             if (economyApi != null)
             {
                 resolver.Economy.SetApi(economyApi);
+                economyResolved = true;
                 Core.Logger.LogInformation("[HZP] Economy API resolved successfully.");
             }
         }
         catch (Exception ex)
         {
-            // Only warn if the user actually configured Economy as the backend.
-            if (cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Economy)
-                Core.Logger.LogWarning("[HZP] Economy API not available but AmmoPacksStorageBackend=Economy: {Ex}", ex.Message);
-            else
-                Core.Logger.LogDebug("[HZP] Economy API not available (not configured as backend): {Ex}", ex.Message);
+            Core.Logger.LogDebug("[HZP] Economy API lookup threw: {Ex}", ex.Message);
         }
 
+        // Warn once if Economy is the configured backend but the plugin isn't available.
+        if (!economyResolved && cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Economy)
+            Core.Logger.LogWarning("[HZP] Economy API not available – AmmoPacksStorageBackend=Economy requires the Economy plugin to be loaded.");
+
         // ── Cookies plugin ────────────────────────────────────────────────────
+        bool cookiesResolved = false;
         try
         {
             var cookiesApi = interfaceManager.GetSharedInterface<IPlayerCookiesAPIv1>("Cookies.Player.v1");
             if (cookiesApi != null)
             {
                 resolver.Cookies.SetApi(cookiesApi);
+                cookiesResolved = true;
                 Core.Logger.LogInformation("[HZP] Cookies (Player) API resolved successfully.");
             }
         }
         catch (Exception ex)
         {
-            // Only warn if the user actually configured Cookies as the backend.
-            if (cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Cookies)
-                Core.Logger.LogWarning("[HZP] Cookies API not available but AmmoPacksStorageBackend=Cookies: {Ex}", ex.Message);
-            else
-                Core.Logger.LogDebug("[HZP] Cookies API not available (not configured as backend): {Ex}", ex.Message);
+            Core.Logger.LogDebug("[HZP] Cookies API lookup threw: {Ex}", ex.Message);
         }
+
+        // Warn once if Cookies is the configured backend but the plugin isn't available.
+        if (!cookiesResolved && cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Cookies)
+            Core.Logger.LogWarning("[HZP] Cookies API not available – AmmoPacksStorageBackend=Cookies requires the Cookies plugin to be loaded.");
 
         // Ensure the active backend is ready (e.g. register wallet kind in Economy).
         _ = resolver.Active.EnsureReadyAsync();
