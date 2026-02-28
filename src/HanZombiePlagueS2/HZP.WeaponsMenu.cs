@@ -18,7 +18,6 @@ public class HZPWeaponsMenu
     private readonly HZPHelpers _helpers;
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPWeaponsCFG> _weaponsCFG;
-    private readonly HZPGameMode _gameMode;
 
     public HZPWeaponsMenu(
         ISwiftlyCore core,
@@ -26,8 +25,7 @@ public class HZPWeaponsMenu
         HZPGlobals globals,
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
-        IOptionsMonitor<HZPWeaponsCFG> weaponsCFG,
-        HZPGameMode gameMode)
+        IOptionsMonitor<HZPWeaponsCFG> weaponsCFG)
     {
         _core = core;
         _logger = logger;
@@ -35,18 +33,19 @@ public class HZPWeaponsMenu
         _helpers = helpers;
         _menuHelper = menuHelper;
         _weaponsCFG = weaponsCFG;
-        _gameMode = gameMode;
     }
 
-    /// <summary>Returns true only in Normal/NormalInfection/MultiInfection modes where a
-    /// free weapon selection makes sense. Special modes (Survivor, Sniper, etc.) give
-    /// weapons automatically, so the buy-weapons menu is suppressed.</summary>
-    private bool IsWeaponMenuAllowedForCurrentMode()
+    private bool IsWeaponSelectionWindowOpen(IPlayer player, bool sendReason = false)
     {
-        var mode = _gameMode.CurrentMode;
-        return mode == GameModeType.Normal
-            || mode == GameModeType.NormalInfection
-            || mode == GameModeType.MultiInfection;
+        // Once infection/custom start begins, late selections are no longer allowed.
+        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
+        {
+            if (sendReason)
+                _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
+            return false;
+        }
+
+        return true;
     }
 
     private bool IsWeaponSelectionWindowOpen(IPlayer player, bool sendReason = false)
@@ -118,8 +117,6 @@ public class HZPWeaponsMenu
         if (!CFG.EnableWeaponsMenu || !CFG.GiveMenuOnRoundStart)
             return;
 
-        if (!IsWeaponMenuAllowedForCurrentMode())
-            return;
 
         var allPlayers = _core.PlayerManager.GetAllPlayers();
         foreach (var player in allPlayers)
