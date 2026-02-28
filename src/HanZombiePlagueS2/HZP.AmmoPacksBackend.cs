@@ -79,11 +79,10 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
 
     public Task EnsureReadyAsync()
     {
+        // If the API hasn't been injected yet (Economy plugin not loaded), do nothing silently.
+        // The caller (UseSharedInterface) is responsible for emitting the appropriate warning.
         if (_api == null)
-        {
-            _logger.LogWarning("[HZP-Economy] Economy API not available – AmmoPacksStorageBackend=Economy requires the Economy plugin to be loaded.");
             return Task.CompletedTask;
-        }
 
         var walletKind = _mainCFG.CurrentValue.EconomyWalletKind;
         if (!_api.WalletKindExists(walletKind))
@@ -193,9 +192,8 @@ public class CookiesAmmoPacksBackend : IAmmoPacksBackend
 
     public Task EnsureReadyAsync()
     {
-        if (_api == null)
-            _logger.LogWarning("[HZP-Cookies] Cookies API not available – AmmoPacksStorageBackend=Cookies requires the Cookies plugin to be loaded.");
-
+        // If the API hasn't been injected yet (Cookies plugin not loaded), do nothing silently.
+        // The caller (UseSharedInterface) is responsible for emitting the appropriate warning.
         return Task.CompletedTask;
     }
 
