@@ -39,6 +39,7 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         if (ServiceProvider == null) return;
 
         var resolver = ServiceProvider.GetRequiredService<AmmoPacksBackendResolver>();
+        var cfg = ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<HZPMainCFG>>().CurrentValue;
 
         // ── Economy plugin ────────────────────────────────────────────────────
         try
@@ -52,7 +53,11 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         }
         catch (Exception ex)
         {
-            Core.Logger.LogWarning("[HZP] Economy API not available: {Ex}", ex.Message);
+            // Only warn if the user actually configured Economy as the backend.
+            if (cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Economy)
+                Core.Logger.LogWarning("[HZP] Economy API not available but AmmoPacksStorageBackend=Economy: {Ex}", ex.Message);
+            else
+                Core.Logger.LogDebug("[HZP] Economy API not available (not configured as backend): {Ex}", ex.Message);
         }
 
         // ── Cookies plugin ────────────────────────────────────────────────────
@@ -67,7 +72,11 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         }
         catch (Exception ex)
         {
-            Core.Logger.LogWarning("[HZP] Cookies API not available: {Ex}", ex.Message);
+            // Only warn if the user actually configured Cookies as the backend.
+            if (cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Cookies)
+                Core.Logger.LogWarning("[HZP] Cookies API not available but AmmoPacksStorageBackend=Cookies: {Ex}", ex.Message);
+            else
+                Core.Logger.LogDebug("[HZP] Cookies API not available (not configured as backend): {Ex}", ex.Message);
         }
 
         // Ensure the active backend is ready (e.g. register wallet kind in Economy).
