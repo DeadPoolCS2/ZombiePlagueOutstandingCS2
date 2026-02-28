@@ -431,7 +431,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public string HZP_GetZombieClassname(IPlayer player)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return string.Empty;
 
         var id = player.PlayerID;
@@ -445,7 +445,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public int HZP_GetZombieMaxHealth(IPlayer player, bool original)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return 0;
 
         var pawn = player.PlayerPawn;
@@ -487,7 +487,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public void HZP_GiveFireGrenade(IPlayer player)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -504,7 +504,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public void HZP_GiveLightGrenade(IPlayer player)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -521,7 +521,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public void HZP_GiveFreezeGrenade(IPlayer player)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -538,7 +538,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public void HZP_GiveTeleportGrenade(IPlayer player)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -555,7 +555,7 @@ public partial class HanZombiePlagueAPI : IHanZombiePlagueAPI, IDisposable
     public void HZP_GiveIncGrenade(IPlayer player)
     {
         ThrowIfDisposed();
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;

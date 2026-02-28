@@ -58,7 +58,7 @@ public class HZPExtraItemsMenu
         return ap;
     }
 
-    public void SetAmmoPacks(int playerId, int amount)
+    public void SetAmmoPacks(int playerId, int amount, bool persist = true)
     {
         int clamped = Math.Max(0, amount);
         _globals.AmmoPacks.TryGetValue(playerId, out int previous);
@@ -66,7 +66,8 @@ public class HZPExtraItemsMenu
             return;
 
         _globals.AmmoPacks[playerId] = clamped;
-        PersistAmmoPacks(playerId, clamped);
+        if (persist)
+            PersistAmmoPacks(playerId, clamped);
     }
 
     private void PersistAmmoPacks(int playerId, int ammoPacks)
@@ -76,7 +77,7 @@ public class HZPExtraItemsMenu
 
         ulong steamId = 0;
         var player = _core.PlayerManager.GetPlayer(playerId);
-        if (player != null && player.IsValid && !player.IsFakeClient)
+        if (player.IsValid && !player.IsFakeClient)
             steamId = player.SteamID;
 
         if (steamId == 0)
@@ -189,7 +190,7 @@ public class HZPExtraItemsMenu
 
     public void OpenExtraItemsMenu(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
@@ -262,7 +263,7 @@ public class HZPExtraItemsMenu
 
     private void HandleItemPurchase(IPlayer player, ExtraItemEntry item)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
@@ -451,7 +452,7 @@ public class HZPExtraItemsMenu
 
         _core.Scheduler.DelayBySeconds(duration, () =>
         {
-            if (player == null || !player.IsValid) return;
+            if (!player.IsValid) return;
             _globals.ZombieMadnessActive[playerId] = false;
             _helpers.SendChatT(player, "ExtraItemsMadnessEnd");
         });
@@ -593,7 +594,7 @@ public class HZPExtraItemsMenu
 
     public void TryExecuteKnifeBlink(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
@@ -651,7 +652,7 @@ public class HZPExtraItemsMenu
 
     public void TryExecuteJetpackThrust(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         int id = player.PlayerID;
         if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) return;
@@ -697,7 +698,7 @@ public class HZPExtraItemsMenu
 
     public void TryFireJetpackRocket(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         int id = player.PlayerID;
         if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) return;
@@ -782,7 +783,7 @@ public class HZPExtraItemsMenu
 
     public void TryPlantTripMine(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
@@ -932,7 +933,7 @@ public class HZPExtraItemsMenu
     /// <summary>Recovers the owner's nearest planted mine, returning one charge.</summary>
     public void TryTakeTripMine(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
@@ -1010,7 +1011,7 @@ public class HZPExtraItemsMenu
 
             foreach (var player in _core.PlayerManager.GetAlive())
             {
-                if (player == null || !player.IsValid) continue;
+                if (!player.IsValid) continue;
 
                 _globals.IsZombie.TryGetValue(player.PlayerID, out bool isZombie);
                 if (!isZombie) continue;

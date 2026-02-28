@@ -51,7 +51,7 @@ public class HZPWeaponsMenu
 
     public bool IsEligibleHuman(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return false;
 
         var controller = player.Controller;
@@ -177,7 +177,7 @@ public class HZPWeaponsMenu
         if (!CFG.EnableWeaponsMenu)
             return;
 
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         if (!IsWeaponSelectionWindowOpen(player, sendReason: false))
@@ -227,7 +227,7 @@ public class HZPWeaponsMenu
 
     private void GiveWeaponBySlot(IPlayer player, string classname, gear_slot_t slot)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -254,7 +254,7 @@ public class HZPWeaponsMenu
 
     private void GiveDefaultGrenades(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var CFG = _weaponsCFG.CurrentValue;

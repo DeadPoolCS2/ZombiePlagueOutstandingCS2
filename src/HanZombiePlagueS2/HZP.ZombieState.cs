@@ -33,7 +33,7 @@ public class PlayerZombieState
 
     public void ClearSpecialAndSetPlayerZombie(IPlayer player, List<ZombieClass> classList, List<SpecialZombieClass> specialClassList)
     {
-        if(player == null || !player.IsValid)
+        if(!player.IsValid)
             return;
 
         var slot = player.PlayerID;

@@ -210,7 +210,7 @@ public partial class HZPServices
 
     public void SetPlayerZombie(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
         var Id = player.PlayerID;
         var steamId = player.SteamID;
@@ -252,7 +252,7 @@ public partial class HZPServices
 
     public void SetPlayerHuman(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -770,7 +770,7 @@ public partial class HZPServices
 
     public void RandomSpawnPoint(IPlayer player, bool isZombie)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var CFG = _mainCFG.CurrentValue;

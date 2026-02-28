@@ -298,7 +298,7 @@ public partial class HZPEvents
             var allplayer = _core.PlayerManager.GetAllPlayers();
             foreach (var player in allplayer)
             {
-                if (player == null || !player.IsValid)
+                if (!player.IsValid)
                     continue;
 
                 _helpers.RemoveGlow(player);
@@ -487,7 +487,7 @@ public partial class HZPEvents
         try
         {
             var player = @event.UserIdPlayer;
-            if (player == null || !player.IsValid)
+            if (!player.IsValid)
                 return HookResult.Continue;
 
             var pawn = @event.UserIdPawn;
@@ -500,14 +500,14 @@ public partial class HZPEvents
 
             var Id = player.PlayerID;
             ulong steamId = player.SteamID;
-            if (steamId != 0 && !_globals.PlayerSteamIdCache.ContainsKey(Id))
+            if (steamId != 0)
                 _globals.PlayerSteamIdCache[Id] = steamId;
 
             _core.Scheduler.NextWorldUpdate(() =>
             {
                 try
                 {
-                    if (player == null || !player.IsValid)
+                    if (!player.IsValid)
                         return;
 
                     _helpers.SetNoBlock(player);
@@ -604,7 +604,7 @@ public partial class HZPEvents
     private HookResult OnPlayerDeath(EventPlayerDeath @event)
     {
         var player = @event.UserIdPlayer;
-        if(player == null || !player.IsValid)
+        if(!player.IsValid)
             return HookResult.Continue;
 
         var Pawn = player.PlayerPawn;
@@ -733,14 +733,14 @@ public partial class HZPEvents
             _core.Scheduler.DelayBySeconds(1.0f, () =>
             {
                 var player = _core.PlayerManager.GetPlayer(Id);
-                if (player == null || !player.IsValid)
+                if (!player.IsValid)
                     return;
 
                 player.Respawn();
 
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
-                    if (player == null || !player.IsValid)
+                    if (!player.IsValid)
                         return;
 
                     var zombieConfig = _zombieClassCFG.CurrentValue;
@@ -912,7 +912,7 @@ public partial class HZPEvents
         if (controller == null || !controller.IsValid) return;
 
         var Player = _core.PlayerManager.GetPlayer((int)(controller.Index - 1));
-        if (Player == null || !Player.IsValid) return;
+        if (!Player.IsValid) return;
 
         if (weaponName == "weapon_c4")
         {
@@ -991,7 +991,7 @@ public partial class HZPEvents
         var snapshot = new List<(ulong steamId, int ap)>();
         foreach (var player in _core.PlayerManager.GetAllPlayers())
         {
-            if (player == null || !player.IsValid || player.IsFakeClient)
+            if (!player.IsValid || player.IsFakeClient)
                 continue;
             ulong steamId = player.SteamID;
             if (steamId == 0) continue;
@@ -1116,7 +1116,7 @@ public partial class HZPEvents
         _ammoPacksLoadGeneration[id] = loadGeneration;
 
         // Always reset slot AP at connect so stale values from a previous occupant cannot leak.
-        _extraItemsMenu.SetAmmoPacks(id, 0);
+        _extraItemsMenu.SetAmmoPacks(id, 0, persist: false);
 
         // Load AP from backend once SteamID is available; avoid overwriting rewards gained while async load is running.
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
@@ -1132,7 +1132,7 @@ public partial class HZPEvents
             }
 
             var player = _core.PlayerManager.GetPlayer(id);
-            if (player == null || !player.IsValid || player.IsFakeClient)
+            if (!player.IsValid || player.IsFakeClient)
             {
                 if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
                     _extraItemsMenu.SetAmmoPacks(id, startingAP);
@@ -1141,7 +1141,7 @@ public partial class HZPEvents
             }
 
             ulong steamId = player.SteamID;
-            if (steamId != 0 && !_globals.PlayerSteamIdCache.ContainsKey(id))
+            if (steamId != 0)
                 _globals.PlayerSteamIdCache[id] = steamId;
 
             if (steamId == 0)
@@ -1196,7 +1196,7 @@ public partial class HZPEvents
             }
 
             var current = _core.PlayerManager.GetPlayer(id);
-            if (current == null || !current.IsValid || current.IsFakeClient)
+            if (!current.IsValid || current.IsFakeClient)
             {
                 _ammoPacksLoadInProgress.Remove(id);
                 return;
@@ -1215,8 +1215,7 @@ public partial class HZPEvents
                 return;
             }
 
-            if (!_globals.PlayerSteamIdCache.ContainsKey(id))
-                _globals.PlayerSteamIdCache[id] = currentSteamId;
+            _globals.PlayerSteamIdCache[id] = currentSteamId;
 
             int currentAp = _extraItemsMenu.GetAmmoPacks(id);
             if (savedAP.HasValue)
@@ -1247,18 +1246,17 @@ public partial class HZPEvents
         // belongs to an older session and must not wipe the new player's AP/state.
         var player = _core.PlayerManager.GetPlayer(id);
         ulong currentSlotSteamId = 0;
-        if (player != null && player.IsValid && !player.IsFakeClient)
+        if (player.IsValid && !player.IsFakeClient)
             currentSlotSteamId = player.SteamID;
 
         _globals.PlayerSteamIdCache.TryGetValue(id, out ulong cachedSteamId);
 
-        // SwiftlyS2 disconnect event only gives PlayerId (no SteamID), so slot reuse can race.
-        // If a different SteamID already occupies this slot, this is a stale disconnect.
-        if (currentSlotSteamId != 0 && cachedSteamId != 0 && currentSlotSteamId != cachedSteamId)
+        // If slot is already occupied by a valid player, this disconnect belongs to an older session.
+        if (currentSlotSteamId != 0)
         {
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogInformation("[HZP-AP] Stale disconnect ignored for slot {Slot}: current={CurrentSteam} cached={CachedSteam}.",
-                    id, currentSlotSteamId, cachedSteamId);
+                _logger.LogInformation("[HZP-AP] Stale disconnect ignored for slot {Slot}: current={CurrentSteam}.",
+                    id, currentSlotSteamId);
             return;
         }
 
@@ -1335,7 +1333,7 @@ public partial class HZPEvents
         var allplayer = _core.PlayerManager.GetAlive();
         foreach (var player in allplayer)
         {
-            if (player == null || !player.IsValid)
+            if (!player.IsValid)
                 continue;
 
             var pawn = player.PlayerPawn;
@@ -1410,7 +1408,7 @@ public partial class HZPEvents
 
         foreach (var player in _core.PlayerManager.GetAllPlayers())
         {
-            if (player == null || !player.IsValid)
+            if (!player.IsValid)
                 continue;
 
             var pawn = player.PlayerPawn;
@@ -1449,7 +1447,7 @@ public partial class HZPEvents
 
         foreach (var player in _core.PlayerManager.GetAlive())
         {
-            if (player == null || !player.IsValid)
+            if (!player.IsValid)
                 continue;
 
             int id = player.PlayerID;
@@ -1486,7 +1484,7 @@ public partial class HZPEvents
     {
         foreach (var player in _core.PlayerManager.GetAlive())
         {
-            if (player == null || !player.IsValid) continue;
+            if (!player.IsValid) continue;
 
             int id = player.PlayerID;
             if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) continue;
@@ -1599,7 +1597,7 @@ public partial class HZPEvents
     private HookResult OnHumanWeaponFire(EventWeaponFire @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         var pawn = @event.UserIdPawn;
@@ -1663,7 +1661,7 @@ public partial class HZPEvents
     private HookResult CheckRoundWinDeath(EventPlayerDeath @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         if(!_globals.GameStart)
@@ -1677,7 +1675,7 @@ public partial class HZPEvents
     private HookResult CheckRoundWinSpawn(EventPlayerSpawn @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         if (!_globals.GameStart)
@@ -1691,7 +1689,7 @@ public partial class HZPEvents
     private HookResult RandomSpawn(EventPlayerSpawn @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         var pawn = player.PlayerPawn;
@@ -1855,7 +1853,7 @@ public partial class HZPEvents
     private HookResult OnPlayerBlind(EventPlayerBlind @event)
     {
         var player = @event.UserIdPlayer;
-        if(player == null || !player.IsValid)
+        if(!player.IsValid)
             return HookResult.Continue;
 
         var pawn = player.PlayerPawn;
@@ -2001,7 +1999,7 @@ public partial class HZPEvents
             return HookResult.Continue;
 
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         var CFG = _mainCFG.CurrentValue;
