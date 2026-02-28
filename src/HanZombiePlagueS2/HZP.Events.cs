@@ -993,6 +993,8 @@ public partial class HZPEvents
         {
             if (!player!.IsValid || player.IsFakeClient)
                 continue;
+            if (!_globals.AmmoPacksLoaded.Contains(player.PlayerID))
+                continue;
             ulong steamId = player.SteamID;
             if (steamId == 0) continue;
             int ap = _extraItemsMenu.GetAmmoPacks(player.PlayerID);
@@ -1109,6 +1111,7 @@ public partial class HZPEvents
 
         _globals.IsZombie[id] = _globals.GameStart;
         _ammoPacksLoadInProgress.Remove(id);
+        _globals.AmmoPacksLoaded.Remove(id);
 
         int loadGeneration = _ammoPacksLoadGeneration.TryGetValue(id, out int prevGeneration)
             ? prevGeneration + 1
@@ -1134,8 +1137,6 @@ public partial class HZPEvents
             var player = _core.PlayerManager.GetPlayer(id);
             if (!player!.IsValid || player.IsFakeClient)
             {
-                if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
-                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
                 _ammoPacksLoadInProgress.Remove(id);
                 return;
             }
@@ -1152,8 +1153,6 @@ public partial class HZPEvents
                     return;
                 }
 
-                if (startingAP > 0 && !_globals.AmmoPacks.ContainsKey(id))
-                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
                 _ammoPacksLoadInProgress.Remove(id);
                 return;
             }
@@ -1163,18 +1162,19 @@ public partial class HZPEvents
             {
                 if (startingAP > 0 && _extraItemsMenu.GetAmmoPacks(id) <= 0)
                     _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _globals.AmmoPacksLoaded.Add(id);
                 _ammoPacksLoadInProgress.Remove(id);
                 return;
             }
 
-            _ = LoadAmmoPacksAndApplyAsync(id, steamId, loadGeneration, startingAP);
+            _ = LoadAmmoPacksAndApplyAsync(id, steamId, loadGeneration, startingAP, attemptsLeft, retryDelaySeconds);
         }
 
         if (_ammoPacksLoadInProgress.Add(id))
             TryLoadAmmoPacks(maxAttempts);
     }
 
-    private async Task LoadAmmoPacksAndApplyAsync(int id, ulong steamId, int loadGeneration, int startingAP)
+    private async Task LoadAmmoPacksAndApplyAsync(int id, ulong steamId, int loadGeneration, int startingAP, int attemptsLeft, float retryDelaySeconds)
     {
         int? savedAP;
         try
@@ -1219,9 +1219,30 @@ public partial class HZPEvents
 
             int currentAp = _extraItemsMenu.GetAmmoPacks(id);
             if (savedAP.HasValue)
+            {
                 _extraItemsMenu.SetAmmoPacks(id, Math.Max(currentAp, savedAP.Value));
-            else if (startingAP > 0 && currentAp <= 0)
-                _extraItemsMenu.SetAmmoPacks(id, startingAP);
+                _globals.AmmoPacksLoaded.Add(id);
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
+            if (attemptsLeft > 0)
+            {
+                _core.Scheduler.DelayBySeconds(retryDelaySeconds, () =>
+                {
+                    if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    _ = LoadAmmoPacksAndApplyAsync(id, steamId, loadGeneration, startingAP, attemptsLeft - 1, retryDelaySeconds);
+                });
+                return;
+            }
+
+            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
+                _logger.LogWarning("[HZP-AP] Load unavailable for steamid={SteamId}; keeping current AP={AP}.", steamId, currentAp);
 
             _ammoPacksLoadInProgress.Remove(id);
         });
@@ -1236,6 +1257,7 @@ public partial class HZPEvents
 
         var id = @event.PlayerId;
         _ammoPacksLoadInProgress.Remove(id);
+        _globals.AmmoPacksLoaded.Remove(id);
 
         if (_ammoPacksLoadGeneration.TryGetValue(id, out int previousGeneration))
             _ammoPacksLoadGeneration[id] = previousGeneration + 1;
@@ -1266,7 +1288,7 @@ public partial class HZPEvents
         if (steamId != 0)
         {
             var cfg = _mainCFG.CurrentValue;
-            if (cfg.AmmoPacksEnabled)
+            if (cfg.AmmoPacksEnabled && _globals.AmmoPacksLoaded.Contains(id))
             {
                 int currentAP = _extraItemsMenu.GetAmmoPacks(id);
                 _ = _backendResolver.Active.SaveAsync(steamId, currentAP);
@@ -1296,6 +1318,7 @@ public partial class HZPEvents
 
         // Extra items cleanup
         _globals.AmmoPacks.Remove(id);
+        _globals.AmmoPacksLoaded.Remove(id);
         _globals.PlayerSteamIdCache.Remove(id);
         _ammoPacksLoadGeneration.Remove(id);
         _globals.DamageAccumulator.Remove(id);

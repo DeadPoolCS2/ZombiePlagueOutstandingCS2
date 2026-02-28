@@ -75,6 +75,8 @@ public class HZPGlobals
     // ── Extra Items / Ammo Packs ──────────────────────────────────────────────
     /// <summary>Per-player ammo-pack balance (keyed by PlayerID).</summary>
     public Dictionary<int, int> AmmoPacks = new Dictionary<int, int>();
+    /// <summary>Players for which ammo packs were successfully loaded from the active backend this session.</summary>
+    public HashSet<int> AmmoPacksLoaded = new HashSet<int>();
     /// <summary>Last known SteamID64 per player slot (for reliable AP save on disconnect).</summary>
     public Dictionary<int, ulong> PlayerSteamIdCache = new Dictionary<int, ulong>();
     /// <summary>
