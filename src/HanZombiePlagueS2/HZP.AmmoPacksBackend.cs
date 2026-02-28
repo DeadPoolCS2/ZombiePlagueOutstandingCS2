@@ -102,8 +102,8 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         try
         {
             var walletKind = _mainCFG.CurrentValue.EconomyWalletKind;
-            decimal balance = _api.GetPlayerBalance(steamId, walletKind);
-            int ap = (int)Math.Max(0, Math.Truncate(balance));
+            int balance = _api.GetPlayerBalance(steamId, walletKind);
+            int ap = Math.Max(0, balance);
 
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
                 _logger.LogInformation("[HZP-Economy] Load: steamid={SteamId} ap={AP}", steamId, ap);
