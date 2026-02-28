@@ -858,8 +858,8 @@ public class HZPExtraItemsMenu
 
             // Mine body model visual
             var mineCfgLocal = _mainCFG.CurrentValue.Mine;
-            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic_override")
-                ?? _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic");
+            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_physics_override")
+                ?? _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_physics");
             if (modelEnt != null && modelEnt.IsValid && modelEnt.IsValidEntity)
             {
                 if (!float.TryParse(mineCfgLocal.ModelAngleFix, System.Globalization.NumberStyles.Float,

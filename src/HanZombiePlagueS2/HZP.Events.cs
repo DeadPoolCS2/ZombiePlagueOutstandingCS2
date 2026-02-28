@@ -1120,6 +1120,9 @@ public partial class HZPEvents
             : 1;
         _ammoPacksLoadGeneration[id] = loadGeneration;
 
+        // Always reset slot AP at connect so stale values from a previous occupant cannot leak.
+        _extraItemsMenu.SetAmmoPacks(id, 0);
+
         // Load AP from DB once SteamID is available; avoid overwriting rewards gained while async load is running.
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
         const int maxAttempts = 20;
