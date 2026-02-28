@@ -64,7 +64,7 @@ public class HZPGameMenu
 
     public void OpenGameMenu(IPlayer player)
     {
-        if (!player.IsValid) return;
+        if (player == null || !player.IsValid) return;
 
         IMenuAPI menu = _menuHelper.CreateMenu(_helpers.T(player, "GameMenuTitle"));
 
@@ -186,7 +186,7 @@ public class HZPGameMenu
 
     private bool HasAdminPermission(IPlayer player)
     {
-        if (!player.IsValid) return false;
+        if (player == null || !player.IsValid) return false;
         ulong steamId = player.SteamID;
         if (steamId == 0) return false;
         var permString = _mainCFG.CurrentValue.AdminMenuPermission;
@@ -252,7 +252,7 @@ public class HZPGameMenu
 
     private void TryUnstuck(IPlayer player)
     {
-        if (!player.IsValid) return;
+        if (player == null || !player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
@@ -310,7 +310,7 @@ public class HZPGameMenu
 
     private void TryJoinSpectator(IPlayer player)
     {
-        if (!player.IsValid) return;
+        if (player == null || !player.IsValid) return;
 
         try
         {

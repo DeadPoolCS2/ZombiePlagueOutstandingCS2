@@ -21,7 +21,7 @@ public partial class HZPHelpers
 {
     public void TVaccine(IPlayer player, int maxHealth, float initialSpeed, string models, string sound, float volume)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -64,7 +64,7 @@ public partial class HZPHelpers
 
     public void TVirusGrenade(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -104,7 +104,7 @@ public partial class HZPHelpers
 
     public void GiveScbaSuit(IPlayer player, string sound)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -126,7 +126,7 @@ public partial class HZPHelpers
 
     public void RemoveScbaSuit(IPlayer player, string sound)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -142,7 +142,7 @@ public partial class HZPHelpers
 
     public void SetGodState(IPlayer player, float time)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -163,7 +163,7 @@ public partial class HZPHelpers
 
     public void RemoveGodState(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -179,7 +179,7 @@ public partial class HZPHelpers
 
     public void AddHealth(IPlayer player, int MaxHealth, int valve, string sound)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -207,7 +207,7 @@ public partial class HZPHelpers
 
     public void SetInfiniteAmmoState(IPlayer player, float time)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -228,7 +228,7 @@ public partial class HZPHelpers
 
     public void RemoveInfiniteAmmo(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -315,7 +315,7 @@ public partial class HZPHelpers
 
     public void GiveFireGrenade(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -355,7 +355,7 @@ public partial class HZPHelpers
 
     public void GiveFreezeGrenade(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -391,7 +391,7 @@ public partial class HZPHelpers
 
     public void GiveLightGrenade(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -426,7 +426,7 @@ public partial class HZPHelpers
 
     public void GiveTeleprotGrenade(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -461,7 +461,7 @@ public partial class HZPHelpers
 
     public void GiveIncGrenade(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Id = player.PlayerID;

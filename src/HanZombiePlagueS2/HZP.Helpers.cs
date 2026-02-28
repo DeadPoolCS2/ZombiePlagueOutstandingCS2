@@ -56,7 +56,7 @@ public partial class HZPHelpers
     /// <summary>Sends a localised center message to a single player.</summary>
     public void SendCenterT(IPlayer player, string key, params object[] args)
     {
-        if (!player.IsValid || player.IsFakeClient)
+        if (player == null || !player.IsValid || player.IsFakeClient)
             return;
         player.SendMessage(MessageType.Center, T(player, key, args));
     }
@@ -64,7 +64,7 @@ public partial class HZPHelpers
     /// <summary>Sends a prefixed localised chat message to a single player.</summary>
     public void SendChatT(IPlayer player, string key, params object[] args)
     {
-        if (!player.IsValid || player.IsFakeClient)
+        if (player == null || !player.IsValid || player.IsFakeClient)
             return;
         player.SendMessage(MessageType.Chat, ChatMsg(T(player, key, args)));
     }
@@ -75,7 +75,7 @@ public partial class HZPHelpers
         var list = new List<IPlayer>();
         foreach (var player in allplayer)
         {
-            if (!player.IsValid)
+            if (player == null || !player.IsValid)
                 continue;
 
             list.Add(player);
@@ -241,7 +241,7 @@ public partial class HZPHelpers
         var allplayer = _core.PlayerManager.GetAllPlayers();
         foreach (var player in allplayer)
         {
-            if (!player.IsValid)
+            if (player == null || !player.IsValid)
                 continue;
 
             player.SwitchTeam(Team.CT);
@@ -257,7 +257,7 @@ public partial class HZPHelpers
     }
     public void SetNoBlock(IPlayer player) //碰撞体积关闭
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -270,7 +270,7 @@ public partial class HZPHelpers
 
     public void ChangeKnife(IPlayer player, bool isZombie, bool customKnife, string knifepath = "")
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -332,7 +332,7 @@ public partial class HZPHelpers
 
     public void SetInvisibility(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -354,7 +354,7 @@ public partial class HZPHelpers
 
     public void SetUnInvisibility(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -381,7 +381,7 @@ public partial class HZPHelpers
 
     public void SetGlow(IPlayer player, int ColorR, int ColorG, int ColorB, int ColorA)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var controller = player.Controller;
@@ -443,7 +443,7 @@ public partial class HZPHelpers
 
     public void RemoveGlow(IPlayer player)
     {
-        if (!player.IsValid || !_core.PlayerManager.IsPlayerOnline(player.PlayerID))
+        if (player == null || !player.IsValid || !_core.PlayerManager.IsPlayerOnline(player.PlayerID))
             return;
 
         var controller = player.Controller;
@@ -475,7 +475,7 @@ public partial class HZPHelpers
 
     public void SetFov(IPlayer player, int fov)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var Pawn = player.PlayerPawn;
@@ -983,7 +983,7 @@ public partial class HZPHelpers
 
     public void SetZombieFreezeOrStun(IPlayer player, float duration, string sound = "")
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var controller = player.Controller;
@@ -1027,7 +1027,7 @@ public partial class HZPHelpers
     }
     public void ClearFreezeStaten(IPlayer player)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         var pawn = player.PlayerPawn;
@@ -1074,7 +1074,7 @@ public partial class HZPHelpers
         var allplayer = _core.PlayerManager.GetAllPlayers();
         foreach (var player in allplayer)
         {
-            if (!player.IsValid)
+            if (player == null || !player.IsValid)
                 continue;
 
             _core.Scheduler.NextWorldUpdate(() =>
@@ -1098,7 +1098,7 @@ public partial class HZPHelpers
     {
         foreach (var player in _core.PlayerManager.GetAllPlayers())
         {
-            if (!player.IsValid)
+            if (player == null || !player.IsValid)
                 continue;
 
             if(player.IsFakeClient)
@@ -1112,7 +1112,7 @@ public partial class HZPHelpers
     {
         foreach (var player in _core.PlayerManager.GetAllPlayers())
         {
-            if (!player.IsValid)
+            if (player == null || !player.IsValid)
                 continue;
 
             if (player.IsFakeClient)
@@ -1126,7 +1126,7 @@ public partial class HZPHelpers
 
     public string T(IPlayer? player, string key, params object[] args)
     {
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
         {
             if (args.Length == 0)
                 return key;
@@ -1170,7 +1170,7 @@ public partial class HZPHelpers
             return;
 
         var player = _core.PlayerManager.GetPlayerFromPawn(pawn);
-        if (!player.IsValid)
+        if (player == null || !player.IsValid)
             return;
 
         _globals.IsZombie.TryGetValue(player.PlayerID, out bool IsZombie);
