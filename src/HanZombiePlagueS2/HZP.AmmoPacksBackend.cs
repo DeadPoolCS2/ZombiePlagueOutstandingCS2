@@ -1,4 +1,3 @@
-using Cookies.Contract;
 using Economy.Contract;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,8 +9,8 @@ namespace HanZombiePlagueS2;
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// <summary>
-/// Abstraction over the three supported Ammo Packs persistence backends:
-/// MySQL (built-in), Economy plugin, and Cookies plugin.
+/// Abstraction over the two supported Ammo Packs persistence backends:
+/// MySQL (built-in) and Economy plugin.
 /// </summary>
 public interface IAmmoPacksBackend
 {
@@ -58,7 +57,7 @@ public class MySqlAmmoPacksBackend : IAmmoPacksBackend
 
 /// <summary>
 /// Ammo Packs backend that delegates to the Economy plugin
-/// (https://github.com/DeadPoolCS2/Economy) via <see cref="IEconomyAPIv1"/>.
+/// (https://github.com/SwiftlyS2-Plugins/Economy) via <see cref="IEconomyAPIv1"/>.
 /// </summary>
 public class EconomyAmmoPacksBackend : IAmmoPacksBackend
 {
@@ -79,8 +78,6 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
 
     public Task EnsureReadyAsync()
     {
-        // If the API hasn't been injected yet (Economy plugin not loaded), do nothing silently.
-        // The caller (UseSharedInterface) is responsible for emitting the appropriate warning.
         if (_api == null)
             return Task.CompletedTask;
 
@@ -102,8 +99,8 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         try
         {
             var walletKind = _mainCFG.CurrentValue.EconomyWalletKind;
-            int balance = _api.GetPlayerBalance(steamId, walletKind);
-            int ap = Math.Max(0, balance);
+            var balance = _api.GetPlayerBalance(steamId, walletKind);
+            int ap = Convert.ToInt32(Math.Max(0, Math.Truncate(Convert.ToDecimal(balance))));
 
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
                 _logger.LogInformation("[HZP-Economy] Load: steamid={SteamId} ap={AP}", steamId, ap);
@@ -125,7 +122,7 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         try
         {
             var walletKind = _mainCFG.CurrentValue.EconomyWalletKind;
-            _api.SetPlayerBalance(steamId, walletKind, ammoPacks);
+            _api.SetPlayerBalance(steamId, walletKind, (decimal)ammoPacks);
             _api.SaveData(steamId);
 
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
@@ -149,7 +146,7 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         {
             try
             {
-                _api.SetPlayerBalance(steamId, walletKind, ammoPacks);
+                _api.SetPlayerBalance(steamId, walletKind, (decimal)ammoPacks);
                 _api.SaveData(steamId);
 
                 if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
@@ -158,115 +155,6 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
             catch (Exception ex)
             {
                 _logger.LogWarning("[HZP-Economy] SaveAllAsync({SteamId},{AP}) failed: {Ex}", steamId, ammoPacks, ex.Message);
-            }
-        }
-
-        return Task.CompletedTask;
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Cookies plugin backend
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// <summary>
-/// Ammo Packs backend that delegates to the Cookies plugin
-/// (https://github.com/DeadPoolCS2/Cookies) via <see cref="IPlayerCookiesAPIv1"/>.
-/// </summary>
-public class CookiesAmmoPacksBackend : IAmmoPacksBackend
-{
-    private readonly ILogger<CookiesAmmoPacksBackend> _logger;
-    private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
-    private IPlayerCookiesAPIv1? _api;
-
-    public CookiesAmmoPacksBackend(
-        ILogger<CookiesAmmoPacksBackend> logger,
-        IOptionsMonitor<HZPMainCFG> mainCFG)
-    {
-        _logger = logger;
-        _mainCFG = mainCFG;
-    }
-
-    /// <summary>Called by the plugin after the Cookies shared interface is resolved.</summary>
-    public void SetApi(IPlayerCookiesAPIv1 api) => _api = api;
-
-    public Task EnsureReadyAsync()
-    {
-        // If the API hasn't been injected yet (Cookies plugin not loaded), do nothing silently.
-        // The caller (UseSharedInterface) is responsible for emitting the appropriate warning.
-        return Task.CompletedTask;
-    }
-
-    public Task<int?> LoadAsync(ulong steamId)
-    {
-        if (_api == null)
-            return Task.FromResult<int?>(null);
-
-        try
-        {
-            var key = _mainCFG.CurrentValue.CookiesAmmoPacksKey;
-            long sid = (long)steamId;
-
-            if (!_api.Has(sid, key))
-                return Task.FromResult<int?>(null);
-
-            int? ap = _api.Get<int>(sid, key);
-
-            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogInformation("[HZP-Cookies] Load: steamid={SteamId} ap={AP}", steamId, ap);
-
-            return Task.FromResult(ap);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("[HZP-Cookies] LoadAsync({SteamId}) failed: {Ex}", steamId, ex.Message);
-            return Task.FromResult<int?>(null);
-        }
-    }
-
-    public Task SaveAsync(ulong steamId, int ammoPacks)
-    {
-        if (_api == null)
-            return Task.CompletedTask;
-
-        try
-        {
-            var key = _mainCFG.CurrentValue.CookiesAmmoPacksKey;
-            long sid = (long)steamId;
-            _api.Set(sid, key, ammoPacks);
-            _api.Save(sid);
-
-            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogInformation("[HZP-Cookies] Save: steamid={SteamId} ap={AP}", steamId, ammoPacks);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("[HZP-Cookies] SaveAsync({SteamId},{AP}) failed: {Ex}", steamId, ammoPacks, ex.Message);
-        }
-
-        return Task.CompletedTask;
-    }
-
-    public Task SaveAllAsync(IEnumerable<(ulong steamId, int ammoPacks)> players)
-    {
-        if (_api == null)
-            return Task.CompletedTask;
-
-        var key = _mainCFG.CurrentValue.CookiesAmmoPacksKey;
-        foreach (var (steamId, ammoPacks) in players)
-        {
-            try
-            {
-                long sid = (long)steamId;
-                _api.Set(sid, key, ammoPacks);
-                _api.Save(sid);
-
-                if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                    _logger.LogInformation("[HZP-Cookies] SaveAll: steamid={SteamId} ap={AP}", steamId, ammoPacks);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("[HZP-Cookies] SaveAllAsync({SteamId},{AP}) failed: {Ex}", steamId, ammoPacks, ex.Message);
             }
         }
 
@@ -287,31 +175,24 @@ public class AmmoPacksBackendResolver
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
     private readonly MySqlAmmoPacksBackend _mysql;
     private readonly EconomyAmmoPacksBackend _economy;
-    private readonly CookiesAmmoPacksBackend _cookies;
 
     public AmmoPacksBackendResolver(
         IOptionsMonitor<HZPMainCFG> mainCFG,
         MySqlAmmoPacksBackend mysql,
-        EconomyAmmoPacksBackend economy,
-        CookiesAmmoPacksBackend cookies)
+        EconomyAmmoPacksBackend economy)
     {
         _mainCFG = mainCFG;
         _mysql = mysql;
         _economy = economy;
-        _cookies = cookies;
     }
 
     /// <summary>Returns the currently configured backend.</summary>
     public IAmmoPacksBackend Active => _mainCFG.CurrentValue.AmmoPacksStorageBackend switch
     {
         AmmoPacksBackend.Economy => _economy,
-        AmmoPacksBackend.Cookies => _cookies,
         _ => _mysql
     };
 
     /// <summary>Provides direct access to the Economy backend for API injection.</summary>
     public EconomyAmmoPacksBackend Economy => _economy;
-
-    /// <summary>Provides direct access to the Cookies backend for API injection.</summary>
-    public CookiesAmmoPacksBackend Cookies => _cookies;
 }
