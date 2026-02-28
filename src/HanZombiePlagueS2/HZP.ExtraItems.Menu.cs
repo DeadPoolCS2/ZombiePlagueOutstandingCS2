@@ -23,6 +23,7 @@ public class HZPExtraItemsMenu
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
+    private readonly AmmoPacksBackendResolver _backendResolver;
     private readonly HZPGameMode _gameMode;
 
     public HZPExtraItemsMenu(
@@ -33,6 +34,7 @@ public class HZPExtraItemsMenu
         HZPMenuHelper menuHelper,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
         IOptionsMonitor<HZPMainCFG> mainCFG,
+        AmmoPacksBackendResolver backendResolver,
         HZPGameMode gameMode)
     {
         _core = core;
@@ -42,6 +44,7 @@ public class HZPExtraItemsMenu
         _menuHelper = menuHelper;
         _extraItemsCFG = extraItemsCFG;
         _mainCFG = mainCFG;
+        _backendResolver = backendResolver;
         _gameMode = gameMode;
     }
 
@@ -57,7 +60,32 @@ public class HZPExtraItemsMenu
 
     public void SetAmmoPacks(int playerId, int amount)
     {
-        _globals.AmmoPacks[playerId] = Math.Max(0, amount);
+        int clamped = Math.Max(0, amount);
+        _globals.AmmoPacks.TryGetValue(playerId, out int previous);
+        if (previous == clamped)
+            return;
+
+        _globals.AmmoPacks[playerId] = clamped;
+        PersistAmmoPacks(playerId, clamped);
+    }
+
+    private void PersistAmmoPacks(int playerId, int ammoPacks)
+    {
+        if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
+            return;
+
+        ulong steamId = 0;
+        var player = _core.PlayerManager.GetPlayer(playerId);
+        if (player != null && player.IsValid && !player.IsFakeClient)
+            steamId = player.SteamID;
+
+        if (steamId == 0)
+            _globals.PlayerSteamIdCache.TryGetValue(playerId, out steamId);
+
+        if (steamId == 0)
+            return;
+
+        _ = _backendResolver.Active.SaveAsync(steamId, ammoPacks);
     }
 
     public bool SpendAmmoPacks(int playerId, int cost)

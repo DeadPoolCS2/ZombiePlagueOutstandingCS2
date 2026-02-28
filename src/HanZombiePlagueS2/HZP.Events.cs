@@ -508,7 +508,7 @@ public partial class HZPEvents
 
             var Id = player.PlayerID;
             ulong steamId = player.SteamID;
-            if (steamId != 0)
+            if (steamId != 0 && !_globals.PlayerSteamIdCache.ContainsKey(Id))
                 _globals.PlayerSteamIdCache[Id] = steamId;
 
             _core.Scheduler.NextWorldUpdate(() =>
@@ -1149,7 +1149,7 @@ public partial class HZPEvents
             }
 
             ulong steamId = player.SteamID;
-            if (steamId != 0)
+            if (steamId != 0 && !_globals.PlayerSteamIdCache.ContainsKey(id))
                 _globals.PlayerSteamIdCache[id] = steamId;
 
             if (steamId == 0)
@@ -1206,7 +1206,8 @@ public partial class HZPEvents
                         return;
                     }
 
-                    _globals.PlayerSteamIdCache[id] = currentSteamId;
+                    if (!_globals.PlayerSteamIdCache.ContainsKey(id))
+                        _globals.PlayerSteamIdCache[id] = currentSteamId;
 
                     int currentAp = _extraItemsMenu.GetAmmoPacks(id);
                     if (savedAP.HasValue)
@@ -1241,12 +1242,23 @@ public partial class HZPEvents
         // Defensive guard: if the slot is already occupied again, this disconnect event
         // belongs to an older session and must not wipe the new player's AP/state.
         var player = _core.PlayerManager.GetPlayer(id);
-        ulong steamId = 0;
+        ulong currentSlotSteamId = 0;
         if (player != null && player.IsValid && !player.IsFakeClient)
-            steamId = player.SteamID;
+            currentSlotSteamId = player.SteamID;
 
-        if (steamId == 0)
-            _globals.PlayerSteamIdCache.TryGetValue(id, out steamId);
+        _globals.PlayerSteamIdCache.TryGetValue(id, out ulong cachedSteamId);
+
+        // SwiftlyS2 disconnect event only gives PlayerId (no SteamID), so slot reuse can race.
+        // If a different SteamID already occupies this slot, this is a stale disconnect.
+        if (currentSlotSteamId != 0 && cachedSteamId != 0 && currentSlotSteamId != cachedSteamId)
+        {
+            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
+                _logger.LogInformation("[HZP-AP] Stale disconnect ignored for slot {Slot}: current={CurrentSteam} cached={CachedSteam}.",
+                    id, currentSlotSteamId, cachedSteamId);
+            return;
+        }
+
+        ulong steamId = cachedSteamId != 0 ? cachedSteamId : currentSlotSteamId;
 
         // ── Save AP BEFORE removing from memory ──────────────────────────────
         if (steamId != 0)

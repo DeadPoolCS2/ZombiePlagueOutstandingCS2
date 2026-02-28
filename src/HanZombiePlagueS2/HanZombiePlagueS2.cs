@@ -44,12 +44,15 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         bool economyResolved = false;
         try
         {
-            var economyApi = interfaceManager.GetSharedInterface<IEconomyAPIv1>("Economy.API.v1");
-            if (economyApi != null)
+            if (interfaceManager.HasSharedInterface("Economy.API.v1"))
             {
-                resolver.Economy.SetApi(economyApi);
-                economyResolved = true;
-                Core.Logger.LogInformation("[HZP] Economy API resolved successfully.");
+                var economyApi = interfaceManager.GetSharedInterface<IEconomyAPIv1>("Economy.API.v1");
+                if (economyApi != null)
+                {
+                    resolver.Economy.SetApi(economyApi);
+                    economyResolved = true;
+                    Core.Logger.LogInformation("[HZP] Economy API resolved successfully.");
+                }
             }
         }
         catch (Exception ex)

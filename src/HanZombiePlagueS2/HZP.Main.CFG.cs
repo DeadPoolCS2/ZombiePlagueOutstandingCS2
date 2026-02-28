@@ -4,7 +4,7 @@ namespace HanZombiePlagueS2;
 /// Selects which persistence backend is used for Ammo Packs.
 /// <list type="bullet">
 ///   <item><description><b>MySQL</b> – built-in direct MySQL/MariaDB connection (legacy, requires <c>AmmoPacksConnectionName</c>).</description></item>
-///   <item><description><b>Economy</b> – delegates to the <i>Economy</i> plugin (https://github.com/DeadPoolCS2/Economy) via its shared API.</description></item>
+///   <item><description><b>Economy</b> – delegates to the <i>Economy</i> plugin (https://github.com/SwiftlyS2-Plugins/Economy) via its shared API.</description></item>
 ///   <item><description><b>Cookies</b> – delegates to the <i>Cookies</i> plugin (https://github.com/DeadPoolCS2/Cookies) via its shared API.</description></item>
 /// </list>
 /// </summary>
@@ -203,11 +203,11 @@ public class HZPMainCFG
     /// Selects the persistence backend for Ammo Packs.
     /// <list type="bullet">
     ///   <item><description><b>MySQL</b> – built-in direct MySQL/MariaDB (requires <see cref="AmmoPacksConnectionName"/>).</description></item>
-    ///   <item><description><b>Economy</b> – uses the Economy plugin (https://github.com/DeadPoolCS2/Economy).</description></item>
+    ///   <item><description><b>Economy</b> – uses the Economy plugin (https://github.com/SwiftlyS2-Plugins/Economy).</description></item>
     ///   <item><description><b>Cookies</b> – uses the Cookies plugin (https://github.com/DeadPoolCS2/Cookies).</description></item>
     /// </list>
     /// </summary>
-    public AmmoPacksBackend AmmoPacksStorageBackend { get; set; } = AmmoPacksBackend.MySQL;
+    public AmmoPacksBackend AmmoPacksStorageBackend { get; set; } = AmmoPacksBackend.Economy;
 
     // ── MySQL backend settings (only used when AmmoPacksBackend = MySQL) ──────
     /// <summary>
