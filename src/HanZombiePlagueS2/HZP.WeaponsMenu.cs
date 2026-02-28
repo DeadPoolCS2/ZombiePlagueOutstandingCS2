@@ -18,7 +18,6 @@ public class HZPWeaponsMenu
     private readonly HZPHelpers _helpers;
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPWeaponsCFG> _weaponsCFG;
-    private readonly HZPGameMode _gameMode;
 
     public HZPWeaponsMenu(
         ISwiftlyCore core,
@@ -26,8 +25,7 @@ public class HZPWeaponsMenu
         HZPGlobals globals,
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
-        IOptionsMonitor<HZPWeaponsCFG> weaponsCFG,
-        HZPGameMode gameMode)
+        IOptionsMonitor<HZPWeaponsCFG> weaponsCFG)
     {
         _core = core;
         _logger = logger;
@@ -35,18 +33,19 @@ public class HZPWeaponsMenu
         _helpers = helpers;
         _menuHelper = menuHelper;
         _weaponsCFG = weaponsCFG;
-        _gameMode = gameMode;
     }
 
-    /// <summary>Returns true only in Normal/NormalInfection/MultiInfection modes where a
-    /// free weapon selection makes sense. Special modes (Survivor, Sniper, etc.) give
-    /// weapons automatically, so the buy-weapons menu is suppressed.</summary>
-    private bool IsWeaponMenuAllowedForCurrentMode()
+    private bool IsWeaponSelectionWindowOpen(IPlayer player, bool sendReason = false)
     {
-        var mode = _gameMode.CurrentMode;
-        return mode == GameModeType.Normal
-            || mode == GameModeType.NormalInfection
-            || mode == GameModeType.MultiInfection;
+        // Once infection/custom start begins, late selections are no longer allowed.
+        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
+        {
+            if (sendReason)
+                _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
+            return false;
+        }
+
+        return true;
     }
 
     public bool IsEligibleHuman(IPlayer player)
@@ -71,19 +70,8 @@ public class HZPWeaponsMenu
         if (!CFG.EnableWeaponsMenu || !CFG.AllowOpenFromGameMenu)
             return;
 
-        // Disable buy-weapons in special game modes
-        if (!IsWeaponMenuAllowedForCurrentMode())
-        {
-            _helpers.SendChatT(player, "WeaponsMenuDisabledInMode");
+        if (!IsWeaponSelectionWindowOpen(player, sendReason: true))
             return;
-        }
-
-        // Disable after infection has started or when admin forced a custom mode
-        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
-        {
-            _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
-            return;
-        }
 
         if (!IsEligibleHuman(player))
         {
@@ -107,8 +95,6 @@ public class HZPWeaponsMenu
         if (!CFG.EnableWeaponsMenu || !CFG.GiveMenuOnRoundStart)
             return;
 
-        if (!IsWeaponMenuAllowedForCurrentMode())
-            return;
 
         var allPlayers = _core.PlayerManager.GetAllPlayers();
         foreach (var player in allPlayers)
@@ -117,6 +103,12 @@ public class HZPWeaponsMenu
                 continue;
 
             var id = player.PlayerID;
+
+            // Avoid duplicate auto-open within the same round (e.g. reliability pass).
+            // Presence in this dictionary means this player has already been prompted.
+            if (_globals.CanBuyWeaponsThisRound.ContainsKey(id))
+                continue;
+
             _globals.CanBuyWeaponsThisRound[id] = true;
             ShowPrimaryMenu(player);
         }
@@ -129,6 +121,9 @@ public class HZPWeaponsMenu
             return;
 
         if (!IsEligibleHuman(player))
+            return;
+
+        if (!IsWeaponSelectionWindowOpen(player, sendReason: false))
             return;
 
         IMenuAPI menu = _menuHelper.CreateMenu(_helpers.T(player, "WeaponMenuPrimaryTitle"));
@@ -159,6 +154,9 @@ public class HZPWeaponsMenu
                 {
                     if (!clicker.IsValid) return;
 
+                    if (!IsWeaponSelectionWindowOpen(clicker, sendReason: true))
+                        return;
+
                     var id = clicker.PlayerID;
                     _globals.CanBuyWeaponsThisRound[id] = false;
                     GiveWeaponBySlot(clicker, classname, gear_slot_t.GEAR_SLOT_RIFLE);
@@ -179,6 +177,9 @@ public class HZPWeaponsMenu
             return;
 
         if (player == null || !player.IsValid)
+            return;
+
+        if (!IsWeaponSelectionWindowOpen(player, sendReason: false))
             return;
 
         IMenuAPI menu = _menuHelper.CreateMenu(_helpers.T(player, "WeaponMenuSecondaryTitle"));
@@ -208,6 +209,9 @@ public class HZPWeaponsMenu
                 _core.Scheduler.NextTick(() =>
                 {
                     if (!clicker.IsValid) return;
+
+                    if (!IsWeaponSelectionWindowOpen(clicker, sendReason: true))
+                        return;
 
                     GiveWeaponBySlot(clicker, classname, gear_slot_t.GEAR_SLOT_PISTOL);
                     GiveDefaultGrenades(clicker);
