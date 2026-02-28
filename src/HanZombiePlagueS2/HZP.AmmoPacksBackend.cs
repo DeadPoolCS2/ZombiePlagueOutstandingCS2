@@ -99,8 +99,8 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         try
         {
             var walletKind = _mainCFG.CurrentValue.EconomyWalletKind;
-            var balance = _api.GetPlayerBalance(steamId, walletKind);
-            int ap = Convert.ToInt32(Math.Max(0, Math.Truncate(Convert.ToDecimal(balance))));
+            int balance = _api.GetPlayerBalance(steamId, walletKind);
+            int ap = Math.Max(0, balance);
 
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
                 _logger.LogInformation("[HZP-Economy] Load: steamid={SteamId} ap={AP}", steamId, ap);
@@ -122,7 +122,7 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         try
         {
             var walletKind = _mainCFG.CurrentValue.EconomyWalletKind;
-            _api.SetPlayerBalance(steamId, walletKind, (decimal)ammoPacks);
+            _api.SetPlayerBalance(steamId, walletKind, ammoPacks);
             _api.SaveData(steamId);
 
             if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
@@ -146,7 +146,7 @@ public class EconomyAmmoPacksBackend : IAmmoPacksBackend
         {
             try
             {
-                _api.SetPlayerBalance(steamId, walletKind, (decimal)ammoPacks);
+                _api.SetPlayerBalance(steamId, walletKind, ammoPacks);
                 _api.SaveData(steamId);
 
                 if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
