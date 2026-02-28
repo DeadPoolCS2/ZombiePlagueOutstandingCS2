@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -19,6 +19,15 @@
 		<PackageReference Include="SwiftlyS2.CS2" Version="1.1.5-beta.27" />
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
 		<ProjectReference Include="../IHanZombiePlagueAPI/IHanZombiePlagueAPI.csproj" />
+		<!-- Contract DLLs from Economy and Cookies plugins (must match the assemblies loaded at runtime) -->
+		<Reference Include="Economy.Contract">
+			<HintPath>lib/Economy.Contract.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
+		<Reference Include="Cookies.Contract">
+			<HintPath>lib/Cookies.Contract.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="../../translations/**/*">
