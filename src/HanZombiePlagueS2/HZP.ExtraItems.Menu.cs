@@ -23,6 +23,7 @@ public class HZPExtraItemsMenu
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
+    private readonly HZPGameMode _gameMode;
 
     public HZPExtraItemsMenu(
         ISwiftlyCore core,
@@ -31,7 +32,8 @@ public class HZPExtraItemsMenu
         HZPHelpers helpers,
         HZPMenuHelper menuHelper,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        IOptionsMonitor<HZPMainCFG> mainCFG)
+        IOptionsMonitor<HZPMainCFG> mainCFG,
+        HZPGameMode gameMode)
     {
         _core = core;
         _logger = logger;
@@ -40,6 +42,7 @@ public class HZPExtraItemsMenu
         _menuHelper = menuHelper;
         _extraItemsCFG = extraItemsCFG;
         _mainCFG = mainCFG;
+        _gameMode = gameMode;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -122,6 +125,21 @@ public class HZPExtraItemsMenu
 
     /// <summary>Returns false when the HZPMainCFG feature toggle for this item is disabled.</summary>
 
+    private bool IsSpecialOrCustomModeActive()
+    {
+        if (_globals.AdminForcedModeThisRound)
+            return true;
+
+        return _gameMode.CurrentMode is GameModeType.Nemesis
+            or GameModeType.Survivor
+            or GameModeType.Sniper
+            or GameModeType.Swarm
+            or GameModeType.Plague
+            or GameModeType.Assassin
+            or GameModeType.AVS
+            or GameModeType.Hero;
+    }
+
     private bool IsToggleEnabled(ExtraItemEntry item)
     {
         var cfg = _mainCFG.CurrentValue;
@@ -158,6 +176,11 @@ public class HZPExtraItemsMenu
             return;
         }
 
+        if (IsSpecialOrCustomModeActive())
+        {
+            _helpers.SendChatT(player, "ExtraItemsDisabledInMode");
+            return;
+        }
 
         var cfg = _extraItemsCFG.CurrentValue;
         int playerId = player.PlayerID;
@@ -847,11 +870,7 @@ public class HZPExtraItemsMenu
 
             // Mine body model visual
             var mineCfgLocal = _mainCFG.CurrentValue.Mine;
-            var modelPath = mineCfgLocal.Model?.Trim() ?? string.Empty;
-            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic_override")
-                           ?? _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic")
-                           ?? _core.EntitySystem.CreateEntity<CBaseModelEntity>();
-
+            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic");
             if (modelEnt != null && modelEnt.IsValid && modelEnt.IsValidEntity)
             {
                 if (!float.TryParse(mineCfgLocal.ModelAngleFix, System.Globalization.NumberStyles.Float,
@@ -859,36 +878,22 @@ public class HZPExtraItemsMenu
                     modelYawFix = 90f;
 
                 var modelAngles = new QAngle(0f, angles.Y + modelYawFix, 0f);
-                if (!string.IsNullOrWhiteSpace(modelPath))
-                    modelEnt.SetModel(modelPath);
-                else
-                    _logger.LogWarning("[HZP-Mine] Mine model path is empty in config; skipping model assignment.");
+                if (!string.IsNullOrWhiteSpace(mineCfgLocal.Model))
+                    modelEnt.SetModel(mineCfgLocal.Model);
 
                 // Ensure model is transmitted/visible.
                 const uint EF_NODRAW = 32;
                 const uint EF_NODRAW_BUT_TRANSMIT = 1024;
                 modelEnt.Effects &= ~(EF_NODRAW | EF_NODRAW_BUT_TRANSMIT);
                 modelEnt.EffectsUpdated();
-                var ownerEntity = modelEnt.CBodyComponent?.SceneNode?.Owner?.Entity;
-                if (ownerEntity != null)
-                    ownerEntity.Flags &= unchecked((uint)~(1 << 2));
 
                 modelEnt.Teleport(minePos, modelAngles, Vector.Zero);
                 modelEnt.DispatchSpawn();
-
-                // Re-apply model after spawn for workshop props that fail first assignment pre-spawn.
-                if (!string.IsNullOrWhiteSpace(modelPath))
-                    modelEnt.SetModel(modelPath);
-
                 modelEnt.Render = ParseColor(mineCfgLocal.GlowColor, 0, 255, 0, 255);
                 modelEnt.RenderMode = RenderMode_t.kRenderNormal;
                 modelEnt.RenderModeUpdated();
                 modelEnt.RenderUpdated();
                 mine.ModelVisual = modelEnt;
-            }
-            else
-            {
-                _logger.LogWarning("[HZP-Mine] Failed to create mine model entity (prop_dynamic_override/prop_dynamic).");
             }
 
             // Lightweight particle marker at mine origin

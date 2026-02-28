@@ -48,6 +48,28 @@ public class HZPWeaponsMenu
         return true;
     }
 
+    private bool IsWeaponSelectionWindowOpen(IPlayer player, bool sendReason = false)
+    {
+        // In special/custom modes players receive forced loadouts (sniper/assassin/etc.),
+        // so buy selection must remain locked.
+        if (!IsWeaponMenuAllowedForCurrentMode())
+        {
+            if (sendReason)
+                _helpers.SendChatT(player, "WeaponsMenuDisabledInMode");
+            return false;
+        }
+
+        // Once infection/custom start begins, late selections are no longer allowed.
+        if (_globals.InfectionStartedThisRound || _globals.AdminForcedModeThisRound)
+        {
+            if (sendReason)
+                _helpers.SendChatT(player, "WeaponsMenuInfectionStarted");
+            return false;
+        }
+
+        return true;
+    }
+
     public bool IsEligibleHuman(IPlayer player)
     {
         if (player == null || !player.IsValid)
