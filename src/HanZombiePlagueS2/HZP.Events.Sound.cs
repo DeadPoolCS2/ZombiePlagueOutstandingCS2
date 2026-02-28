@@ -24,7 +24,7 @@ public partial class HZPEvents
     private HookResult OnPlayerSoundSpawn(EventPlayerSpawn @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         var Id = player.PlayerID;
@@ -76,7 +76,7 @@ public partial class HZPEvents
             return HookResult.Continue;
 
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
 
@@ -108,7 +108,7 @@ public partial class HZPEvents
     private HookResult OnPlayerSoundDeath(EventPlayerDeath @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         var Id = player.PlayerID;
@@ -174,7 +174,7 @@ public partial class HZPEvents
     private HookResult OnWeaponSoundFire(EventWeaponFire @event)
     {
         var player = @event.UserIdPlayer;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         var Id = player.PlayerID;

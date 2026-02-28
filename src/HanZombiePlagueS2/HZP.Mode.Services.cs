@@ -21,7 +21,7 @@ public partial class HZPServices
 
     public void InfectMotherPlayer(IPlayer player, bool isMother = false)
     {
-        if (player == null || !player.IsValid) 
+        if (!player.IsValid) 
             return;
 
         var zombieConfig = _zombieClassCFG.CurrentValue;
@@ -323,7 +323,7 @@ public partial class HZPServices
 
     public void SetupSurvivor(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -338,7 +338,7 @@ public partial class HZPServices
 
     public void SetupSniper(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -353,7 +353,7 @@ public partial class HZPServices
 
     public void SetupMotherZombie(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -411,7 +411,7 @@ public partial class HZPServices
 
     public void SetupNemesis(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -479,7 +479,7 @@ public partial class HZPServices
         
     public void SetupAssassin(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var Id = player.PlayerID;
@@ -662,7 +662,7 @@ public partial class HZPServices
     {
         foreach (var player in _core.PlayerManager.GetAllPlayers())
         {
-            if (player == null || !player.IsValid)
+            if (!player.IsValid)
                 continue;
 
             var pawn = player.PlayerPawn;
@@ -683,7 +683,7 @@ public partial class HZPServices
     
     private void posshuman(IPlayer player, bool isSurvivor = false)
     {
-        if (player == null || !player.IsValid) 
+        if (!player.IsValid) 
             return;
 
         var Id = player.PlayerID;
@@ -744,7 +744,7 @@ public partial class HZPServices
 
     public void posshero(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         var Id = player.PlayerID;

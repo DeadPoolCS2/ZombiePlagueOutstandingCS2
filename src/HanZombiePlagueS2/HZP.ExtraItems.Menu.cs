@@ -161,7 +161,7 @@ public class HZPExtraItemsMenu
 
     public void OpenExtraItemsMenu(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
@@ -240,7 +240,7 @@ public class HZPExtraItemsMenu
 
     private void HandleItemPurchase(IPlayer player, ExtraItemEntry item)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
@@ -435,7 +435,7 @@ public class HZPExtraItemsMenu
 
         _core.Scheduler.DelayBySeconds(duration, () =>
         {
-            if (player == null || !player.IsValid) return;
+            if (!player.IsValid) return;
             _globals.ZombieMadnessActive[playerId] = false;
             _helpers.SendChatT(player, "ExtraItemsMadnessEnd");
         });
@@ -577,7 +577,7 @@ public class HZPExtraItemsMenu
 
     public void TryExecuteKnifeBlink(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
@@ -635,7 +635,7 @@ public class HZPExtraItemsMenu
 
     public void TryExecuteJetpackThrust(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         int id = player.PlayerID;
         if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) return;
@@ -681,7 +681,7 @@ public class HZPExtraItemsMenu
 
     public void TryFireJetpackRocket(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         int id = player.PlayerID;
         if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) return;
@@ -766,7 +766,7 @@ public class HZPExtraItemsMenu
 
     public void TryPlantTripMine(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
@@ -915,7 +915,7 @@ public class HZPExtraItemsMenu
     /// <summary>Recovers the owner's nearest planted mine, returning one charge.</summary>
     public void TryTakeTripMine(IPlayer player)
     {
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
 
         var controller = player.Controller;
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive) return;
@@ -993,7 +993,7 @@ public class HZPExtraItemsMenu
 
             foreach (var player in _core.PlayerManager.GetAlive())
             {
-                if (player == null || !player.IsValid) continue;
+                if (!player.IsValid) continue;
 
                 _globals.IsZombie.TryGetValue(player.PlayerID, out bool isZombie);
                 if (!isZombie) continue;

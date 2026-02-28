@@ -80,7 +80,7 @@ public class HZPCommands
     public void SelectZombieClass(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid) 
+        if (!player.IsValid) 
             return;
 
         _hZPZombieClassMenu.OpenZombieClassMenu(player);
@@ -90,7 +90,7 @@ public class HZPCommands
     public void UseItemMenu(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
 
@@ -107,7 +107,7 @@ public class HZPCommands
     public void BuyWeapons(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return;
 
         _weaponsMenu.OpenWeaponsMenuIfAllowed(player);
@@ -116,35 +116,35 @@ public class HZPCommands
     public void OpenGameMenu(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
         _gameMenu.OpenGameMenu(player);
     }
 
     public void OpenExtraItemsMenu(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
         _extraItemsMenu.OpenExtraItemsMenu(player);
     }
 
     public void KnifeBlink(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
         _extraItemsMenu.TryExecuteKnifeBlink(player);
     }
 
     public void PlantMine(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
         _extraItemsMenu.TryPlantTripMine(player);
     }
 
     public void TakeMine(ICommandContext context)
     {
         var player = context.Sender;
-        if (player == null || !player.IsValid) return;
+        if (!player.IsValid) return;
         _extraItemsMenu.TryTakeTripMine(player);
     }
 
@@ -212,7 +212,7 @@ public class HZPCommands
 
     private bool HasAdminMenuPermission(IPlayer player)
     {
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return false;
 
         ulong steamId = player.SteamID;
@@ -279,7 +279,7 @@ public class HZPCommands
     public HookResult OnJoinTeam(int playerId, string commandLine)
     {
         IPlayer? player = _core.PlayerManager.GetPlayer(playerId);
-        if (player == null || !player.IsValid)
+        if (!player.IsValid)
             return HookResult.Continue;
 
         if (!player.IsFakeClient)
