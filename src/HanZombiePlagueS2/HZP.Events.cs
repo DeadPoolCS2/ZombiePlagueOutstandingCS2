@@ -1,12 +1,6 @@
 using System.Numerics;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Security.AccessControl;
-using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mono.Cecil.Cil;
-using Spectre.Console;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.GameEventDefinitions;
@@ -16,9 +10,7 @@ using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.ProtobufDefinitions;
 using SwiftlyS2.Shared.SchemaDefinitions;
 using SwiftlyS2.Shared.Sounds;
-using static Dapper.SqlMapper;
 using static HanZombiePlagueS2.HZPZombieClassCFG;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace HanZombiePlagueS2;
 
@@ -1175,53 +1167,65 @@ public partial class HZPEvents
                 return;
             }
 
-            _ = Task.Run(async () =>
-            {
-                int? savedAP = await _backendResolver.Active.LoadAsync(steamId);
-                _core.Scheduler.NextWorldUpdate(() =>
-                {
-                    if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
-                    {
-                        _ammoPacksLoadInProgress.Remove(id);
-                        return;
-                    }
-
-                    var current = _core.PlayerManager.GetPlayer(id);
-                    if (current == null || !current.IsValid || current.IsFakeClient)
-                    {
-                        _ammoPacksLoadInProgress.Remove(id);
-                        return;
-                    }
-
-                    ulong currentSteamId = current.SteamID;
-                    if (currentSteamId == 0)
-                    {
-                        _ammoPacksLoadInProgress.Remove(id);
-                        return;
-                    }
-
-                    if (currentSteamId != steamId)
-                    {
-                        _ammoPacksLoadInProgress.Remove(id);
-                        return;
-                    }
-
-                    if (!_globals.PlayerSteamIdCache.ContainsKey(id))
-                        _globals.PlayerSteamIdCache[id] = currentSteamId;
-
-                    int currentAp = _extraItemsMenu.GetAmmoPacks(id);
-                    if (savedAP.HasValue)
-                        _extraItemsMenu.SetAmmoPacks(id, Math.Max(currentAp, savedAP.Value));
-                    else if (startingAP > 0 && currentAp <= 0)
-                        _extraItemsMenu.SetAmmoPacks(id, startingAP);
-
-                    _ammoPacksLoadInProgress.Remove(id);
-                });
-            });
+            _ = LoadAmmoPacksAndApplyAsync(id, steamId, loadGeneration, startingAP);
         }
 
         if (_ammoPacksLoadInProgress.Add(id))
             TryLoadAmmoPacks(maxAttempts);
+    }
+
+    private async Task LoadAmmoPacksAndApplyAsync(int id, ulong steamId, int loadGeneration, int startingAP)
+    {
+        int? savedAP;
+        try
+        {
+            savedAP = await _backendResolver.Active.LoadAsync(steamId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("[HZP-AP] Load failed for steamid={SteamId}: {Ex}", steamId, ex.Message);
+            savedAP = null;
+        }
+
+        _core.Scheduler.NextWorldUpdate(() =>
+        {
+            if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
+            {
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
+            var current = _core.PlayerManager.GetPlayer(id);
+            if (current == null || !current.IsValid || current.IsFakeClient)
+            {
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
+            ulong currentSteamId = current.SteamID;
+            if (currentSteamId == 0)
+            {
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
+            if (currentSteamId != steamId)
+            {
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
+            if (!_globals.PlayerSteamIdCache.ContainsKey(id))
+                _globals.PlayerSteamIdCache[id] = currentSteamId;
+
+            int currentAp = _extraItemsMenu.GetAmmoPacks(id);
+            if (savedAP.HasValue)
+                _extraItemsMenu.SetAmmoPacks(id, Math.Max(currentAp, savedAP.Value));
+            else if (startingAP > 0 && currentAp <= 0)
+                _extraItemsMenu.SetAmmoPacks(id, startingAP);
+
+            _ammoPacksLoadInProgress.Remove(id);
+        });
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)

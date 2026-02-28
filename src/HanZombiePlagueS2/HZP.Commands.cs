@@ -2,7 +2,6 @@ using System.Numerics;
 using System.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mono.Cecil.Cil;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Commands;
 using SwiftlyS2.Shared.Events;

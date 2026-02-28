@@ -9,7 +9,6 @@ using SwiftlyS2.Shared.Natives;
 using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.SchemaDefinitions;
 using static HanZombiePlagueS2.HZPZombieClassCFG;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace HanZombiePlagueS2;
 

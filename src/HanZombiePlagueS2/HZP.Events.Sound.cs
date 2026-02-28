@@ -202,13 +202,13 @@ public partial class HZPEvents
 
 
         _globals.InSwing[player.PlayerID] = false;
-        Task.Run(async () =>
+        _core.Scheduler.DelayBySeconds(0.05f, () =>
         {
-            await Task.Delay(50);
+            if (player == null || !player.IsValid)
+                return;
+
             if (!_globals.InSwing[player.PlayerID])
-            {
-                _service.PlayerSelectSoundtoEntity(player, zombie.Sounds.SwingSound , zombie.Stats.ZombieSoundVolume);
-            }
+                _service.PlayerSelectSoundtoEntity(player, zombie.Sounds.SwingSound, zombie.Stats.ZombieSoundVolume);
         });
 
         return HookResult.Continue;

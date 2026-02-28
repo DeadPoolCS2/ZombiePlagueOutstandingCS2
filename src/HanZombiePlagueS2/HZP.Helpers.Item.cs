@@ -1,4 +1,3 @@
-using System.Security.AccessControl;
 using Microsoft.Extensions.Logging;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.GameEventDefinitions;
@@ -9,11 +8,6 @@ using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.ProtobufDefinitions;
 using SwiftlyS2.Shared.SchemaDefinitions;
 using SwiftlyS2.Shared.Sounds;
-using static Dapper.SqlMapper;
-using static HanZombiePlagueS2.HanZombiePlagueS2;
-using static HanZombiePlagueS2.HZPVoxCFG;
-using static Mono.CompilerServices.SymbolWriter.CodeBlockEntry;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace HanZombiePlagueS2;
 
