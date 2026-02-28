@@ -170,12 +170,6 @@ public class HZPExtraItemsMenu
             return;
         }
 
-        if (!_globals.GameStart)
-        {
-            _helpers.SendChatT(player, "ExtraItemsRoundNotActive");
-            return;
-        }
-
         if (IsSpecialOrCustomModeActive())
         {
             _helpers.SendChatT(player, "ExtraItemsDisabledInMode");
@@ -246,12 +240,6 @@ public class HZPExtraItemsMenu
         if (controller == null || !controller.IsValid || !controller.PawnIsAlive)
         {
             _helpers.SendChatT(player, "ExtraItemsMustBeAlive");
-            return;
-        }
-
-        if (!_globals.GameStart)
-        {
-            _helpers.SendChatT(player, "ExtraItemsRoundNotActive");
             return;
         }
 
@@ -870,7 +858,8 @@ public class HZPExtraItemsMenu
 
             // Mine body model visual
             var mineCfgLocal = _mainCFG.CurrentValue.Mine;
-            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic");
+            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic_override")
+                ?? _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic");
             if (modelEnt != null && modelEnt.IsValid && modelEnt.IsValidEntity)
             {
                 if (!float.TryParse(mineCfgLocal.ModelAngleFix, System.Globalization.NumberStyles.Float,
