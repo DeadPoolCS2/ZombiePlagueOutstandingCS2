@@ -43,6 +43,7 @@ public partial class HZPEvents
     private readonly HZPDatabase _database;
     private readonly HZPWeaponsMenu _weaponsMenu;
     private readonly HashSet<int> _ammoPacksLoadInProgress = new HashSet<int>();
+    private readonly Dictionary<int, int> _ammoPacksLoadGeneration = new Dictionary<int, int>();
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -1114,6 +1115,14 @@ public partial class HZPEvents
         _globals.IsZombie[id] = _globals.GameStart;
         _ammoPacksLoadInProgress.Remove(id);
 
+        int loadGeneration = _ammoPacksLoadGeneration.TryGetValue(id, out int prevGeneration)
+            ? prevGeneration + 1
+            : 1;
+        _ammoPacksLoadGeneration[id] = loadGeneration;
+
+        // Always reset slot AP at connect so stale values from a previous occupant cannot leak.
+        _extraItemsMenu.SetAmmoPacks(id, 0);
+
         // Load AP from DB once SteamID is available; avoid overwriting rewards gained while async load is running.
         int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
         const int maxAttempts = 20;
@@ -1121,6 +1130,12 @@ public partial class HZPEvents
 
         void TryLoadAmmoPacks(int attemptsLeft)
         {
+            if (!_ammoPacksLoadGeneration.TryGetValue(id, out int currentGeneration) || currentGeneration != loadGeneration)
+            {
+                _ammoPacksLoadInProgress.Remove(id);
+                return;
+            }
+
             var player = _core.PlayerManager.GetPlayer(id);
             if (player == null || !player.IsValid || player.IsFakeClient)
             {
@@ -1131,6 +1146,9 @@ public partial class HZPEvents
             }
 
             ulong steamId = player.SteamID;
+            if (steamId != 0)
+                _globals.PlayerSteamIdCache[id] = steamId;
+
             if (steamId == 0)
             {
                 if (attemptsLeft > 0)
@@ -1150,12 +1168,33 @@ public partial class HZPEvents
                 int? savedAP = await _database.LoadAmmoPacksAsync(steamId);
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
-                    var current = _core.PlayerManager.GetPlayer(id);
-                    if (current == null || !current.IsValid)
+                    if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
                     {
                         _ammoPacksLoadInProgress.Remove(id);
                         return;
                     }
+
+                    var current = _core.PlayerManager.GetPlayer(id);
+                    if (current == null || !current.IsValid || current.IsFakeClient)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    ulong currentSteamId = current.SteamID;
+                    if (currentSteamId == 0)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    if (currentSteamId != steamId)
+                    {
+                        _ammoPacksLoadInProgress.Remove(id);
+                        return;
+                    }
+
+                    _globals.PlayerSteamIdCache[id] = currentSteamId;
 
                     int currentAp = _extraItemsMenu.GetAmmoPacks(id);
                     if (savedAP.HasValue)
@@ -1181,6 +1220,11 @@ public partial class HZPEvents
 
         var id = @event.PlayerId;
         _ammoPacksLoadInProgress.Remove(id);
+
+        if (_ammoPacksLoadGeneration.TryGetValue(id, out int previousGeneration))
+            _ammoPacksLoadGeneration[id] = previousGeneration + 1;
+        else
+            _ammoPacksLoadGeneration[id] = 1;
 
         // Defensive guard: if the slot is already occupied again, this disconnect event
         // belongs to an older session and must not wipe the new player's AP/state.
@@ -1221,6 +1265,7 @@ public partial class HZPEvents
         // Extra items cleanup
         _globals.AmmoPacks.Remove(id);
         _globals.PlayerSteamIdCache.Remove(id);
+        _ammoPacksLoadGeneration.Remove(id);
         _globals.DamageAccumulator.Remove(id);
         _globals.ExtraJumps.Remove(id);
         _globals.JumpsUsed.Remove(id);
