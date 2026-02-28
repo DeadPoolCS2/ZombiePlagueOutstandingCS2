@@ -1,5 +1,4 @@
 using System.Numerics;
-using Cookies.Contract;
 using Economy.Contract;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +38,7 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         if (ServiceProvider == null) return;
 
         var resolver = ServiceProvider.GetRequiredService<AmmoPacksBackendResolver>();
-        var cfg = ServiceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<HZPMainCFG>>().CurrentValue;
+        var cfg = ServiceProvider.GetRequiredService<IOptionsMonitor<HZPMainCFG>>().CurrentValue;
 
         // ── Economy plugin ────────────────────────────────────────────────────
         bool economyResolved = false;
@@ -62,30 +61,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         if (!economyResolved && cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Economy)
             Core.Logger.LogWarning("[HZP] Economy API not available – AmmoPacksStorageBackend=Economy requires the Economy plugin to be loaded.");
 
-        // ── Cookies plugin ────────────────────────────────────────────────────
-        bool cookiesResolved = false;
-        try
-        {
-            var cookiesApi = interfaceManager.GetSharedInterface<IPlayerCookiesAPIv1>("Cookies.Player.v1");
-            if (cookiesApi != null)
-            {
-                resolver.Cookies.SetApi(cookiesApi);
-                cookiesResolved = true;
-                Core.Logger.LogInformation("[HZP] Cookies (Player) API resolved successfully.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Core.Logger.LogDebug("[HZP] Cookies API lookup threw: {Ex}", ex.Message);
-        }
-
-        // Warn once if Cookies is the configured backend but the plugin isn't available.
-        if (!cookiesResolved && cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Cookies)
-            Core.Logger.LogWarning("[HZP] Cookies API not available – AmmoPacksStorageBackend=Cookies requires the Cookies plugin to be loaded.");
-
         // Ensure the active backend is ready (e.g. register wallet kind in Economy).
         _ = resolver.Active.EnsureReadyAsync();
     }
+
     public override void Load(bool hotReload)
     {
         Core.Configuration.InitializeJsonWithModel<HZPMainCFG>("HZPMainCFG.jsonc", "HZPMainCFG").Configure(builder =>
@@ -113,7 +92,6 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
             builder.AddJsonFile("HZPExtraItemsCFG.jsonc", false, true);
         });
 
-        
         var collection = new ServiceCollection();
         collection.AddSwiftly(Core);
         collection.AddSingleton<ISwiftlyCore>(Core);
@@ -150,7 +128,6 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         // ── Ammo Packs backend services ───────────────────────────────────────
         collection.AddSingleton<MySqlAmmoPacksBackend>();
         collection.AddSingleton<EconomyAmmoPacksBackend>();
-        collection.AddSingleton<CookiesAmmoPacksBackend>();
         collection.AddSingleton<AmmoPacksBackendResolver>();
 
         collection.AddSingleton<HZPEvents>();
@@ -165,7 +142,6 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         collection.AddSingleton<HZPWeaponsMenu>();
         collection.AddSingleton<HZPExtraItemsMenu>();
         collection.AddSingleton<HZPGameMenu>();
-
 
         ServiceProvider = collection.BuildServiceProvider();
 
@@ -191,7 +167,7 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         ZriotCFGMonitor.OnChange(newConfig =>
         {
             _HZPMainCFG = newConfig;
-            Core.Logger.LogInformation(Core.Localizer["ServerInfoHotReload"]); 
+            Core.Logger.LogInformation(Core.Localizer["ServerInfoHotReload"]);
         });
 
         _Events.HookEvents();
@@ -200,14 +176,9 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         _Commands.MenuCommands();
 
         // Initialise the active backend in background (non-blocking).
-        // For MySQL this creates the table; for Economy/Cookies it registers the wallet kind.
-        // Note: UseSharedInterface() may not have run yet at this point, so Economy/Cookies
-        // backends will re-run EnsureReadyAsync() from UseSharedInterface() once the APIs
-        // are available.
         var resolver = ServiceProvider.GetRequiredService<AmmoPacksBackendResolver>();
         _ = resolver.Active.EnsureReadyAsync();
     }
-
 
     public override void Unload()
     {
@@ -225,6 +196,4 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         _apiInstance!.Dispose();
         ServiceProvider!.Dispose();
     }
-
-    
 }
