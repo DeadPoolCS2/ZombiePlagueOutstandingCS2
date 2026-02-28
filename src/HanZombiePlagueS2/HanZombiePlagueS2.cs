@@ -132,6 +132,7 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         collection.AddSingleton<MySqlAmmoPacksBackend>();
         collection.AddSingleton<EconomyAmmoPacksBackend>();
         collection.AddSingleton<AmmoPacksBackendResolver>();
+        collection.AddSingleton<AmmoPacksService>();
 
         collection.AddSingleton<HZPEvents>();
         collection.AddSingleton<HZPHelpers>();

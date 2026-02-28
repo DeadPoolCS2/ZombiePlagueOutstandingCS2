@@ -32,10 +32,8 @@ public partial class HZPEvents
     private readonly HanZombiePlagueAPI _api;
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
-    private readonly AmmoPacksBackendResolver _backendResolver;
+    private readonly AmmoPacksService _ammoPacks;
     private readonly HZPWeaponsMenu _weaponsMenu;
-    private readonly HashSet<int> _ammoPacksLoadInProgress = new HashSet<int>();
-    private readonly Dictionary<int, int> _ammoPacksLoadGeneration = new Dictionary<int, int>();
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -47,7 +45,7 @@ public partial class HZPEvents
         HanZombiePlagueAPI api,
         HZPExtraItemsMenu extraItemsMenu,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        AmmoPacksBackendResolver backendResolver,
+        AmmoPacksService ammoPacks,
         HZPWeaponsMenu weaponsMenu)
     {
         _core = core;
@@ -65,7 +63,7 @@ public partial class HZPEvents
         _api = api;
         _extraItemsMenu = extraItemsMenu;
         _extraItemsCFG = extraItemsCFG;
-        _backendResolver = backendResolver;
+        _ammoPacks = ammoPacks;
         _weaponsMenu = weaponsMenu;
     }
 
@@ -501,7 +499,10 @@ public partial class HZPEvents
             var Id = player.PlayerID;
             ulong steamId = player.SteamID;
             if (steamId != 0)
+            {
                 _globals.PlayerSteamIdCache[Id] = steamId;
+                _ammoPacks.OnPlayerSteamIdObserved(Id, steamId);
+            }
 
             _core.Scheduler.NextWorldUpdate(() =>
             {
@@ -985,24 +986,7 @@ public partial class HZPEvents
     /// </summary>
     public async Task SaveAllConnectedPlayersAsync()
     {
-        var cfg = _mainCFG.CurrentValue;
-        if (!cfg.AmmoPacksEnabled) return;
-
-        var snapshot = new List<(ulong steamId, int ap)>();
-        foreach (var player in _core.PlayerManager.GetAllPlayers())
-        {
-            if (!player!.IsValid || player.IsFakeClient)
-                continue;
-            if (!_globals.AmmoPacksLoaded.Contains(player.PlayerID))
-                continue;
-            ulong steamId = player.SteamID;
-            if (steamId == 0) continue;
-            int ap = _extraItemsMenu.GetAmmoPacks(player.PlayerID);
-            snapshot.Add((steamId, ap));
-        }
-
-        if (snapshot.Count > 0)
-            await _backendResolver.Active.SaveAllAsync(snapshot);
+        await _ammoPacks.SaveAllConnectedPlayersAsync();
     }
     private void Event_OnEntityTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)
     {
@@ -1110,142 +1094,7 @@ public partial class HZPEvents
         }
 
         _globals.IsZombie[id] = _globals.GameStart;
-        _ammoPacksLoadInProgress.Remove(id);
-        _globals.AmmoPacksLoaded.Remove(id);
-
-        int loadGeneration = _ammoPacksLoadGeneration.TryGetValue(id, out int prevGeneration)
-            ? prevGeneration + 1
-            : 1;
-        _ammoPacksLoadGeneration[id] = loadGeneration;
-
-        // Always reset slot AP at connect so stale values from a previous occupant cannot leak.
-        _extraItemsMenu.SetAmmoPacks(id, 0, persist: false);
-
-        // Load AP from backend once SteamID is available; avoid overwriting rewards gained while async load is running.
-        int startingAP = _extraItemsCFG.CurrentValue.StartingAmmoPacks;
-        const int maxAttempts = 20;
-        const float retryDelaySeconds = 0.5f;
-
-        void TryLoadAmmoPacks(int attemptsLeft)
-        {
-            if (!_ammoPacksLoadGeneration.TryGetValue(id, out int currentGeneration) || currentGeneration != loadGeneration)
-            {
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            var player = _core.PlayerManager.GetPlayer(id);
-            if (!player!.IsValid || player.IsFakeClient)
-            {
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            ulong steamId = player.SteamID;
-            if (steamId != 0)
-                _globals.PlayerSteamIdCache[id] = steamId;
-
-            if (steamId == 0)
-            {
-                if (attemptsLeft > 0)
-                {
-                    _core.Scheduler.DelayBySeconds(retryDelaySeconds, () => TryLoadAmmoPacks(attemptsLeft - 1));
-                    return;
-                }
-
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            // If persistence is disabled, just apply the starting AP and bail.
-            if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
-            {
-                if (startingAP > 0 && _extraItemsMenu.GetAmmoPacks(id) <= 0)
-                    _extraItemsMenu.SetAmmoPacks(id, startingAP);
-                _globals.AmmoPacksLoaded.Add(id);
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            _ = LoadAmmoPacksAndApplyAsync(id, steamId, loadGeneration, startingAP, attemptsLeft, retryDelaySeconds);
-        }
-
-        if (_ammoPacksLoadInProgress.Add(id))
-            TryLoadAmmoPacks(maxAttempts);
-    }
-
-    private async Task LoadAmmoPacksAndApplyAsync(int id, ulong steamId, int loadGeneration, int startingAP, int attemptsLeft, float retryDelaySeconds)
-    {
-        int? savedAP;
-        try
-        {
-            savedAP = await _backendResolver.Active.LoadAsync(steamId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("[HZP-AP] Load failed for steamid={SteamId}: {Ex}", steamId, ex.Message);
-            savedAP = null;
-        }
-
-        _core.Scheduler.NextWorldUpdate(() =>
-        {
-            if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
-            {
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            var current = _core.PlayerManager.GetPlayer(id);
-            if (!current!.IsValid || current.IsFakeClient)
-            {
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            ulong currentSteamId = current.SteamID;
-            if (currentSteamId == 0)
-            {
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            if (currentSteamId != steamId)
-            {
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            _globals.PlayerSteamIdCache[id] = currentSteamId;
-
-            int currentAp = _extraItemsMenu.GetAmmoPacks(id);
-            if (savedAP.HasValue)
-            {
-                _extraItemsMenu.SetAmmoPacks(id, Math.Max(currentAp, savedAP.Value));
-                _globals.AmmoPacksLoaded.Add(id);
-                _ammoPacksLoadInProgress.Remove(id);
-                return;
-            }
-
-            if (attemptsLeft > 0)
-            {
-                _core.Scheduler.DelayBySeconds(retryDelaySeconds, () =>
-                {
-                    if (!_ammoPacksLoadGeneration.TryGetValue(id, out int latestGeneration) || latestGeneration != loadGeneration)
-                    {
-                        _ammoPacksLoadInProgress.Remove(id);
-                        return;
-                    }
-
-                    _ = LoadAmmoPacksAndApplyAsync(id, steamId, loadGeneration, startingAP, attemptsLeft - 1, retryDelaySeconds);
-                });
-                return;
-            }
-
-            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogWarning("[HZP-AP] Load unavailable for steamid={SteamId}; keeping current AP={AP}.", steamId, currentAp);
-
-            _ammoPacksLoadInProgress.Remove(id);
-        });
+        _ammoPacks.OnClientConnected(id);
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)
@@ -1256,45 +1105,7 @@ public partial class HZPEvents
         }
 
         var id = @event.PlayerId;
-        _ammoPacksLoadInProgress.Remove(id);
-        _globals.AmmoPacksLoaded.Remove(id);
-
-        if (_ammoPacksLoadGeneration.TryGetValue(id, out int previousGeneration))
-            _ammoPacksLoadGeneration[id] = previousGeneration + 1;
-        else
-            _ammoPacksLoadGeneration[id] = 1;
-
-        // Defensive guard: if the slot is already occupied again, this disconnect event
-        // belongs to an older session and must not wipe the new player's AP/state.
-        var player = _core.PlayerManager.GetPlayer(id);
-        ulong currentSlotSteamId = 0;
-        if (player!.IsValid && !player!.IsFakeClient)
-            currentSlotSteamId = player.SteamID;
-
-        _globals.PlayerSteamIdCache.TryGetValue(id, out ulong cachedSteamId);
-
-        // If slot is already occupied by a valid player, this disconnect belongs to an older session.
-        if (currentSlotSteamId != 0)
-        {
-            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogInformation("[HZP-AP] Stale disconnect ignored for slot {Slot}: current={CurrentSteam}.",
-                    id, currentSlotSteamId);
-            return;
-        }
-
-        ulong steamId = cachedSteamId != 0 ? cachedSteamId : currentSlotSteamId;
-
-        // ── Save AP BEFORE removing from memory ──────────────────────────────
-        if (steamId != 0)
-        {
-            var cfg = _mainCFG.CurrentValue;
-            if (cfg.AmmoPacksEnabled && _globals.AmmoPacksLoaded.Contains(id))
-            {
-                int currentAP = _extraItemsMenu.GetAmmoPacks(id);
-                _ = _backendResolver.Active.SaveAsync(steamId, currentAP);
-            }
-        }
-        // ────────────────────────────────────────────────────────────────────
+        _ammoPacks.OnClientDisconnected(id);
 
         _helpers.ClearPlayerBurn(id);
         _globals.IsZombie.Remove(id);
@@ -1317,10 +1128,6 @@ public partial class HZPEvents
         _globals.ThrowerIsZombie.Remove(id);
 
         // Extra items cleanup
-        _globals.AmmoPacks.Remove(id);
-        _globals.AmmoPacksLoaded.Remove(id);
-        _globals.PlayerSteamIdCache.Remove(id);
-        _ammoPacksLoadGeneration.Remove(id);
         _globals.DamageAccumulator.Remove(id);
         _globals.ExtraJumps.Remove(id);
         _globals.JumpsUsed.Remove(id);
@@ -1345,7 +1152,8 @@ public partial class HZPEvents
             }
         });
 
-        if (player != null && player.IsValid)
+        var player = _core.PlayerManager.GetPlayer(id);
+        if (player.IsValid)
         {
             _helpers.RemoveGlow(player);
         }

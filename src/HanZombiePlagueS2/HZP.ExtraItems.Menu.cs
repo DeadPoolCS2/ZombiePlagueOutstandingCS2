@@ -23,7 +23,7 @@ public class HZPExtraItemsMenu
     private readonly HZPMenuHelper _menuHelper;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
-    private readonly AmmoPacksBackendResolver _backendResolver;
+    private readonly AmmoPacksService _ammoPacks;
     private readonly HZPGameMode _gameMode;
 
     public HZPExtraItemsMenu(
@@ -34,7 +34,7 @@ public class HZPExtraItemsMenu
         HZPMenuHelper menuHelper,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
         IOptionsMonitor<HZPMainCFG> mainCFG,
-        AmmoPacksBackendResolver backendResolver,
+        AmmoPacksService ammoPacks,
         HZPGameMode gameMode)
     {
         _core = core;
@@ -44,7 +44,7 @@ public class HZPExtraItemsMenu
         _menuHelper = menuHelper;
         _extraItemsCFG = extraItemsCFG;
         _mainCFG = mainCFG;
-        _backendResolver = backendResolver;
+        _ammoPacks = ammoPacks;
         _gameMode = gameMode;
     }
 
@@ -54,53 +54,22 @@ public class HZPExtraItemsMenu
 
     public int GetAmmoPacks(int playerId)
     {
-        _globals.AmmoPacks.TryGetValue(playerId, out int ap);
-        return ap;
+        return _ammoPacks.GetBalance(playerId);
     }
 
     public void SetAmmoPacks(int playerId, int amount, bool persist = true)
     {
-        int clamped = Math.Max(0, amount);
-        _globals.AmmoPacks.TryGetValue(playerId, out int previous);
-        if (previous == clamped)
-            return;
-
-        _globals.AmmoPacks[playerId] = clamped;
-        if (persist)
-            PersistAmmoPacks(playerId, clamped);
-    }
-
-    private void PersistAmmoPacks(int playerId, int ammoPacks)
-    {
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
-            return;
-
-        ulong steamId = 0;
-        var player = _core.PlayerManager.GetPlayer(playerId);
-        if (player!.IsValid && !player!.IsFakeClient)
-            steamId = player.SteamID;
-
-        if (steamId == 0)
-            _globals.PlayerSteamIdCache.TryGetValue(playerId, out steamId);
-
-        if (steamId == 0)
-            return;
-
-        _ = _backendResolver.Active.SaveAsync(steamId, ammoPacks);
+        _ammoPacks.SetBalance(playerId, amount, persist);
     }
 
     public bool SpendAmmoPacks(int playerId, int cost)
     {
-        int current = GetAmmoPacks(playerId);
-        if (current < cost) return false;
-        SetAmmoPacks(playerId, current - cost);
-        return true;
+        return _ammoPacks.SpendBalance(playerId, cost, persist: true);
     }
 
     public void AddAmmoPacks(int playerId, int amount)
     {
-        int current = GetAmmoPacks(playerId);
-        SetAmmoPacks(playerId, current + amount);
+        _ammoPacks.AddBalance(playerId, amount, persist: true);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
