@@ -185,28 +185,36 @@
 	// Send a chat reply to the invoking player on each command invocation.
 	"EnableCommandDebugChatReply": false,
 
-	// ── Ammo Packs persistence ───────────────────────────────────────────────
-	// Set to true to enable persistence for Ammo Packs.
-	"AmmoPacksEnabled": false,
-	// Backend to use for Ammo Packs persistence.
-	// "MySQL"    – built-in direct MySQL/MariaDB connection (requires AmmoPacksConnectionName).
-	// "Economy"  – delegates to the Economy plugin (https://github.com/DeadPoolCS2/Economy).
-	// "Cookies"  – delegates to the Cookies plugin (https://github.com/DeadPoolCS2/Cookies).
-	"AmmoPacksStorageBackend": "MySQL",
-
-	// ── MySQL backend settings (only used when AmmoPacksStorageBackend = "MySQL") ──
-	// Connection name from configs/database.jsonc (leave empty = use default_connection).
-	"AmmoPacksConnectionName": "",
-	// Table name for per-player ammo pack balances.
-	"AmmoPacksTableName": "hzp_ammo_packs",
-
-	// ── Economy backend settings (only used when AmmoPacksStorageBackend = "Economy") ──
-	// Wallet kind name registered in the Economy plugin. Must match a wallet kind in Economy's config.
+	// ── Ammo Packs (Economy plugin) ─────────────────────────────────────────
+	// Wallet kind name registered in the Economy plugin.
+	// Must match a wallet kind configured in Economy's config.
 	"EconomyWalletKind": "ammopacks",
 
-	// ── Cookies backend settings (only used when AmmoPacksStorageBackend = "Cookies") ──
-	// Cookie key used to store the ammo pack balance in the Cookies plugin.
-	"CookiesAmmoPacksKey": "hzp_ammopacks",
+	// ── Atmosphere (fog + darkness) ──────────────────────────────────────────
+	"Atmosphere": {
+		// ── Fog (ceată) ─────────────────────────────────────────────────────
+		// Set to true to enable a server-side fog controller on every map.
+		"FogEnable": false,
+		// Fog colour in "R,G,B" format (0–255 each).
+		// Example: "100,120,130" → cold grey;  "200,180,140" → warm dust.
+		"FogColor": "100,120,130",
+		// Distance from the camera at which fog starts (units).
+		"FogStart": 400.0,
+		// Distance at which fog reaches maximum density (units).
+		"FogEnd": 2000.0,
+		// Maximum fog opacity (0.0 = invisible, 1.0 = fully opaque).
+		"FogMaxDensity": 0.7,
+
+		// ── Darkness (tonemap) ───────────────────────────────────────────────
+		// Set to true to override the screen exposure (makes the map darker).
+		"DarknessEnable": false,
+		// Minimum auto-exposure value. Lower = darker screen.
+		// CS2 default ≈ 0.5. Values 0.05–0.2 give a noticeable dark feel.
+		"ExposureMin": 0.1,
+		// Maximum auto-exposure value. Lower = darker screen.
+		// CS2 default ≈ 2.0. Values 0.1–0.5 give a dark feel.
+		"ExposureMax": 0.3
+	},
 
 	// ── Laser trip-mine visual/model settings ────────────────────────────────
 	"Mine": {

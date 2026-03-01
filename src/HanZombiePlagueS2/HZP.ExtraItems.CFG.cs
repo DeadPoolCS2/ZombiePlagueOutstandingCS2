@@ -55,22 +55,12 @@ public class HZPExtraItemsCFG
     public float KnifeBlinkCooldown { get; set; } = 2f;
 
     // ── Jetpack ───────────────────────────────────────────────────────────────
-    /// <summary>Maximum jetpack fuel capacity (depletes while flying; default 250).</summary>
+    /// <summary>Jetpack max fuel capacity (depletes while flying; default 250).</summary>
     public float JetpackMaxFuel { get; set; } = 250f;
     /// <summary>Upward thrust velocity applied each second while flying (units/s).</summary>
     public float JetpackThrustForce { get; set; } = 350f;
     /// <summary>Fuel units consumed per second while flying.</summary>
     public float JetpackFuelConsumeRate { get; set; } = 30f;
-    /// <summary>Base damage dealt to zombies by a rocket at point-blank range.</summary>
-    public int JetpackRocketDamage { get; set; } = 500;
-    /// <summary>Explosion radius of the jetpack rocket (units).</summary>
-    public float JetpackRocketRadius { get; set; } = 300f;
-    /// <summary>Maximum forward distance the rocket can travel (units).</summary>
-    public float JetpackRocketRange { get; set; } = 750f;
-    /// <summary>Simulated rocket flight time in seconds before detonation.</summary>
-    public float JetpackRocketFlightTime { get; set; } = 0.3f;
-    /// <summary>Minimum seconds between rocket shots.</summary>
-    public float JetpackRocketCooldown { get; set; } = 2f;
 
     // ── Trip Mine ─────────────────────────────────────────────────────────────
     /// <summary>Maximum number of mines a single player may have planted simultaneously.</summary>

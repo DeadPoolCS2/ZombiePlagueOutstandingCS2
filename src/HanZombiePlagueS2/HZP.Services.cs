@@ -369,16 +369,16 @@ public partial class HZPServices
             _globals.HasJetpack.Remove(Id);
             _globals.JetpackFuel.Remove(Id);
             _globals.JetpackLastFuelTime.Remove(Id);
-            _globals.JetpackRocketCooldownEnd.Remove(Id);
-            _globals.PrevAttack2Pressed.Remove(Id);
             _globals.HasReviveToken.Remove(Id);
             var minesToRemove = _globals.AllMines.Where(m => m.OwnerId == Id && !m.Exploded).ToList();
             foreach (var mine in minesToRemove)
             {
                 if (mine.Beam != null && mine.Beam.IsValid && mine.Beam.IsValidEntity)
                     mine.Beam.AcceptInput("Kill", 0);
-                if (mine.Visual != null && mine.Visual.IsValid && mine.Visual.IsValidEntity)
-                    mine.Visual.AcceptInput("Kill", 0);
+                if (mine.GlowModel != null && mine.GlowModel.IsValid)
+                    mine.GlowModel.AcceptInput("Kill", 0);
+                if (mine.GlowRelay != null && mine.GlowRelay.IsValid)
+                    mine.GlowRelay.AcceptInput("Kill", 0);
                 if (mine.ModelVisual != null && mine.ModelVisual.IsValid && mine.ModelVisual.IsValidEntity)
                     mine.ModelVisual.AcceptInput("Kill", 0);
                 mine.Exploded = true;

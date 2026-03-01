@@ -30,7 +30,6 @@ public class HZPGlobals
 
     public CancellationTokenSource? g_hRoundEndTimer { get; set; } = null;
     public CancellationTokenSource? g_hCountdown { get; set; } = null;
-    public CancellationTokenSource? g_hAutoSaveTimer { get; set; } = null;
 
     // ── Round-state flags ─────────────────────────────────────────────────────
     /// <summary>True once SwitchMode() has been called this round (infection started).</summary>
@@ -73,12 +72,6 @@ public class HZPGlobals
     public Dictionary<int, bool> CanBuyWeaponsThisRound = new Dictionary<int, bool>();
 
     // ── Extra Items / Ammo Packs ──────────────────────────────────────────────
-    /// <summary>Per-player ammo-pack balance (keyed by PlayerID).</summary>
-    public Dictionary<int, int> AmmoPacks = new Dictionary<int, int>();
-    /// <summary>Players for which ammo packs were successfully loaded from the active backend this session.</summary>
-    public HashSet<int> AmmoPacksLoaded = new HashSet<int>();
-    /// <summary>Last known SteamID64 per player slot (for reliable AP save on disconnect).</summary>
-    public Dictionary<int, ulong> PlayerSteamIdCache = new Dictionary<int, ulong>();
     /// <summary>
     /// Accumulated damage dealt by each human to zombies this round (keyed by PlayerID).
     /// Reset at round end and on disconnect. Used for damage-based AP reward.
@@ -112,10 +105,6 @@ public class HZPGlobals
     public Dictionary<int, float> JetpackFuel = new Dictionary<int, float>();
     /// <summary>Server time (CurrentTime) at which fuel was last consumed.</summary>
     public Dictionary<int, float> JetpackLastFuelTime = new Dictionary<int, float>();
-    /// <summary>Server time at which the player's rocket cooldown expires.</summary>
-    public Dictionary<int, float> JetpackRocketCooldownEnd = new Dictionary<int, float>();
-    /// <summary>True if the player had Attack2 (right-click) pressed in the previous tick.</summary>
-    public Dictionary<int, bool> PrevAttack2Pressed = new Dictionary<int, bool>();
 
     // ── Trip Mines ────────────────────────────────────────────────────────────
     /// <summary>Number of unplanted mine charges the player has.</summary>
@@ -171,10 +160,12 @@ public class TripMineData
     public Vector BeamEnd;
     /// <summary>The beam entity (laser visual).</summary>
     public CBeam? Beam;
-    /// <summary>Particle visual attached at the mine position.</summary>
-    public CParticleSystem? Visual;
-    /// <summary>Mine body model visual attached at the mine position.</summary>
+    /// <summary>Mine body model (prop_dynamic_override).</summary>
     public CBaseModelEntity? ModelVisual;
+    /// <summary>Invisible relay used by the glow FollowEntity chain.</summary>
+    public CBaseModelEntity? GlowRelay;
+    /// <summary>Glow entity following the relay.</summary>
+    public CBaseModelEntity? GlowModel;
     /// <summary>Remaining health of the mine.</summary>
     public int Health;
     /// <summary>True once the mine has detonated (pending removal).</summary>

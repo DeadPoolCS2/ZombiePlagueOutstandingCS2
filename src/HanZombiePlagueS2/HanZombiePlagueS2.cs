@@ -1,4 +1,3 @@
-using System.Numerics;
 using Economy.Contract;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,11 +36,9 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
     {
         if (ServiceProvider == null) return;
 
-        var resolver = ServiceProvider.GetRequiredService<AmmoPacksBackendResolver>();
-        var cfg = ServiceProvider.GetRequiredService<IOptionsMonitor<HZPMainCFG>>().CurrentValue;
+        var ammoPacks = ServiceProvider.GetRequiredService<AmmoPacksService>();
 
         // ── Economy plugin ────────────────────────────────────────────────────
-        bool economyResolved = false;
         try
         {
             if (interfaceManager.HasSharedInterface("Economy.API.v1"))
@@ -49,23 +46,20 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
                 var economyApi = interfaceManager.GetSharedInterface<IEconomyAPIv1>("Economy.API.v1");
                 if (economyApi != null)
                 {
-                    resolver.Economy.SetApi(economyApi);
-                    economyResolved = true;
+                    ammoPacks.SetApi(economyApi);
+                    ammoPacks.EnsureWalletKind();
                     Core.Logger.LogInformation("[HZP] Economy API resolved successfully.");
                 }
+            }
+            else
+            {
+                Core.Logger.LogWarning("[HZP] Economy plugin not found – ammo packs will not function until the Economy plugin is loaded.");
             }
         }
         catch (Exception ex)
         {
-            Core.Logger.LogDebug("[HZP] Economy API lookup threw: {Ex}", ex.Message);
+            Core.Logger.LogWarning("[HZP] Economy API lookup failed: {Ex}", ex.Message);
         }
-
-        // Warn once if Economy is the configured backend but the plugin isn't available.
-        if (!economyResolved && cfg.AmmoPacksEnabled && cfg.AmmoPacksStorageBackend == AmmoPacksBackend.Economy)
-            Core.Logger.LogWarning("[HZP] Economy API not available – AmmoPacksStorageBackend=Economy requires the Economy plugin to be loaded.");
-
-        // Ensure the active backend is ready (e.g. register wallet kind in Economy).
-        _ = resolver.Active.EnsureReadyAsync();
     }
 
     public override void Load(bool hotReload)
@@ -126,13 +120,12 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
             .BindConfiguration("HZPExtraItemsCFG");
 
         collection.AddSingleton<HZPGlobals>();
-        collection.AddSingleton<HZPDatabase>();
 
-        // ── Ammo Packs backend services ───────────────────────────────────────
-        collection.AddSingleton<MySqlAmmoPacksBackend>();
-        collection.AddSingleton<EconomyAmmoPacksBackend>();
-        collection.AddSingleton<AmmoPacksBackendResolver>();
+        // ── Ammo Packs service (Economy-only) ─────────────────────────────────
         collection.AddSingleton<AmmoPacksService>();
+
+        // ── Atmosphere service ────────────────────────────────────────────────
+        collection.AddSingleton<HZPAtmosphere>();
 
         collection.AddSingleton<HZPEvents>();
         collection.AddSingleton<HZPHelpers>();
@@ -178,25 +171,10 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         _Events.HookZombieSoundEvents();
         _Commands.Command();
         _Commands.MenuCommands();
-
-        // Initialise the active backend in background (non-blocking).
-        var resolver = ServiceProvider.GetRequiredService<AmmoPacksBackendResolver>();
-        _ = resolver.Active.EnsureReadyAsync();
     }
 
     public override void Unload()
     {
-        // Failsafe: persist every connected player's AP before the plugin unloads.
-        try
-        {
-            _Events.SaveAllConnectedPlayersAsync().GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            // Log but do not block unload.
-            Core.Logger.LogWarning("[HZP] Unload AP save failed: {Ex}", ex.Message);
-        }
-
         _apiInstance!.Dispose();
         ServiceProvider!.Dispose();
     }

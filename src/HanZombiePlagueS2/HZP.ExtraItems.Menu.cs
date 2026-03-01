@@ -57,19 +57,19 @@ public class HZPExtraItemsMenu
         return _ammoPacks.GetBalance(playerId);
     }
 
-    public void SetAmmoPacks(int playerId, int amount, bool persist = true)
+    public void SetAmmoPacks(int playerId, int amount)
     {
-        _ammoPacks.SetBalance(playerId, amount, persist);
+        _ammoPacks.SetBalance(playerId, amount);
     }
 
     public bool SpendAmmoPacks(int playerId, int cost)
     {
-        return _ammoPacks.SpendBalance(playerId, cost, persist: true);
+        return _ammoPacks.SpendBalance(playerId, cost);
     }
 
     public void AddAmmoPacks(int playerId, int amount)
     {
-        _ammoPacks.AddBalance(playerId, amount, persist: true);
+        _ammoPacks.AddBalance(playerId, amount);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -475,7 +475,6 @@ public class HZPExtraItemsMenu
         _globals.HasJetpack[playerId] = true;
         _globals.JetpackFuel[playerId] = cfg.JetpackMaxFuel;
         _globals.JetpackLastFuelTime[playerId] = 0f;
-        _globals.JetpackRocketCooldownEnd[playerId] = 0f;
 
         _helpers.SendChatT(player, "ExtraItemsJetpackSuccess", cfg.JetpackMaxFuel, remainingAP);
     }
@@ -610,7 +609,7 @@ public class HZPExtraItemsMenu
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Jetpack – thrust & rocket (called from OnTick)
+    //  Jetpack – thrust only (rocket removed, use Economy/admin commands for AP)
     // ─────────────────────────────────────────────────────────────────────────
 
     // Named constants for internal physics values
@@ -665,87 +664,6 @@ public class HZPExtraItemsMenu
         pawn.Teleport(null, null, newVel);
     }
 
-    public void TryFireJetpackRocket(IPlayer player)
-    {
-        if (!player!.IsValid) return;
-
-        int id = player.PlayerID;
-        if (!_globals.HasJetpack.TryGetValue(id, out bool hasJetpack) || !hasJetpack) return;
-
-        // Rising-edge detection for Mouse2 (right-click)
-        bool attack2Now = (player.PressedButtons & GameButtonFlags.Mouse2) != 0;
-        _globals.PrevAttack2Pressed.TryGetValue(id, out bool prevAttack2);
-        _globals.PrevAttack2Pressed[id] = attack2Now;
-
-        if (!attack2Now || prevAttack2) return; // only on fresh press
-
-        float now = _core.Engine.GlobalVars.CurrentTime;
-        _globals.JetpackRocketCooldownEnd.TryGetValue(id, out float cooldownEnd);
-        if (now < cooldownEnd) return;
-
-        var cfg = _extraItemsCFG.CurrentValue;
-        _globals.JetpackRocketCooldownEnd[id] = now + cfg.JetpackRocketCooldown;
-
-        var pawn = player.PlayerPawn;
-        if (pawn == null || !pawn.IsValid) return;
-
-        var origin = pawn.AbsOrigin;
-        if (origin == null) return;
-
-        QAngle eyeAngles = pawn.EyeAngles;
-        eyeAngles.ToDirectionVectors(out Vector fwd, out _, out _);
-
-        // Eye position (player eye is above AbsOrigin by PlayerEyeHeight)
-        var eyePos = new Vector(origin.Value.X, origin.Value.Y, origin.Value.Z + PlayerEyeHeight);
-
-        var impactPos = new Vector(
-            eyePos.X + fwd.X * cfg.JetpackRocketRange,
-            eyePos.Y + fwd.Y * cfg.JetpackRocketRange,
-            eyePos.Z + fwd.Z * cfg.JetpackRocketRange
-        );
-
-        // Simulate rocket flight then explode
-        _core.Scheduler.DelayBySeconds(cfg.JetpackRocketFlightTime, () =>
-        {
-            ExplodeJetpackRocket(player, id, impactPos, cfg.JetpackRocketDamage, cfg.JetpackRocketRadius);
-        });
-
-        _helpers.SendChatT(player, "ExtraItemsJetpackRocketFired");
-    }
-
-    private void ExplodeJetpackRocket(IPlayer shooter, int shooterId, Vector pos, int damage, float radius)
-    {
-        if (!_globals.GameStart) return;
-
-        float radiusSqr = radius * radius;
-        foreach (var target in _core.PlayerManager.GetAlive())
-        {
-            if (target == null || !target.IsValid) continue;
-
-            _globals.IsZombie.TryGetValue(target.PlayerID, out bool isZombie);
-            if (!isZombie) continue;
-
-            var targetPawn = target.PlayerPawn;
-            if (targetPawn?.IsValid != true) continue;
-
-            var targetPos = targetPawn.AbsOrigin;
-            if (targetPos == null) continue;
-
-            float distSqr = _helpers.DistanceSquared(pos, targetPos.Value);
-            if (distSqr > radiusSqr) continue;
-
-            float dist = MathF.Sqrt(distSqr);
-            float falloff = radius > 0f ? 1f - (dist / radius) : 1f;
-            float actualDmg = damage * Math.Max(0.1f, falloff);
-
-            var shooterNow = _core.PlayerManager.GetPlayer(shooterId);
-            if (shooterNow != null && shooterNow.IsValid)
-                _helpers.ApplyDamage(shooterNow, target, actualDmg, DamageTypes_t.DMG_BLAST);
-        }
-
-        _helpers.DrawExpandingRing(pos, radius, 255, 120, 0, 180, 0.3f);
-    }
-
     // ─────────────────────────────────────────────────────────────────────────
     //  Trip Mine – plant, take & tick check
     // ─────────────────────────────────────────────────────────────────────────
@@ -795,28 +713,63 @@ public class HZPExtraItemsMenu
         var pawn = player.PlayerPawn;
         if (pawn == null || !pawn.IsValid) return;
 
-        var origin = pawn.AbsOrigin;
-        if (origin == null) return;
+        // ── Ray trace from player eye to find the surface ─────────────────────
+        var eyePos = pawn.EyePosition;
+        if (eyePos == null) return;
 
-        QAngle angles = pawn.EyeAngles;
-        angles.ToDirectionVectors(out Vector fwd, out _, out _);
+        pawn.EyeAngles.ToDirectionVectors(out Vector fwd, out _, out _);
 
-        float plantDist = mineCfg.PlantDistance;
-        float beamLen   = mineCfg.BeamLength;
+        var traceStart = new Vector(eyePos.Value.X, eyePos.Value.Y, eyePos.Value.Z);
+        var traceEnd   = traceStart + fwd * 8192f;
 
-        // Place mine at PlantDistance ahead of eye (simulates placing on a wall)
-        var minePos = new Vector(
-            origin.Value.X + fwd.X * plantDist,
-            origin.Value.Y + fwd.Y * plantDist,
-            origin.Value.Z + PlayerEyeHeight + fwd.Z * plantDist
+        var traceResult = new CGameTrace();
+        _core.Trace.SimpleTrace(
+            traceStart, traceEnd,
+            RayType_t.RAY_TYPE_LINE,
+            RnQueryObjectSet.Static | RnQueryObjectSet.Dynamic,
+            MaskTrace.Solid | MaskTrace.Player,
+            MaskTrace.Empty,
+            MaskTrace.Empty,
+            CollisionGroup.Player,
+            ref traceResult,
+            null
         );
 
-        // Laser beam extends further in the same forward direction
-        var beamEnd = new Vector(
-            minePos.X + fwd.X * beamLen,
-            minePos.Y + fwd.Y * beamLen,
-            minePos.Z + fwd.Z * beamLen
-        );
+        if (traceResult.Fraction >= 1.0f) return; // nothing hit
+
+        var surfaceNormal = traceResult.HitNormal;
+        var minePos = traceResult.EndPos;
+
+        // ── Compute orientation aligned to the surface normal ─────────────────
+        surfaceNormal.Normalize();
+        fwd.Normalize();
+
+        bool isFlat = MathF.Abs(MathF.Abs(surfaceNormal.Z) - 1.0f) < 0.01f;
+
+        float angleFix = float.TryParse(mineCfg.ModelAngleFix,
+            System.Globalization.NumberStyles.Float,
+            System.Globalization.CultureInfo.InvariantCulture, out float af) ? af : 90f;
+
+        QAngle mineAngles;
+        if (isFlat)
+        {
+            // Floor / ceiling: use player yaw, fix pitch for ceiling
+            float pitch = MathF.Asin(-surfaceNormal.Z) * 180f / MathF.PI;
+            if (surfaceNormal.Z > 0.5f) { pitch -= angleFix; }
+            else { pitch += angleFix; }
+            mineAngles = new QAngle(pitch, pawn.EyeAngles.Yaw, 0f);
+        }
+        else
+        {
+            // Wall: align to normal
+            float yaw   = MathF.Atan2(surfaceNormal.Y, surfaceNormal.X) * 180f / MathF.PI + angleFix;
+            float pitch = MathF.Asin(-surfaceNormal.Z) * 180f / MathF.PI;
+            mineAngles = new QAngle(pitch, yaw, 0f);
+        }
+
+        // ── Beam endpoint (from mine forward along mine orientation) ──────────
+        mineAngles.ToDirectionVectors(out Vector mineForward, out _, out _);
+        var beamEnd = minePos + mineForward * (mineCfg.BeamLength > 0f ? mineCfg.BeamLength : cfg.TripMineBeamLength);
 
         _globals.TripMineCharges[id] = charges - 1;
 
@@ -830,73 +783,107 @@ public class HZPExtraItemsMenu
         };
         _globals.AllMines.Add(mine);
 
-        // Parse configurable colors (defaults: green beam, green glow)
+        // Parse configurable beam color
         var beamColor = ParseColor(mineCfg.LaserColor, 0, 255, 0, 220);
         if (!float.TryParse(mineCfg.LaserSize, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out float beamWidth))
             beamWidth = 2.5f;
 
-        // Create entities on the next world update
         _core.Scheduler.NextWorldUpdate(() =>
         {
-            // Configurable-color laser beam
+            // ── 1. Beam entity ────────────────────────────────────────────────
             var beamEnt = _core.EntitySystem.CreateEntityByDesignerName<CBeam>("beam");
-            if (beamEnt != null && beamEnt.IsValid && beamEnt.IsValidEntity)
+            if (beamEnt != null && beamEnt.IsValid)
             {
                 beamEnt.Render = beamColor;
                 beamEnt.Width = beamWidth;
-                beamEnt.HaloScale = 1.5f;
+                beamEnt.EndWidth = beamWidth;
                 beamEnt.Teleport(minePos, new QAngle(), new Vector(0, 0, 0));
-                beamEnt.EndPos.X = beamEnd.X;
-                beamEnt.EndPos.Y = beamEnd.Y;
-                beamEnt.EndPos.Z = beamEnd.Z;
+                beamEnt.EndPos = beamEnd;
                 beamEnt.DispatchSpawn();
                 mine.Beam = beamEnt;
             }
 
-            // Mine body model visual
-            var mineCfgLocal = _mainCFG.CurrentValue.Mine;
-            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_physics_override")
-                ?? _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_physics");
-            if (modelEnt != null && modelEnt.IsValid && modelEnt.IsValidEntity)
+            // ── 2. Mine body model (prop_dynamic_override) ────────────────────
+            var modelEnt = _core.EntitySystem.CreateEntityByDesignerName<CBaseModelEntity>("prop_dynamic_override");
+            if (modelEnt != null && modelEnt.IsValid)
             {
-                if (!float.TryParse(mineCfgLocal.ModelAngleFix, System.Globalization.NumberStyles.Float,
-                        System.Globalization.CultureInfo.InvariantCulture, out float modelYawFix))
-                    modelYawFix = 90f;
-
-                var modelAngles = new QAngle(0f, angles.Y + modelYawFix, 0f);
-                if (!string.IsNullOrWhiteSpace(mineCfgLocal.Model))
-                    modelEnt.SetModel(mineCfgLocal.Model);
-
-                // Ensure model is transmitted/visible.
-                const uint EF_NODRAW = 32;
-                const uint EF_NODRAW_BUT_TRANSMIT = 1024;
-                modelEnt.Effects &= ~(EF_NODRAW | EF_NODRAW_BUT_TRANSMIT);
-                modelEnt.EffectsUpdated();
-
-                modelEnt.Teleport(minePos, modelAngles, Vector.Zero);
+                try
+                {
+                    // Clear the "don't transmit" flag so the entity is sent to clients.
+                    // This pattern is required for prop_dynamic_override in CS2 — same as the
+                    // reference implementation (H-AN/HanLaserTripmineS2).
+                    modelEnt.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= unchecked((uint)~(1u << 2));
+                }
+                catch { /* CBodyComponent chain not ready yet — entity will still spawn */ }
                 modelEnt.DispatchSpawn();
-                modelEnt.Render = ParseColor(mineCfgLocal.GlowColor, 0, 255, 0, 255);
-                modelEnt.RenderMode = RenderMode_t.kRenderNormal;
-                modelEnt.RenderModeUpdated();
-                modelEnt.RenderUpdated();
+                modelEnt.Teleport(minePos, mineAngles, null);
+                modelEnt.MoveType = MoveType_t.MOVETYPE_NONE;
+                modelEnt.MoveTypeUpdated();
                 mine.ModelVisual = modelEnt;
-            }
 
-            // Lightweight particle marker at mine origin
-            var particleEnt = _core.EntitySystem.CreateEntityByDesignerName<CParticleSystem>("info_particle_system");
-            if (particleEnt != null && particleEnt.IsValid && particleEnt.IsValidEntity)
-            {
-                particleEnt.StartActive = true;
-                particleEnt.EffectName = "particles/survival_fx/danger_trail_spores_world.vpcf";
-                particleEnt.AcceptInput("Start", "");
-                particleEnt.DispatchSpawn();
-                particleEnt.Teleport(minePos, new QAngle(), Vector.Zero);
-                mine.Visual = particleEnt;
+                // Model and glow must be set after spawn (NextTick)
+                _core.Scheduler.NextTick(() =>
+                {
+                    if (!modelEnt.IsValid) return;
+                    var modelPath = _mainCFG.CurrentValue.Mine.Model;
+                    if (!string.IsNullOrWhiteSpace(modelPath))
+                        modelEnt.SetModel(modelPath);
+
+                    // ── 3. Glow via two FollowEntity helper entities ───────────
+                    var glowColor = ParseColor(_mainCFG.CurrentValue.Mine.GlowColor, 0, 255, 0, 255);
+                    SetMineGlow(modelEnt, glowColor, mine);
+                });
             }
         });
 
         _helpers.SendChatT(player, "TripMinePlanted", activeMines + 1, limit);
+    }
+
+    /// <summary>
+    /// Creates the glow-relay chain used by the reference implementation to make the
+    /// mine model visible with a coloured outline:
+    ///   modelRelay (kRenderNone, FollowEntity → modelEnt)
+    ///   modelGlow  (glow props,  FollowEntity → modelRelay)
+    /// </summary>
+    private void SetMineGlow(CBaseModelEntity modelEnt, SwiftlyS2.Shared.Natives.Color glowColor, TripMineData mine)
+    {
+        if (modelEnt == null || !modelEnt.IsValid) return;
+
+        string modelName;
+        try { modelName = modelEnt.CBodyComponent!.SceneNode!.GetSkeletonInstance().ModelState.ModelName; }
+        catch { return; }
+
+        if (string.IsNullOrEmpty(modelName)) return;
+
+        var modelRelay = _core.EntitySystem.CreateEntity<CBaseModelEntity>();
+        var modelGlow  = _core.EntitySystem.CreateEntity<CBaseModelEntity>();
+        if (modelRelay == null || modelGlow == null) return;
+
+        // relay – invisible, follows main entity
+        try { modelRelay.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= unchecked((uint)~(1u << 2)); } catch { }
+        modelRelay.SetModel(modelName);
+        modelRelay.Spawnflags = 256u;
+        modelRelay.RenderMode = RenderMode_t.kRenderNone;
+        modelRelay.DispatchSpawn();
+
+        // glow – carries the outline, follows relay
+        try { modelGlow.CBodyComponent!.SceneNode!.Owner!.Entity!.Flags &= unchecked((uint)~(1u << 2)); } catch { }
+        modelGlow.SetModel(modelName);
+        modelGlow.Spawnflags = 256u;
+        modelGlow.DispatchSpawn();
+
+        modelGlow.Glow.GlowColorOverride = glowColor;
+        modelGlow.Glow.GlowRange    = 5000;
+        modelGlow.Glow.GlowTeam     = -1;
+        modelGlow.Glow.GlowType     = 3;
+        modelGlow.Glow.GlowRangeMin = 100;
+
+        modelRelay.AcceptInput("FollowEntity", "!activator", modelEnt,   modelRelay);
+        modelGlow.AcceptInput( "FollowEntity", "!activator", modelRelay, modelGlow);
+
+        mine.GlowRelay = modelRelay;
+        mine.GlowModel = modelGlow;
     }
 
     /// <summary>Recovers the owner's nearest planted mine, returning one charge.</summary>
@@ -1070,14 +1057,17 @@ public class HZPExtraItemsMenu
 
     private static void DestroyMineEntities(TripMineData mine)
     {
-        if (mine.Beam != null && mine.Beam.IsValid && mine.Beam.IsValidEntity)
+        if (mine.Beam != null && mine.Beam.IsValid)
             mine.Beam.AcceptInput("Kill", 0);
-        if (mine.Visual != null && mine.Visual.IsValid && mine.Visual.IsValidEntity)
-            mine.Visual.AcceptInput("Kill", 0);
-        if (mine.ModelVisual != null && mine.ModelVisual.IsValid && mine.ModelVisual.IsValidEntity)
+        if (mine.GlowModel != null && mine.GlowModel.IsValid)
+            mine.GlowModel.AcceptInput("Kill", 0);
+        if (mine.GlowRelay != null && mine.GlowRelay.IsValid)
+            mine.GlowRelay.AcceptInput("Kill", 0);
+        if (mine.ModelVisual != null && mine.ModelVisual.IsValid)
             mine.ModelVisual.AcceptInput("Kill", 0);
         mine.Beam = null;
-        mine.Visual = null;
+        mine.GlowModel = null;
+        mine.GlowRelay = null;
         mine.ModelVisual = null;
     }
 
@@ -1090,8 +1080,6 @@ public class HZPExtraItemsMenu
         _globals.HasJetpack.Remove(playerId);
         _globals.JetpackFuel.Remove(playerId);
         _globals.JetpackLastFuelTime.Remove(playerId);
-        _globals.JetpackRocketCooldownEnd.Remove(playerId);
-        _globals.PrevAttack2Pressed.Remove(playerId);
     }
 
     public void CleanupTripMinesForPlayer(int playerId)

@@ -32,8 +32,8 @@ public partial class HZPEvents
     private readonly HanZombiePlagueAPI _api;
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
-    private readonly AmmoPacksService _ammoPacks;
     private readonly HZPWeaponsMenu _weaponsMenu;
+    private readonly HZPAtmosphere _atmosphere;
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -45,8 +45,8 @@ public partial class HZPEvents
         HanZombiePlagueAPI api,
         HZPExtraItemsMenu extraItemsMenu,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        AmmoPacksService ammoPacks,
-        HZPWeaponsMenu weaponsMenu)
+        HZPWeaponsMenu weaponsMenu,
+        HZPAtmosphere atmosphere)
     {
         _core = core;
         _logger = logger;
@@ -63,8 +63,8 @@ public partial class HZPEvents
         _api = api;
         _extraItemsMenu = extraItemsMenu;
         _extraItemsCFG = extraItemsCFG;
-        _ammoPacks = ammoPacks;
         _weaponsMenu = weaponsMenu;
+        _atmosphere = atmosphere;
     }
 
     public void HookEvents()
@@ -498,11 +498,6 @@ public partial class HZPEvents
 
             var Id = player.PlayerID;
             ulong steamId = player.SteamID;
-            if (steamId != 0)
-            {
-                _globals.PlayerSteamIdCache[Id] = steamId;
-                _ammoPacks.OnPlayerSteamIdObserved(Id, steamId);
-            }
 
             _core.Scheduler.NextWorldUpdate(() =>
             {
@@ -966,28 +961,12 @@ public partial class HZPEvents
             _globals.RoundVoxGroup = _helpers.PickRandomActiveGroup(VoxList);
         }
 
-        // Failsafe: persist every connected player's AP on map change.
-        _ = SaveAllConnectedPlayersAsync();
-
-        // Start periodic autosave (every 60 s). Cancel any existing timer first.
-        _globals.g_hAutoSaveTimer?.Cancel();
-        _globals.g_hAutoSaveTimer = _core.Scheduler.RepeatBySeconds(60.0f, () =>
+        _core.Scheduler.NextWorldUpdate(() =>
         {
-            if (_mainCFG.CurrentValue.EnableCommandDebugLogs)
-                _logger.LogInformation("[HZP-AP] Autosave: saving all connected players.");
-            _ = SaveAllConnectedPlayersAsync();
+            _atmosphere.Apply();
         });
-        _core.Scheduler.StopOnMapChange(_globals.g_hAutoSaveTimer);
     }
 
-    /// <summary>
-    /// Collects current ammo pack balances for all connected human players and
-    /// persists them via the active backend. Used as a failsafe on map change and unload.
-    /// </summary>
-    public async Task SaveAllConnectedPlayersAsync()
-    {
-        await _ammoPacks.SaveAllConnectedPlayersAsync();
-    }
     private void Event_OnEntityTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)
     {
         var victim = @event.Entity;
@@ -1094,7 +1073,6 @@ public partial class HZPEvents
         }
 
         _globals.IsZombie[id] = _globals.GameStart;
-        _ammoPacks.OnClientConnected(id);
     }
 
     private void Event_OnClientDisconnected(SwiftlyS2.Shared.Events.IOnClientDisconnectedEvent @event)
@@ -1105,7 +1083,6 @@ public partial class HZPEvents
         }
 
         var id = @event.PlayerId;
-        _ammoPacks.OnClientDisconnected(id);
 
         _helpers.ClearPlayerBurn(id);
         _globals.IsZombie.Remove(id);
@@ -1324,7 +1301,6 @@ public partial class HZPEvents
             if (isZombie) continue;
 
             _extraItemsMenu.TryExecuteJetpackThrust(player);
-            _extraItemsMenu.TryFireJetpackRocket(player);
         }
     }
 

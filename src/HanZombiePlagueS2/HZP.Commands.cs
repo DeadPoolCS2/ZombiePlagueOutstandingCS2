@@ -72,9 +72,6 @@ public class HZPCommands
 
         _core.Command.RegisterCommand(CFG.TakeMineCommand, TakeMine, true);
         _logger.LogInformation("[HZP] Registered take mine command: {Cmd}", CFG.TakeMineCommand);
-
-        _core.Command.RegisterCommand(CFG.GiveAmmoPacksCommand, GiveAmmoPacks, true);
-        _logger.LogInformation("[HZP] Registered give ammo packs command: {Cmd}", CFG.GiveAmmoPacksCommand);
     }
     public void SelectZombieClass(ICommandContext context)
     {
@@ -145,68 +142,6 @@ public class HZPCommands
         var player = context.Sender;
         if (!player!.IsValid) return;
         _extraItemsMenu.TryTakeTripMine(player);
-    }
-
-    public void GiveAmmoPacks(ICommandContext context)
-    {
-        var sender = context.Sender;
-
-        // Require admin permission
-        if (sender != null && sender.IsValid)
-        {
-            if (!HasAdminMenuPermission(sender))
-            {
-                _helpers.SendChatT(sender, "NoPermission");
-                return;
-            }
-        }
-
-        // Parse arguments: hzp_give_ap <target> <amount>
-        string[] args = context.Args;
-        if (args.Length < 2)
-        {
-            if (sender != null && sender.IsValid)
-                _helpers.SendChatT(sender, "GiveAPUsage");
-            return;
-        }
-
-        string targetName = args[0];
-        if (!int.TryParse(args[1], out int amount) || amount <= 0)
-        {
-            if (sender != null && sender.IsValid)
-                _helpers.SendChatT(sender, "GiveAPInvalidAmount");
-            return;
-        }
-
-        var allPlayers = _core.PlayerManager.GetAllPlayers();
-        IPlayer? target = null;
-
-        // Support "#userid" or partial name match
-        if (targetName.StartsWith("#") && int.TryParse(targetName[1..], out int uid))
-        {
-            target = allPlayers.FirstOrDefault(p => p != null && p.IsValid && p.PlayerID == uid);
-        }
-        else
-        {
-            target = allPlayers.FirstOrDefault(p =>
-                p != null && p.IsValid &&
-                p.Name.Contains(targetName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (target == null || !target.IsValid)
-        {
-            if (sender != null && sender.IsValid)
-                _helpers.SendChatT(sender, "GiveAPTargetNotFound");
-            return;
-        }
-
-        _extraItemsMenu.AddAmmoPacks(target.PlayerID, amount);
-        int newTotal = _extraItemsMenu.GetAmmoPacks(target.PlayerID);
-
-        _helpers.SendChatT(target, "GiveAPReceived", amount, newTotal);
-
-        if (sender != null && sender.IsValid)
-            _helpers.SendChatT(sender, "GiveAPSuccess", target.Name, amount, newTotal);
     }
 
     private bool HasAdminMenuPermission(IPlayer player)
