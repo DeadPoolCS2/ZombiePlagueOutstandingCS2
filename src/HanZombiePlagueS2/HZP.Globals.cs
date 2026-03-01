@@ -36,6 +36,11 @@ public class HZPGlobals
     public bool InfectionStartedThisRound { get; set; } = false;
     /// <summary>True when an admin forced a custom mode this round.</summary>
     public bool AdminForcedModeThisRound { get; set; } = false;
+    /// <summary>
+    /// Number of consecutive Normal-Infection rounds played since the last custom round.
+    /// Used together with <see cref="HZPMainCFG.NormalRoundsInterval"/> to throttle custom rounds.
+    /// </summary>
+    public int NormalRoundsStreak { get; set; } = 0;
 
     public Dictionary<int, ZombieIdleState> g_ZombieIdleStates = new();
     public CancellationTokenSource? g_IdleTimer { get; set; } = null;
