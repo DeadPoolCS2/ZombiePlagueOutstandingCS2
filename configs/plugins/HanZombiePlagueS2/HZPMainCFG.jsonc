@@ -190,6 +190,32 @@
 	// Must match a wallet kind configured in Economy's config.
 	"EconomyWalletKind": "ammopacks",
 
+	// ── Atmosphere (fog + darkness) ──────────────────────────────────────────
+	"Atmosphere": {
+		// ── Fog (ceată) ─────────────────────────────────────────────────────
+		// Set to true to enable a server-side fog controller on every map.
+		"FogEnable": false,
+		// Fog colour in "R,G,B" format (0–255 each).
+		// Example: "100,120,130" → cold grey;  "200,180,140" → warm dust.
+		"FogColor": "100,120,130",
+		// Distance from the camera at which fog starts (units).
+		"FogStart": 400.0,
+		// Distance at which fog reaches maximum density (units).
+		"FogEnd": 2000.0,
+		// Maximum fog opacity (0.0 = invisible, 1.0 = fully opaque).
+		"FogMaxDensity": 0.7,
+
+		// ── Darkness (tonemap) ───────────────────────────────────────────────
+		// Set to true to override the screen exposure (makes the map darker).
+		"DarknessEnable": false,
+		// Minimum auto-exposure value. Lower = darker screen.
+		// CS2 default ≈ 0.5. Values 0.05–0.2 give a noticeable dark feel.
+		"ExposureMin": 0.1,
+		// Maximum auto-exposure value. Lower = darker screen.
+		// CS2 default ≈ 2.0. Values 0.1–0.5 give a dark feel.
+		"ExposureMax": 0.3
+	},
+
 	// ── Laser trip-mine visual/model settings ────────────────────────────────
 	"Mine": {
 		// Workshop model for the mine body.

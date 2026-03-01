@@ -146,13 +146,6 @@
     "ExtraItemsKnifeBlinkSuccess": "Received [green]{0}[default] Knife Blink charges (total: [green]{1}[default]). Ammo Packs remaining: [green]{2}[default].",
     "ExtraItemsKnifeBlinkUsed": "Blinked! Charges remaining: [green]{0}[default] (cooldown: [green]{1}[default]s).",
 
-    // ── Admin give-AP command ──────────────────────────────────────────────
-    "GiveAPUsage": "Usage: sw_give_ap <name|#userid> <amount>",
-    "GiveAPInvalidAmount": "Amount must be a positive integer.",
-    "GiveAPTargetNotFound": "Player not found.",
-    "GiveAPReceived": "You received [green]{0}[default] Ammo Packs. Total: [green]{1}[default].",
-    "GiveAPSuccess": "Gave [green]{0}[default] [green]{1}[default] Ammo Pack(s). New total: [green]{2}[default].",
-
     // ── AP reward notifications ────────────────────────────────────────────
     "APRoundSurviveReward": "You survived the round! +[green]{0}[default] Ammo Packs (total: [green]{1}[default]).",
     "APZombieKillReward": "You infected a human! +[green]{0}[default] Ammo Packs (total: [green]{1}[default]).",

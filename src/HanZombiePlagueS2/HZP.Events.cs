@@ -33,6 +33,7 @@ public partial class HZPEvents
     private readonly HZPExtraItemsMenu _extraItemsMenu;
     private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
     private readonly HZPWeaponsMenu _weaponsMenu;
+    private readonly HZPAtmosphere _atmosphere;
 
     public HZPEvents(ISwiftlyCore core, ILogger<HZPEvents> logger
         , HZPGlobals globals, HZPServices services,
@@ -44,7 +45,8 @@ public partial class HZPEvents
         HanZombiePlagueAPI api,
         HZPExtraItemsMenu extraItemsMenu,
         IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        HZPWeaponsMenu weaponsMenu)
+        HZPWeaponsMenu weaponsMenu,
+        HZPAtmosphere atmosphere)
     {
         _core = core;
         _logger = logger;
@@ -62,6 +64,7 @@ public partial class HZPEvents
         _extraItemsMenu = extraItemsMenu;
         _extraItemsCFG = extraItemsCFG;
         _weaponsMenu = weaponsMenu;
+        _atmosphere = atmosphere;
     }
 
     public void HookEvents()
@@ -957,6 +960,11 @@ public partial class HZPEvents
         {
             _globals.RoundVoxGroup = _helpers.PickRandomActiveGroup(VoxList);
         }
+
+        _core.Scheduler.NextWorldUpdate(() =>
+        {
+            _atmosphere.Apply();
+        });
     }
 
     private void Event_OnEntityTakeDamage(SwiftlyS2.Shared.Events.IOnEntityTakeDamageEvent @event)

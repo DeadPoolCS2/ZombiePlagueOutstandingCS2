@@ -124,6 +124,9 @@ public partial class HanZombiePlagueS2(ISwiftlyCore core) : BasePlugin(core)
         // ── Ammo Packs service (Economy-only) ─────────────────────────────────
         collection.AddSingleton<AmmoPacksService>();
 
+        // ── Atmosphere service ────────────────────────────────────────────────
+        collection.AddSingleton<HZPAtmosphere>();
+
         collection.AddSingleton<HZPEvents>();
         collection.AddSingleton<HZPHelpers>();
         collection.AddSingleton<HZPServices>();

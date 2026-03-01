@@ -30,9 +30,10 @@ Ammo Packs are persisted exclusively via the <strong>Economy</strong> plugin —
 9. [Extra Items Shop](#-extra-items-shop)
 10. [Grenades](#-grenades)
 11. [Ammo Packs & Rewards](#-ammo-packs--rewards)
-12. [Configuration Reference](#-configuration-reference)
-13. [Translations](#-translations)
-14. [API](#-api)
+12. [Dark Atmosphere](#-dark-atmosphere)
+13. [Configuration Reference](#-configuration-reference)
+14. [Translations](#-translations)
+15. [API](#-api)
 
 ---
 
@@ -51,6 +52,7 @@ Ammo Packs are persisted exclusively via the <strong>Economy</strong> plugin —
 | ❤️ **Revive Token** | Auto-respawn once on death |
 | 🏃 **Multi-Jump & Knife Blink** | Stackable extra jumps; teleport blink on knife swing |
 | ⚡ **Knockback System** | Per-hit-location and per-hero damage multipliers |
+| 🌑 **Dark Atmosphere** | Configurable per-server fog (ceață) and screen darkness via tonemap; applied on every map load |
 | 💾 **AP Persistence via Economy** | Balances survive reconnects, map changes, and server restarts — handled entirely by the Economy plugin |
 | 🔌 **Full Plugin API** | `IHanZombiePlagueAPI` — external plugins can hook events, query state, and set roles |
 | 🔊 **Vox / Sound System** | Countdown, mode announcements, win sounds, ambient music |
@@ -148,7 +150,6 @@ translations/
 | Command | Description | Permission |
 |---------|-------------|-----------|
 | `sw_zmenu` | Open the admin action menu | `AdminMenuPermission` |
-| `sw_give_ap <name\|#userid> <amount>` | Grant Ammo Packs to a player | `AdminMenuPermission` |
 
 > Command names can be changed freely in `HZPMainCFG.jsonc` under the command keys (`MainMenuCommand`, `ExtraItemsCommand`, etc.).
 
@@ -282,13 +283,46 @@ Ammo Packs (AP) are the in-game currency used to buy Extra Items. All balances a
 | Survive a round as human | +3 | `RoundSurviveReward` |
 | Zombie kills / infects a human | +2 | `ZombieKillReward` |
 | Human deals N damage to zombies | +1 per threshold | `HumanDamageRewardThreshold` / `HumanDamageReward` |
-| Admin grant | any | `sw_give_ap <player> <amount>` |
+| Admin grant | any | Economy plugin admin commands |
 
 > The damage reward stacks: deal 2× the threshold → earn 2× the reward, etc.
 
 ### Economy Wallet Kind
 
 AP balances live in a wallet kind configured by `EconomyWalletKind` in `HZPMainCFG.jsonc` (default: `"ammopacks"`). The plugin registers this wallet kind in Economy automatically on startup if it doesn't already exist.
+
+---
+
+## 🌑 Dark Atmosphere
+
+The plugin can apply a dark atmosphere on **every map load** by spawning two CS2 entities:
+
+| Entity | Effect |
+|--------|--------|
+| `env_fog_controller` | Adds volumetric fog (ceată) with configurable colour, start/end distance, and opacity |
+| `env_tonemap_controller2` | Lowers the screen's auto-exposure (makes the entire map darker) |
+
+Both are **disabled by default** and fully configurable in `HZPMainCFG.jsonc` under the `Atmosphere` key.
+
+### Fog Settings
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `FogEnable` | `false` | Set `true` to activate fog |
+| `FogColor` | `"100,120,130"` | Fog colour in `"R,G,B"` (0–255). Cold grey by default |
+| `FogStart` | `400.0` | Distance from camera where fog begins (units) |
+| `FogEnd` | `2000.0` | Distance where fog reaches maximum density (units) |
+| `FogMaxDensity` | `0.7` | Max opacity: `0.0` = none, `1.0` = fully opaque |
+
+### Darkness Settings
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| `DarknessEnable` | `false` | Set `true` to override screen exposure |
+| `ExposureMin` | `0.1` | Minimum auto-exposure (CS2 default ≈ 0.5). Lower = darker |
+| `ExposureMax` | `0.3` | Maximum auto-exposure (CS2 default ≈ 2.0). Lower = darker |
+
+> **Tip:** A good starting combination for a horror atmosphere: `FogEnable: true`, `FogColor: "60,70,80"`, `FogStart: 200`, `FogEnd: 1200`, `FogMaxDensity: 0.8`, `DarknessEnable: true`, `ExposureMin: 0.05`, `ExposureMax: 0.15`.
 
 ---
 
@@ -331,7 +365,6 @@ AP balances live in a wallet kind configured by `EconomyWalletKind` in `HZPMainC
     "ExtraItemsCommand": "sw_extras",
     "ZombieClassCommand": "sw_zclass",
     "AdminMenuItemCommand": "sw_zmenu",
-    "GiveAmmoPacksCommand": "sw_give_ap",
 
     // ── Admin ───────────────────────────────────────────────────────────────
     "AdminMenuPermission": "",     // Empty = everyone; or "perm1,perm2"
@@ -340,9 +373,20 @@ AP balances live in a wallet kind configured by `EconomyWalletKind` in `HZPMainC
     "ChatPrefix": "[HZP]",
 
     // ── Ammo Packs (Economy plugin) ─────────────────────────────────────────
-    // Wallet kind name registered in the Economy plugin.
-    // Must match a wallet kind configured in Economy's config.
-    "EconomyWalletKind": "ammopacks"
+    "EconomyWalletKind": "ammopacks",
+
+    // ── Atmosphere (fog + darkness) — see "Dark Atmosphere" section ──────────
+    "Atmosphere": {
+      "FogEnable": false,           // true = spawn env_fog_controller on map load
+      "FogColor": "100,120,130",    // "R,G,B" (0–255)
+      "FogStart": 400.0,            // distance fog starts (units)
+      "FogEnd": 2000.0,             // distance fog reaches max density (units)
+      "FogMaxDensity": 0.7,         // 0.0 – 1.0
+
+      "DarknessEnable": false,      // true = spawn env_tonemap_controller2
+      "ExposureMin": 0.1,           // lower = darker (CS2 default ≈ 0.5)
+      "ExposureMax": 0.3            // lower = darker (CS2 default ≈ 2.0)
+    }
   }
 }
 ```

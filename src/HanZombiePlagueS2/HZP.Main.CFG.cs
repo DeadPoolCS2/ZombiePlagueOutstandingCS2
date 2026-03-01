@@ -183,6 +183,51 @@ public class HZPMainCFG
     /// </summary>
     public string EconomyWalletKind { get; set; } = "ammopacks";
 
+    // ── Atmosphere settings ───────────────────────────────────────────────────
+    public AtmosphereCFG Atmosphere { get; set; } = new();
+
     // ── Laser trip-mine visual/model settings ────────────────────────────────
     public HanMineS2CFG Mine { get; set; } = new();
+}
+
+/// <summary>
+/// Controls the server-side dark atmosphere applied on every map load:
+/// fog (ceață) and screen darkness via the tonemap controller.
+/// </summary>
+public class AtmosphereCFG
+{
+    // ── Fog ──────────────────────────────────────────────────────────────────
+    /// <summary>Set to true to spawn an env_fog_controller and apply the fog settings below.</summary>
+    public bool FogEnable { get; set; } = false;
+
+    /// <summary>
+    /// Fog colour in "R,G,B" format (0–255 each).
+    /// Example: "100,120,130" for a cold grey.
+    /// </summary>
+    public string FogColor { get; set; } = "100,120,130";
+
+    /// <summary>Distance from the camera at which fog starts (units).</summary>
+    public float FogStart { get; set; } = 400f;
+
+    /// <summary>Distance from the camera at which fog reaches maximum density (units).</summary>
+    public float FogEnd { get; set; } = 2000f;
+
+    /// <summary>Maximum fog density (0.0 = none, 1.0 = fully opaque).</summary>
+    public float FogMaxDensity { get; set; } = 0.7f;
+
+    // ── Darkness / tonemap ───────────────────────────────────────────────────
+    /// <summary>Set to true to spawn an env_tonemap_controller2 and override exposure.</summary>
+    public bool DarknessEnable { get; set; } = false;
+
+    /// <summary>
+    /// Minimum auto-exposure value. Lower = darker screen.
+    /// CS2 default is roughly 0.5. Values around 0.05–0.2 give a dark feel.
+    /// </summary>
+    public float ExposureMin { get; set; } = 0.1f;
+
+    /// <summary>
+    /// Maximum auto-exposure value. Lower = darker screen.
+    /// CS2 default is roughly 2.0. Values around 0.1–0.5 give a dark feel.
+    /// </summary>
+    public float ExposureMax { get; set; } = 0.3f;
 }
