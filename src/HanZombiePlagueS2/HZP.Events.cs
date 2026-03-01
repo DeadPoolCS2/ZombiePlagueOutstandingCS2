@@ -907,7 +907,7 @@ public partial class HZPEvents
         var controller = pawn.Controller.Value?.As<CCSPlayerController>();
         if (controller == null || !controller.IsValid) return;
 
-        var Player = _core.PlayerManager.GetPlayer((int)(controller.Index - 1));
+        var Player = _core.PlayerManager.GetPlayerFromController(controller);
         if (!Player!.IsValid) return;
 
         if (weaponName == "weapon_c4")
@@ -981,7 +981,7 @@ public partial class HZPEvents
         if (VictimController == null || !VictimController.IsValid)
             return;
 
-        var VictimPlayer = _core.PlayerManager.GetPlayer((int)(VictimController.Index - 1));
+        var VictimPlayer = _core.PlayerManager.GetPlayerFromController(VictimController);
         if (VictimPlayer == null || !VictimPlayer.IsValid)
             return;
 
@@ -997,7 +997,7 @@ public partial class HZPEvents
         if (AttackerController == null || !AttackerController.IsValid)
             return;
 
-        var AttackerPlayer = _core.PlayerManager.GetPlayer((int)(AttackerController.Index - 1));
+        var AttackerPlayer = _core.PlayerManager.GetPlayerFromController(AttackerController);
         if (AttackerPlayer == null || !AttackerPlayer.IsValid)
             return;
 
@@ -1323,7 +1323,7 @@ public partial class HZPEvents
         if (victimController == null || !victimController.IsValid)
             return;
 
-        var victimPlayer = _core.PlayerManager.GetPlayer((int)(victimController.Index - 1));
+        var victimPlayer = _core.PlayerManager.GetPlayerFromController(victimController);
         if (victimPlayer == null || !victimPlayer.IsValid)
             return;
 
@@ -1339,7 +1339,7 @@ public partial class HZPEvents
         if (AttackerController == null || !AttackerController.IsValid)
             return;
 
-        var AttackerPlayer = _core.PlayerManager.GetPlayer((int)(AttackerController.Index - 1));
+        var AttackerPlayer = _core.PlayerManager.GetPlayerFromController(AttackerController);
         if (AttackerPlayer == null || !AttackerPlayer.IsValid)
             return;
 
