@@ -168,6 +168,15 @@ public class HZPMainCFG
     public float AmbSoundVolume { get; set; } = 0.6f;
     public string PrecacheAmbSound { get; set; } = string.Empty;
 
+    // ── Custom round interval ─────────────────────────────────────────────────
+    /// <summary>
+    /// Minimum number of consecutive Normal-Infection rounds that must be played
+    /// before a custom game mode (Nemesis, Survivor, etc.) is allowed to be chosen.
+    /// Set to 0 (default) to use weights without any restriction.
+    /// Example: 2 means at least 2 normal rounds between each custom round.
+    /// </summary>
+    public int NormalRoundsInterval { get; set; } = 0;
+
     // ── Debug / chat settings ────────────────────────────────────────────────
     /// <summary>Prefix prepended to chat messages sent by the plugin.</summary>
     public string ChatPrefix { get; set; } = "[HZP]";

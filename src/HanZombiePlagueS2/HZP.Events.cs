@@ -1130,7 +1130,7 @@ public partial class HZPEvents
         });
 
         var player = _core.PlayerManager.GetPlayer(id);
-        if (player.IsValid)
+        if (player != null && player.IsValid)
         {
             _helpers.RemoveGlow(player);
         }

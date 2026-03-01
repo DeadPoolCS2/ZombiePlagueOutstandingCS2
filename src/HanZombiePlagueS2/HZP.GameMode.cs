@@ -29,6 +29,15 @@ public class HZPGameMode
     {
         var config = _mainCFG.CurrentValue;
 
+        // If a minimum number of normal rounds between custom rounds is configured,
+        // and the streak has not yet been reached, force Normal Infection this round.
+        if (config.NormalRoundsInterval > 0 && _globals.NormalRoundsStreak < config.NormalRoundsInterval)
+        {
+            CurrentMode = GameModeType.NormalInfection;
+            _globals.NormalRoundsStreak++;
+            return GameModeType.NormalInfection;
+        }
+
         var modes = new List<(GameModeType type, int weight, bool enable)>
     {
         (GameModeType.NormalInfection, config.NormalInfection.Weight, config.NormalInfection.Enable),
@@ -47,6 +56,7 @@ public class HZPGameMode
 
         if (enabledModes.Count == 0)
         {
+            _globals.NormalRoundsStreak++;
             CurrentMode = GameModeType.Normal;
             return GameModeType.Normal;
         }
@@ -61,10 +71,16 @@ public class HZPGameMode
             if (randomWeight < currentWeight)
             {
                 CurrentMode = mode.type;
+                bool isNormalMode = mode.type == GameModeType.Normal || mode.type == GameModeType.NormalInfection;
+                if (isNormalMode)
+                    _globals.NormalRoundsStreak++;
+                else
+                    _globals.NormalRoundsStreak = 0;
                 return mode.type;
             }
         }
 
+        _globals.NormalRoundsStreak++;
         CurrentMode = GameModeType.Normal;
         return GameModeType.Normal;
     }
