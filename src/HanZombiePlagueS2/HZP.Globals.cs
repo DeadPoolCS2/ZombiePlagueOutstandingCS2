@@ -105,10 +105,6 @@ public class HZPGlobals
     public Dictionary<int, float> JetpackFuel = new Dictionary<int, float>();
     /// <summary>Server time (CurrentTime) at which fuel was last consumed.</summary>
     public Dictionary<int, float> JetpackLastFuelTime = new Dictionary<int, float>();
-    /// <summary>Server time at which the player's rocket cooldown expires.</summary>
-    public Dictionary<int, float> JetpackRocketCooldownEnd = new Dictionary<int, float>();
-    /// <summary>True if the player had Attack2 (right-click) pressed in the previous tick.</summary>
-    public Dictionary<int, bool> PrevAttack2Pressed = new Dictionary<int, bool>();
 
     // ── Trip Mines ────────────────────────────────────────────────────────────
     /// <summary>Number of unplanted mine charges the player has.</summary>
@@ -164,10 +160,12 @@ public class TripMineData
     public Vector BeamEnd;
     /// <summary>The beam entity (laser visual).</summary>
     public CBeam? Beam;
-    /// <summary>Particle visual attached at the mine position.</summary>
-    public CParticleSystem? Visual;
-    /// <summary>Mine body model visual attached at the mine position.</summary>
+    /// <summary>Mine body model (prop_dynamic_override).</summary>
     public CBaseModelEntity? ModelVisual;
+    /// <summary>Invisible relay used by the glow FollowEntity chain.</summary>
+    public CBaseModelEntity? GlowRelay;
+    /// <summary>Glow entity following the relay.</summary>
+    public CBaseModelEntity? GlowModel;
     /// <summary>Remaining health of the mine.</summary>
     public int Health;
     /// <summary>True once the mine has detonated (pending removal).</summary>

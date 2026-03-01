@@ -47,7 +47,7 @@ Ammo Packs are persisted exclusively via the <strong>Economy</strong> plugin —
 | 🛒 **Extra Items Shop** | Ammo-pack currency; Armor, Grenades, Jetpack, Laser Mine, SCBA Suit, Revive Token, and more |
 | 💰 **Damage-Based AP Rewards** | Every N damage dealt to zombies → +AP (configurable) |
 | 💣 **Laser Trip Mines** | Plant with `!plant`, recover with `!take`; auto-detonate when a zombie crosses the beam |
-| 🚀 **Jetpack** | CTRL+SPACE to fly; right-click to fire rockets |
+| 🚀 **Jetpack** | CTRL+SPACE to fly |
 | 🧪 **SCBA Suit** | Absorbs one zombie infection |
 | ❤️ **Revive Token** | Auto-respawn once on death |
 | 🏃 **Multi-Jump & Knife Blink** | Stackable extra jumps; teleport blink on knife swing |
@@ -221,7 +221,7 @@ Open with `!extras` or via the main menu (`!zp`). Items are purchased with **Amm
 | 🧪 **SCBA Suit** | Human | 5 AP | Absorbs one zombie infection |
 | 🦘 **Multi-Jump (+1 jump)** | Human | 4 AP | Stackable, up to `MultijumpMax` |
 | 🗡️ **Knife Blink (3 charges)** | Human | 5 AP | Teleport blink on knife swing (`!blink`) |
-| 🚀 **Jetpack** | Human | 10 AP | CTRL+SPACE fly; right-click rocket |
+| 🚀 **Jetpack** | Human | 10 AP | CTRL+SPACE to fly (hold CTRL+SPACE) |
 | 💣 **Laser Trip Mine** | Human | 6 AP | `!plant` to set, `!take` to recover |
 | ❤️ **Revive Token** | Human | 8 AP | Auto-respawn once on death |
 | 💊 **Antidote** | Zombie | 8 AP | Converts zombie back to human |
@@ -251,9 +251,8 @@ Mine visuals (color, model, sounds) → `Mine` section of `HZPMainCFG.jsonc`.
 ### 🚀 Jetpack Details
 
 - Hold **CTRL + SPACE** to fly (consumes fuel).
-- **Right-click (Mouse2)** to fire a rocket (2 s cooldown by default).
 - Fuel resets every round.
-- Configure in `HZPExtraItemsCFG.jsonc`: `JetpackMaxFuel`, `JetpackThrustForce`, `JetpackRocketDamage`, `JetpackRocketRadius`.
+- Configure in `HZPExtraItemsCFG.jsonc`: `JetpackMaxFuel`, `JetpackThrustForce`, `JetpackFuelConsumeRate`.
 
 ---
 

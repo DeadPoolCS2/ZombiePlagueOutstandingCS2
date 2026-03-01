@@ -1301,7 +1301,6 @@ public partial class HZPEvents
             if (isZombie) continue;
 
             _extraItemsMenu.TryExecuteJetpackThrust(player);
-            _extraItemsMenu.TryFireJetpackRocket(player);
         }
     }
 

@@ -152,9 +152,8 @@
     "APHumanDamageReward": "Damage bonus! +[green]{0}[default] Ammo Packs (total: [green]{1}[default]).",
 
     // ── Jetpack ───────────────────────────────────────────────────────────
-    "ExtraItemsJetpackSuccess": "Jetpack equipped! Fuel: [green]{0}[default]. Hold CTRL+SPACE to fly, right-click to fire rockets. Ammo Packs remaining: [green]{1}[default].",
+    "ExtraItemsJetpackSuccess": "Jetpack equipped! Fuel: [green]{0}[default]. Hold CTRL+SPACE to fly. Ammo Packs remaining: [green]{1}[default].",
     "ExtraItemsJetpackRefueled": "Jetpack refueled to [green]{0}[default] units. Ammo Packs remaining: [green]{1}[default].",
-    "ExtraItemsJetpackRocketFired": "Rocket launched!",
 
     // ── Trip Mine ─────────────────────────────────────────────────────────
     "ExtraItemsTripMineSuccess": "Trip mine charge added (you now have [green]{0}[default] charge(s)). Use /plant to plant. Ammo Packs remaining: [green]{1}[default].",
