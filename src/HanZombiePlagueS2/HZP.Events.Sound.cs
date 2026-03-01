@@ -228,7 +228,7 @@ public partial class HZPEvents
         if (AttackerController == null || !AttackerController.IsValid)
             return;
 
-        var AttackerPlayer = _core.PlayerManager.GetPlayer((int)(AttackerController.Index - 1));
+        var AttackerPlayer = _core.PlayerManager.GetPlayerFromController(AttackerController);
         if (AttackerPlayer == null || !AttackerPlayer.IsValid)
             return;
 
@@ -269,7 +269,7 @@ public partial class HZPEvents
         if (VictimController == null || !VictimController.IsValid)
             return;
 
-        var VictimPlayer = _core.PlayerManager.GetPlayer((int)(VictimController.Index - 1));
+        var VictimPlayer = _core.PlayerManager.GetPlayerFromController(VictimController);
         if (VictimPlayer == null || !VictimPlayer.IsValid)
             return;
 
