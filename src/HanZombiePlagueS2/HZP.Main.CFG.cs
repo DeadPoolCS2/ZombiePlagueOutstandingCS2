@@ -162,7 +162,6 @@ public class HZPMainCFG
     public string KnifeBlinkCommand { get; set; } = "sw_blink";
     public string PlantMineCommand { get; set; } = "sw_plant";
     public string TakeMineCommand { get; set; } = "sw_take";
-    public string GiveAmmoPacksCommand { get; set; } = "sw_give_ap";
     public string AdminMenuPermission { get; set; } = "";
     public string AmbSound { get; set; } = string.Empty;
     public float AmbSoundLoopTime { get; set; } = 60.0f;
