@@ -1,3 +1,4 @@
+using Economy.Contract;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SwiftlyS2.Shared;
@@ -5,308 +6,134 @@ using SwiftlyS2.Shared;
 namespace HanZombiePlagueS2;
 
 /// <summary>
-/// Authoritative ammo-pack state manager.
-/// Designed after ShopCore-style flow:
-/// 1) load authoritative balance on connect (with retries),
-/// 2) keep in-memory state for live gameplay,
-/// 3) write-through persistence after state is loaded.
+/// Manages ammo-pack balances exclusively via the Economy plugin
+/// (https://github.com/SwiftlyS2-Plugins/Economy).
+/// All persistence is delegated to Economy; no local caching or database is used.
 /// </summary>
 public class AmmoPacksService
 {
-    private sealed class SlotState
-    {
-        public int Generation;
-        public ulong SteamId;
-        public int Balance;
-        public bool Loaded;
-        public int PendingDelta;
-        public bool LoadInProgress;
-    }
-
-    private readonly ISwiftlyCore _core;
     private readonly ILogger<AmmoPacksService> _logger;
-    private readonly HZPGlobals _globals;
+    private readonly ISwiftlyCore _core;
     private readonly IOptionsMonitor<HZPMainCFG> _mainCFG;
-    private readonly IOptionsMonitor<HZPExtraItemsCFG> _extraItemsCFG;
-    private readonly AmmoPacksBackendResolver _backendResolver;
-
-    private readonly Dictionary<int, SlotState> _slots = new();
+    private IEconomyAPIv1? _api;
 
     public AmmoPacksService(
-        ISwiftlyCore core,
         ILogger<AmmoPacksService> logger,
-        HZPGlobals globals,
-        IOptionsMonitor<HZPMainCFG> mainCFG,
-        IOptionsMonitor<HZPExtraItemsCFG> extraItemsCFG,
-        AmmoPacksBackendResolver backendResolver)
+        ISwiftlyCore core,
+        IOptionsMonitor<HZPMainCFG> mainCFG)
     {
-        _core = core;
         _logger = logger;
-        _globals = globals;
+        _core = core;
         _mainCFG = mainCFG;
-        _extraItemsCFG = extraItemsCFG;
-        _backendResolver = backendResolver;
+    }
+
+    /// <summary>Injects the Economy API reference after it is resolved via shared interface.</summary>
+    public void SetApi(IEconomyAPIv1 api) => _api = api;
+
+    private string WalletKind => _mainCFG.CurrentValue.EconomyWalletKind;
+
+    private ulong GetSteamId(int playerId)
+    {
+        var player = _core.PlayerManager.GetPlayer(playerId);
+        if (player == null || !player.IsValid || player.IsFakeClient)
+            return 0;
+        return player.SteamID;
     }
 
     public int GetBalance(int playerId)
     {
-        if (_slots.TryGetValue(playerId, out var slot))
-            return slot.Balance;
-
-        _globals.AmmoPacks.TryGetValue(playerId, out int ap);
-        return ap;
-    }
-
-    public void SetBalance(int playerId, int amount, bool persist = true)
-    {
-        var slot = GetOrCreateSlot(playerId);
-        int clamped = Math.Max(0, amount);
-        if (slot.Balance == clamped)
-            return;
-
-        int delta = clamped - slot.Balance;
-        slot.Balance = clamped;
-        if (!slot.Loaded)
-            slot.PendingDelta += delta;
-
-        _globals.AmmoPacks[playerId] = slot.Balance;
-
-        if (persist)
-            TryPersist(playerId, slot);
-    }
-
-    public void AddBalance(int playerId, int amount, bool persist = true)
-    {
-        if (amount == 0) return;
-        SetBalance(playerId, GetBalance(playerId) + amount, persist);
-    }
-
-    public bool SpendBalance(int playerId, int cost, bool persist = true)
-    {
-        if (cost <= 0) return true;
-        int current = GetBalance(playerId);
-        if (current < cost)
-            return false;
-
-        SetBalance(playerId, current - cost, persist);
-        return true;
-    }
-
-    public void OnClientConnected(int playerId)
-    {
-        var slot = GetOrCreateSlot(playerId);
-        slot.Generation++;
-        slot.SteamId = 0;
-        slot.Balance = 0;
-        slot.Loaded = false;
-        slot.PendingDelta = 0;
-        slot.LoadInProgress = false;
-
-        _globals.AmmoPacks[playerId] = 0;
-        _globals.AmmoPacksLoaded.Remove(playerId);
-        _globals.PlayerSteamIdCache.Remove(playerId);
-
-        StartLoad(playerId, slot.Generation, 24, 0.5f);
-    }
-
-    public void OnPlayerSteamIdObserved(int playerId, ulong steamId)
-    {
-        if (steamId == 0)
-            return;
-
-        var slot = GetOrCreateSlot(playerId);
-        slot.SteamId = steamId;
-        _globals.PlayerSteamIdCache[playerId] = steamId;
-
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled || slot.Loaded || slot.LoadInProgress)
-            return;
-
-        StartLoad(playerId, slot.Generation, 8, 0.5f);
-    }
-
-    public void OnClientDisconnected(int playerId)
-    {
-        if (!_slots.TryGetValue(playerId, out var slot))
-        {
-            _globals.AmmoPacks.Remove(playerId);
-            _globals.AmmoPacksLoaded.Remove(playerId);
-            _globals.PlayerSteamIdCache.Remove(playerId);
-            return;
-        }
-
-        // If this slot is already occupied, this disconnect is stale.
-        var now = _core.PlayerManager.GetPlayer(playerId);
-        if (now.IsValid && !now.IsFakeClient && now.SteamID != 0)
-            return;
-
-        TryPersist(playerId, slot);
-
-        _slots.Remove(playerId);
-        _globals.AmmoPacks.Remove(playerId);
-        _globals.AmmoPacksLoaded.Remove(playerId);
-        _globals.PlayerSteamIdCache.Remove(playerId);
-    }
-
-    public async Task SaveAllConnectedPlayersAsync()
-    {
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
-            return;
-
-        var batch = new List<(ulong steamId, int ammoPacks)>();
-        foreach (var player in _core.PlayerManager.GetAllPlayers())
-        {
-            if (!player!.IsValid || player.IsFakeClient)
-                continue;
-
-            if (!_slots.TryGetValue(player.PlayerID, out var slot) || !slot.Loaded)
-                continue;
-
-            ulong steamId = slot.SteamId != 0 ? slot.SteamId : player.SteamID;
-            if (steamId == 0)
-                continue;
-
-            batch.Add((steamId, slot.Balance));
-        }
-
-        if (batch.Count > 0)
-            await _backendResolver.Active.SaveAllAsync(batch);
-    }
-
-    private SlotState GetOrCreateSlot(int playerId)
-    {
-        if (_slots.TryGetValue(playerId, out var slot))
-            return slot;
-
-        slot = new SlotState();
-        _slots[playerId] = slot;
-        return slot;
-    }
-
-    private void StartLoad(int playerId, int generation, int attemptsLeft, float retrySeconds)
-    {
-        if (!_slots.TryGetValue(playerId, out var slot))
-            return;
-
-        if (slot.LoadInProgress)
-            return;
-
-        slot.LoadInProgress = true;
-        _ = LoadLoopAsync(playerId, generation, attemptsLeft, retrySeconds);
-    }
-
-    private async Task LoadLoopAsync(int playerId, int generation, int attemptsLeft, float retrySeconds)
-    {
-        if (!_slots.TryGetValue(playerId, out var slot) || slot.Generation != generation)
-            return;
-
+        if (_api == null) return 0;
+        ulong steamId = GetSteamId(playerId);
+        if (steamId == 0) return 0;
         try
         {
-            // Resolve steamid for this slot.
-            ulong steamId = slot.SteamId;
-            if (steamId == 0)
-            {
-                var player = _core.PlayerManager.GetPlayer(playerId);
-                if (player!.IsValid && !player.IsFakeClient && player.SteamID != 0)
-                {
-                    steamId = player.SteamID;
-                    slot.SteamId = steamId;
-                    _globals.PlayerSteamIdCache[playerId] = steamId;
-                }
-                else if (_globals.PlayerSteamIdCache.TryGetValue(playerId, out ulong cached) && cached != 0)
-                {
-                    steamId = cached;
-                    slot.SteamId = steamId;
-                }
-            }
-
-            if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
-            {
-                int starting = Math.Max(0, _extraItemsCFG.CurrentValue.StartingAmmoPacks);
-                slot.Balance = Math.Max(slot.Balance, starting);
-                slot.Loaded = true;
-                slot.PendingDelta = 0;
-                _globals.AmmoPacks[playerId] = slot.Balance;
-                _globals.AmmoPacksLoaded.Add(playerId);
-                return;
-            }
-
-            if (steamId == 0)
-            {
-                if (attemptsLeft > 0)
-                {
-                    slot.LoadInProgress = false;
-                    _core.Scheduler.DelayBySeconds(retrySeconds, () => StartLoad(playerId, generation, attemptsLeft - 1, retrySeconds));
-                    return;
-                }
-
-                // SteamID unavailable; keep local balance but mark loaded to avoid deadlock in gameplay.
-                slot.Loaded = true;
-                _globals.AmmoPacksLoaded.Add(playerId);
-                return;
-            }
-
-            int? loaded = null;
-            try
-            {
-                loaded = await _backendResolver.Active.LoadAsync(steamId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("[HZP-AP] LoadAsync failed for steamid={SteamId}: {Ex}", steamId, ex.Message);
-            }
-
-            // Backend unavailable: retry.
-            if (!loaded.HasValue && attemptsLeft > 0)
-            {
-                slot.LoadInProgress = false;
-                _core.Scheduler.DelayBySeconds(retrySeconds, () => StartLoad(playerId, generation, attemptsLeft - 1, retrySeconds));
-                return;
-            }
-
-            int startingAp = Math.Max(0, _extraItemsCFG.CurrentValue.StartingAmmoPacks);
-            int baseBalance = loaded ?? startingAp;
-            int finalBalance = Math.Max(0, baseBalance + slot.PendingDelta);
-
-            slot.Balance = finalBalance;
-            slot.Loaded = true;
-            slot.PendingDelta = 0;
-            _globals.AmmoPacks[playerId] = finalBalance;
-            _globals.AmmoPacksLoaded.Add(playerId);
-
-            // Ensure backend has the resolved balance (new player row/wallet etc).
-            TryPersist(playerId, slot);
+            return Math.Max(0, _api.GetPlayerBalance(steamId, WalletKind));
         }
-        finally
+        catch (Exception ex)
         {
-            if (_slots.TryGetValue(playerId, out var s) && s.Generation == generation)
-                s.LoadInProgress = false;
+            _logger.LogWarning("[HZP-AP] GetBalance({PlayerId}) failed: {Ex}", playerId, ex.Message);
+            return 0;
         }
     }
 
-    private void TryPersist(int playerId, SlotState slot)
+    public void SetBalance(int playerId, int amount)
     {
-        if (!_mainCFG.CurrentValue.AmmoPacksEnabled)
-            return;
-        if (!slot.Loaded)
-            return;
-
-        ulong steamId = slot.SteamId;
-        if (steamId == 0)
-            _globals.PlayerSteamIdCache.TryGetValue(playerId, out steamId);
-
-        if (steamId == 0)
+        if (_api == null) return;
+        ulong steamId = GetSteamId(playerId);
+        if (steamId == 0) return;
+        try
         {
-            var player = _core.PlayerManager.GetPlayer(playerId);
-            if (player.IsValid && !player.IsFakeClient)
-                steamId = player.SteamID;
+            _api.SetPlayerBalance(steamId, WalletKind, Math.Max(0, amount));
+            _api.SaveData(steamId);
         }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("[HZP-AP] SetBalance({PlayerId},{Amount}) failed: {Ex}", playerId, amount, ex.Message);
+        }
+    }
 
-        if (steamId == 0)
-            return;
+    /// <summary>
+    /// Adds <paramref name="amount"/> ammo packs to the player's balance.
+    /// Use <see cref="SpendBalance"/> for deductions.
+    /// All balance mutations execute on the game server's single event thread,
+    /// so no additional synchronization is needed.
+    /// </summary>
+    public void AddBalance(int playerId, int amount)
+    {
+        if (_api == null || amount <= 0) return;
+        ulong steamId = GetSteamId(playerId);
+        if (steamId == 0) return;
+        try
+        {
+            int current = Math.Max(0, _api.GetPlayerBalance(steamId, WalletKind));
+            _api.SetPlayerBalance(steamId, WalletKind, current + amount);
+            _api.SaveData(steamId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("[HZP-AP] AddBalance({PlayerId},{Amount}) failed: {Ex}", playerId, amount, ex.Message);
+        }
+    }
 
-        slot.SteamId = steamId;
-        _globals.PlayerSteamIdCache[playerId] = steamId;
-        _ = _backendResolver.Active.SaveAsync(steamId, slot.Balance);
+    /// <summary>
+    /// Deducts <paramref name="cost"/> ammo packs from the player's balance.
+    /// Returns <c>false</c> when the player has insufficient funds.
+    /// All balance mutations execute on the game server's single event thread,
+    /// so no additional synchronization is needed.
+    /// </summary>
+    public bool SpendBalance(int playerId, int cost)
+    {
+        if (_api == null) return false;
+        if (cost <= 0) return true;
+        ulong steamId = GetSteamId(playerId);
+        if (steamId == 0) return false;
+        try
+        {
+            int current = Math.Max(0, _api.GetPlayerBalance(steamId, WalletKind));
+            if (current < cost) return false;
+            _api.SetPlayerBalance(steamId, WalletKind, current - cost);
+            _api.SaveData(steamId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("[HZP-AP] SpendBalance({PlayerId},{Cost}) failed: {Ex}", playerId, cost, ex.Message);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Ensures the wallet kind exists in the Economy plugin.
+    /// Called once after the Economy API is resolved.
+    /// </summary>
+    public void EnsureWalletKind()
+    {
+        if (_api == null) return;
+        var walletKind = WalletKind;
+        if (!_api.WalletKindExists(walletKind))
+        {
+            _api.EnsureWalletKind(walletKind);
+            _logger.LogInformation("[HZP-AP] Registered wallet kind '{Kind}' in Economy.", walletKind);
+        }
     }
 }
-

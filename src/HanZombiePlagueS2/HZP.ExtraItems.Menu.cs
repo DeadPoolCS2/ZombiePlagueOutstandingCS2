@@ -57,19 +57,19 @@ public class HZPExtraItemsMenu
         return _ammoPacks.GetBalance(playerId);
     }
 
-    public void SetAmmoPacks(int playerId, int amount, bool persist = true)
+    public void SetAmmoPacks(int playerId, int amount)
     {
-        _ammoPacks.SetBalance(playerId, amount, persist);
+        _ammoPacks.SetBalance(playerId, amount);
     }
 
     public bool SpendAmmoPacks(int playerId, int cost)
     {
-        return _ammoPacks.SpendBalance(playerId, cost, persist: true);
+        return _ammoPacks.SpendBalance(playerId, cost);
     }
 
     public void AddAmmoPacks(int playerId, int amount)
     {
-        _ammoPacks.AddBalance(playerId, amount, persist: true);
+        _ammoPacks.AddBalance(playerId, amount);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -1,20 +1,5 @@
 namespace HanZombiePlagueS2;
 
-/// <summary>
-/// Selects which persistence backend is used for Ammo Packs.
-/// <list type="bullet">
-///   <item><description><b>MySQL</b> – built-in direct MySQL/MariaDB connection (legacy, requires <c>AmmoPacksConnectionName</c>).</description></item>
-///   <item><description><b>Economy</b> – delegates to the <i>Economy</i> plugin (https://github.com/SwiftlyS2-Plugins/Economy) via its shared API.</description></item>
-///   <item><description><b>Cookies</b> – delegates to the <i>Cookies</i> plugin (https://github.com/DeadPoolCS2/Cookies) via its shared API.</description></item>
-/// </list>
-/// </summary>
-public enum AmmoPacksBackend
-{
-    MySQL,
-    Economy,
-    Cookies
-}
-
 public enum GameModeType
 {
     Normal,
@@ -192,45 +177,12 @@ public class HZPMainCFG
     /// <summary>When true, command invocations produce a chat reply visible to the invoking player.</summary>
     public bool EnableCommandDebugChatReply { get; set; } = false;
 
-    // ── Ammo Packs persistence settings ──────────────────────────────────────
-    /// <summary>
-    /// Set to true to enable persistence for Ammo Packs.
-    /// The actual storage backend is selected by <see cref="AmmoPacksBackend"/>.
-    /// </summary>
-    public bool AmmoPacksEnabled { get; set; } = false;
-
-    /// <summary>
-    /// Selects the persistence backend for Ammo Packs.
-    /// <list type="bullet">
-    ///   <item><description><b>MySQL</b> – built-in direct MySQL/MariaDB (requires <see cref="AmmoPacksConnectionName"/>).</description></item>
-    ///   <item><description><b>Economy</b> – uses the Economy plugin (https://github.com/SwiftlyS2-Plugins/Economy).</description></item>
-    ///   <item><description><b>Cookies</b> – uses the Cookies plugin (https://github.com/DeadPoolCS2/Cookies).</description></item>
-    /// </list>
-    /// </summary>
-    public AmmoPacksBackend AmmoPacksStorageBackend { get; set; } = AmmoPacksBackend.Economy;
-
-    // ── MySQL backend settings (only used when AmmoPacksBackend = MySQL) ──────
-    /// <summary>
-    /// Connection name to look up in configs/database.jsonc.
-    /// Leave empty to use the value of default_connection from database.jsonc.
-    /// </summary>
-    public string AmmoPacksConnectionName { get; set; } = "";
-    /// <summary>Table name for per-player ammo pack balances (alphanumeric/underscore only).</summary>
-    public string AmmoPacksTableName { get; set; } = "hzp_ammo_packs";
-
-    // ── Economy backend settings (only used when AmmoPacksBackend = Economy) ──
+    // ── Economy backend settings ──────────────────────────────────────────────
     /// <summary>
     /// Wallet kind name registered in the Economy plugin.
     /// Defaults to "ammopacks". Must match a wallet kind configured in Economy's config.
     /// </summary>
     public string EconomyWalletKind { get; set; } = "ammopacks";
-
-    // ── Cookies backend settings (only used when AmmoPacksBackend = Cookies) ──
-    /// <summary>
-    /// Cookie key used to store the ammo pack balance in the Cookies plugin.
-    /// Defaults to "hzp_ammopacks".
-    /// </summary>
-    public string CookiesAmmoPacksKey { get; set; } = "hzp_ammopacks";
 
     // ── Laser trip-mine visual/model settings ────────────────────────────────
     public HanMineS2CFG Mine { get; set; } = new();
