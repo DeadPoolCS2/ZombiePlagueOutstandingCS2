@@ -1,8 +1,15 @@
 {
   "HZPMainCFG": {
+
+	// ── Round timing ─────────────────────────────────────────────────────────
+	// Seconds players have to prepare before infection starts.
 	"RoundReadyTime": "22.0",
+	// Round duration in minutes.
 	"RoundTime": "4.0",
-	"NormalInfection": 
+
+	// ── Game modes ───────────────────────────────────────────────────────────
+	// Weight controls how often a mode is randomly chosen (higher = more frequent).
+	"NormalInfection":
 	{
 		"Enable": true,
 		"Name": "Infection Mode",
@@ -12,7 +19,7 @@
 		"EnableInfiniteClipMode": false,
 		"ZombieCanReborn": false
 	},
-	"MultiInfection": 
+	"MultiInfection":
 	{
 		"Enable": true,
 		"Name": "Multi Infection Mode",
@@ -22,7 +29,7 @@
 		"EnableInfiniteClipMode": true,
 		"ZombieCanReborn": true
 	},
-	"Nemesis": 
+	"Nemesis":
 	{
 		"Enable": true,
 		"Name": "Nemesis Mode",
@@ -31,7 +38,7 @@
 		"EnableInfiniteClipMode": true,
 		"ZombieCanReborn": true
 	},
-	"Survivor": 
+	"Survivor":
 	{
 		"Enable": true,
 		"Name": "Survivor Mode",
@@ -47,7 +54,7 @@
 		"EnableInfiniteClipMode": false,
 		"ZombieCanReborn": false
 	},
-	"Swarm": 
+	"Swarm":
 	{
 		"Enable": true,
 		"Name": "Swarm Mode",
@@ -55,7 +62,7 @@
 		"EnableInfiniteClipMode": true,
 		"ZombieCanReborn": false
 	},
-	"Plague": 
+	"Plague":
 	{
 		"Enable": true,
 		"Name": "Plague Mode",
@@ -65,17 +72,18 @@
 		"EnableInfiniteClipMode": true,
 		"ZombieCanReborn": true
 	},
-	"Assassin": 
+	"Assassin":
 	{
 		"Enable": true,
 		"Name": "Assassin Mode",
 		"Weight": 50,
 		"AssassinNames": "Assassin",
+		// Distance (units) within which the assassin becomes visible.
 		"InvisibilityDist": 200.0,
 		"EnableInfiniteClipMode": false,
 		"ZombieCanReborn": true
 	},
-	"Sniper": 
+	"Sniper":
 	{
 		"Enable": true,
 		"Name": "Sniper Mode",
@@ -91,7 +99,7 @@
 		"EnableInfiniteClipMode": false,
 		"ZombieCanReborn": true
 	},
-	"AVS": 
+	"AVS":
 	{
 		"Enable": true,
 		"Name": "Assassin vs Sniper",
@@ -101,7 +109,7 @@
 		"EnableInfiniteClipMode": true,
 		"ZombieCanReborn": true
 	},
-	"Hero": 
+	"Hero":
 	{
 		"Enable": true,
 		"Name": "Hero Mode",
@@ -116,52 +124,100 @@
 		"EnableInfiniteClipMode": false,
 		"ZombieCanReborn": true
 	},
+
+	// ── Round scheduling ─────────────────────────────────────────────────────
+	// Minimum consecutive Normal-Infection rounds required before a special
+	// game mode (Nemesis, Survivor, etc.) can be randomly chosen.
+	// Set to 0 to disable the restriction (pure weight-based selection).
+	// Example: 2 = at least 2 normal rounds must pass between special rounds.
+	"NormalRoundsInterval": 0,
+
+	// ── Human settings ───────────────────────────────────────────────────────
 	"HumandefaultModel": "characters/models/ctm_st6/ctm_st6_variante.vmdl",
-	// Source: zp_human_health "150"
 	"HumanMaxHealth": 150,
+	// Show a damage HUD indicator when a human damages a zombie.
+	"EnableDamageHud": true,
 	"HumanInitialSpeed": 1.0,
-	// Source: zp_human_gravity "1.0"
 	"HumanInitialGravity": 1.0,
+
+	// ── Knockback multipliers ────────────────────────────────────────────────
+	// Multipliers applied to bullet knockback force depending on hit location / state.
 	"HumanKnockBackHeadMultiply": 2.0,
 	"HumanKnockBackBodyMultiply": 1.0,
 	"HumanKnockBackGroundMultiply": 1.0,
 	"HumanKnockBackAirMultiply": 0.5,
+	// Extra multiplier applied when a Hero shoots a zombie.
 	"HumanHeroKnockBackMultiply": 1.0,
-	"EnableDamageHud": true,
+
+	// ── Weapon settings ──────────────────────────────────────────────────────
 	"EnableInfiniteReserveAmmo": true,
 	"EnableWeaponNoRecoil": true,
+
+	// ── Spawn points ─────────────────────────────────────────────────────────
+	// Comma-separated spawn-point types to use. Valid values: CT, T, DM.
 	"HumanSpawnPoints": "CT,T,DM",
 	"ZombieSpawnPoints": "CT,T,DM",
+
+	// ── Zombie physics ───────────────────────────────────────────────────────
+	// Base knockback force (units/s) applied to a zombie when shot.
 	"KnockZombieForce": 250.0,
+	// Duration (seconds) a zombie is stunned / slowed after a knockback hit.
 	"StunZombieTime": 0.1,
+
+	// ── T-Virus / Vaccine ────────────────────────────────────────────────────
 	"TVaccineSound": "HealthShot.Pickup",
+	// Radius (units) of the T-Virus grenade infection cloud.
 	"TVirusGrenadeRange": 300.0,
+	// Whether the T-Virus grenade can infect Hero-class players.
 	"TVirusCanInfectHero": true,
 	"TVirusGrenadeSound": "han.zombieplague.grenadedote",
+	// Sound played when a player receives bonus health (e.g. from an item).
 	"AddHealthSound": "HealthShot.Pickup",
+
+	// ── Fire grenade ─────────────────────────────────────────────────────────
 	"FireGrenade": true,
+	// Give humans a fire (HE) grenade on spawn.
 	"SpawnGiveFireGrenade": true,
+	// Give humans an incendiary grenade on spawn (in addition to the fire grenade).
+	"SpawnGiveIncGrenade": false,
 	"FireGrenadeRange": 300.0,
 	"FireGrenadeDmg": 500.0,
+	// Damage per tick while a zombie is burning.
 	"FireDmg": 10.0,
 	"FireGrenadeDuration": 5.0,
 	"FireGrenadeSound": "han.zombieplague.grenadedote",
-	"SpawnGiveIncGrenade": false,
+
+	// ── Light grenade ────────────────────────────────────────────────────────
 	"LightGrenade": true,
+	// Give humans a flashbang (light grenade) on spawn.
 	"SpawnGiveLightGrenade": true,
+	// Illumination radius (units).
 	"LightGrenadeRange": 1000.0,
+	// Duration (seconds) the light stays active.
 	"LightGrenadeDuration": 30.0,
 	"LightGrenadeSound": "C4.ExplodeTriggerTrip",
+
+	// ── Freeze grenade ───────────────────────────────────────────────────────
 	"FreezeGrenade": true,
+	// Give humans a smoke (freeze grenade) on spawn.
 	"SpawnGiveFreezeGrenade": true,
 	"FreezeGrenadeRange": 300.0,
+	// Duration (seconds) a zombie remains frozen.
 	"FreezeGrenadeDuration": 10.0,
 	"FreezeGrenadeSound": "han.zombieplague.grenadedote",
+
+	// ── Teleport grenade ─────────────────────────────────────────────────────
 	"TelportGrenade": true,
+	// Give humans a teleport grenade on spawn.
 	"SpawnGiveTelportGrenade": false,
+
+	// ── SCBA Suit ────────────────────────────────────────────────────────────
 	"CanUseScbaSuit": true,
 	"ScbaSuitGetSound": "Player.PickupPistol",
 	"ScbaSuitBrokenSound": "Breakable.Flesh",
+
+	// ── Commands ─────────────────────────────────────────────────────────────
+	// Client commands registered by the plugin (can be changed freely).
 	"ZombieClassCommand": "sw_zclass",
 	"AdminMenuItemCommand": "sw_zadmin",
 	"MainMenuCommand": "sw_zmenu",
@@ -170,13 +226,20 @@
 	"KnifeBlinkCommand": "sw_blink",
 	"PlantMineCommand": "sw_plant",
 	"TakeMineCommand": "sw_take",
+	// Leave empty ("") to allow everyone to open the admin menu.
+	// Use comma-separated Swiftly permission strings to restrict access.
 	"AdminMenuPermission": "",
+
+	// ── Ambient sound ────────────────────────────────────────────────────────
+	// Comma-separated sound events played in rotation during the round.
 	"AmbSound": "han.zombie.amb.zriot,han.zombie.amb.classicA,han.zombie.amb.classicB,han.zombie.amb.classicC,han.zombie.amb.classicD",
+	// Interval in seconds between ambient sound plays.
 	"AmbSoundLoopTime": "60.0",
 	"AmbSoundVolume": "0.8",
+	// Comma-separated .vsndevts files to precache for ambient sounds.
 	"PrecacheAmbSound": "soundevents/hanzbambience.vsndevts,soundevents/hanzombiepanicplayer.vsndevts",
 
-	// ── Debug / chat settings ────────────────────────────────────────────────
+	// ── Chat / debug settings ────────────────────────────────────────────────
 	// Prefix prepended to all plugin chat messages.
 	"ChatPrefix": "[HZP]",
 	// Log command invocations to the server console.
@@ -184,7 +247,7 @@
 	// Send a chat reply to the invoking player on each command invocation.
 	"EnableCommandDebugChatReply": false,
 
-	// ── Ammo Packs (Economy plugin) ─────────────────────────────────────────
+	// ── Economy (Ammo Packs) ─────────────────────────────────────────────────
 	// Wallet kind name registered in the Economy plugin.
 	// Must match a wallet kind configured in Economy's config.
 	"EconomyWalletKind": "ammopacks",
@@ -207,39 +270,49 @@
 		// ── Darkness (tonemap) ───────────────────────────────────────────────
 		// Set to true to override the screen exposure (makes the map darker).
 		"DarknessEnable": false,
-		// Minimum auto-exposure value. Lower = darker screen.
-		// CS2 default ≈ 0.5. Values 0.05–0.2 give a noticeable dark feel.
+		// Minimum auto-exposure value. Lower = darker screen. CS2 default ≈ 0.5.
 		"ExposureMin": 0.1,
-		// Maximum auto-exposure value. Lower = darker screen.
-		// CS2 default ≈ 2.0. Values 0.1–0.5 give a dark feel.
+		// Maximum auto-exposure value. Lower = darker screen. CS2 default ≈ 2.0.
 		"ExposureMax": 0.3
 	},
 
-	// ── Laser trip-mine visual/model settings ────────────────────────────────
+	// ── Laser trip-mine ──────────────────────────────────────────────────────
 	"Mine": {
-		// Workshop model for the mine body.
+		// Workshop model for the mine body (requires addon 3618032051).
 		"Model": "models/stk_sentry_guns/lasermine/stk_lasermines_one.vmdl",
+		// Model yaw angle correction applied when spawning the prop (degrees).
 		"ModelAngleFix": "90.0",
-		// Mine glow colour  "R,G,B,A"  (0–255 each).
+		// Mine glow colour "R,G,B,A" (0–255 each).
 		"GlowColor": "0,255,0,255",
-		// Laser beam colour  "R,G,B,A"  (0–255 each).
+		// Laser beam colour "R,G,B,A" (0–255 each).
 		"LaserColor": "0,255,0,220",
 		"LaserSize": "2.5",
 		"MineOpenSound": "n4a_csdm_sentry.mine_set",
 		"LaserOpenSound": "n4a_csdm_sentry.mine_activate",
 		"LaserTouchSound": "n4a_csdm_sentry.elrocket_lghtning",
 		"PrecacheSoundEvent": "soundevents/n4a_csdm_sentry.vsndevts",
+		// Maximum simultaneously planted mines per player (0 = unlimited).
 		"Limit": 2,
+		// Seconds the player must hold the plant key before the mine is placed.
 		"PlantTime": 1.0,
+		// Seconds the player must hold the take key before the mine is recovered.
 		"TakeTime": 1.0,
 		"MineHealth": 1800,
+		// HP threshold at or below which the mine explodes when damaged (0 = disabled).
 		"ExplodeThreshold": 1000,
+		// Explosion radius (units).
 		"ExplorerRadius": 360,
+		// Maximum explosion damage at the mine centre (linear falloff to edge).
 		"ExplorerDamage": 2600.0,
+		// Length of the laser beam projected from the mine (units).
 		"BeamLength": 300.0,
+		// Distance from the beam line within which a zombie trips the mine (units).
 		"TripRadius": 40.0,
+		// Forward distance from the player's eye at which the mine is planted (units).
 		"PlantDistance": 80.0,
+		// Whether only the mine owner can pick up their own mine.
 		"OwnerOnlyPickup": true,
+		// Whether the explosion can damage the owner's teammates (humans).
 		"FriendlyFire": false
 	}
   }
